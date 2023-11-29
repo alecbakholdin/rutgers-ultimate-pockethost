@@ -19,24 +19,28 @@
       type="name"
       name="name"
       placeholder="First Name"
+      autocomplete="given-name"
       class="input input-bordered"
     />
     <input
       type="email"
       name="email"
       placeholder="Email"
+      autocomplete="email"
       class="input input-bordered"
     />
     <input
       type="password"
       name="password"
       placeholder="Password"
+      autocomplete="new-password"
       class="input input-bordered"
     />
     <input
       type="password"
       name="passwordConfirm"
       placeholder="Confirm password"
+      autocomplete="new-password"
       class="input input-bordered"
     />
     <button class="btn btn-primary">Register</button>

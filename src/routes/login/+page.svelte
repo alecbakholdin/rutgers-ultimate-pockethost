@@ -19,12 +19,14 @@
       type="email"
       name="email"
       placeholder="Email"
+      autocomplete="email"
       class="input input-bordered"
     />
     <input
       type="password"
       name="password"
       placeholder="Password"
+      autocomplete="current-password"
       class="input input-bordered"
     />
     <button class="btn btn-primary">Log in</button>
