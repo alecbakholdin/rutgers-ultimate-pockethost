@@ -6,7 +6,7 @@
 <div class="bg-base-200">
   <div class="max-w-5xl mx-auto navbar">
     <div class="navbar-start">
-      <a href="/" class="btn btn-ghost text-xl">AUTH+CRUD</a>
+      <a href="/" class="btn btn-ghost text-xl">Rutgers Ultimate</a>
     </div>
     <div class="navbar-end">
       <ul class="menu menu-horizontal">
