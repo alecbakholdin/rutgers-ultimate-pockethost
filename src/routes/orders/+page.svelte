@@ -16,44 +16,53 @@
     {@const fulfilledDate = order.fulfilled
       ? new Date(order.fulfilled).toDateString()
       : 'Unfulfilled'}
+    {@const totalFormatted = formatCents(order.total, { excludeDollar: true })}
     {@const lineItems = order.expand?.['order_line_item(order)'] || []}
     <button
       type="button"
-      class="w-full shadow-lg rounded-xl p-4 grid grid-cols-[auto_auto_1fr] gap-2"
+      class="w-full bg-base-100 border rounded-xl p-4 grid grid-cols-[auto_1fr] gap-2"
       on:click={() => (expandedIdx = expandedIdx !== i ? i : undefined)}
     >
-      <div>
-        <div
-          class="bg-base-200 w-[40px] h-[40px] rounded-md flex flex-col items-center text-sm font-semibold"
-        >
-          <p>{shortMonths[createdDate.getMonth()]}</p>
-          <p>{createdDate.getDate()}</p>
-        </div>
-        <div
-          class="mt-2 border w-[40px] h-[40px] rounded-md flex flex-col items-center text-sm font-semibold"
-        >
-          <p>{lineItems.length}</p>
-          <p class="text-xs">Items</p>
-        </div>
-      </div>
-      <div class="btn btn-circle btn-sm" class:rotate-180={expandedIdx !== i}>
+      <div
+        class="btn btn-circle btn-sm place-self-center"
+        class:rotate-180={expandedIdx !== i}
+      >
         <Icon
           icon="tabler:chevron-up"
           class="transition-all text-base-content"
         />
       </div>
-      <div class="text-sm text-left">
-        <div class="flex items-center w-fit gap-1">
-          <Icon icon="mdi:dollar" />
-          <p>{formatCents(order.total, { excludeDollar: true })}</p>
+      <div class="flex gap-2 items-center">
+        <div
+          class="bg-base-200 w-[40px] h-[40px] rounded-md flex flex-col items-center text-sm font-semibold"
+        >
+          <p>{createdDate.getDate()}</p>
+          <p class="text-xs">{shortMonths[createdDate.getMonth()]}</p>
         </div>
-        <div class="flex items-center w-fit gap-1">
-          <Icon icon="mdi:done" />
-          <p>{fulfilledDate}</p>
+        <!-- <div
+          class="border w-[40px] h-[40px] rounded-md flex flex-col items-center text-sm font-semibold"
+        >
+          <p>{lineItems.length}</p>
+          <p class="text-xs">Items</p>
+        </div> -->
+      </div>
+      <div />
+      <div class="text-sm text-left flex gap-2">
+        <div>
+          {#each [['mdi:dollar', totalFormatted], ['mdi:done', fulfilledDate], ['ant-design:number-outlined', `${lineItems.length} items`]] as [icon, text]}
+            <div class="flex items-center w-fit gap-1">
+              <Icon {icon} />
+              <p>{text}</p>
+            </div>
+          {/each}
+          <!-- <div class="flex items-center w-fit gap-1">
+            <Icon icon="tabler:number" />
+            <p class="text">{order.id}</p>
+          </div> -->
         </div>
         {#if order.shippingAddress && order.shippingCostInCents}
           {@const addr = order.shippingAddress}
-          <div class="flex items-center w-fit border p-1 rounded-md mt-2">
+          <div class="flex items-center w-fit border p-1 rounded-md">
             <Icon icon="material-symbols:local-shipping" class="text-3xl" />
             <div>
               <p>{addr.line1}</p>

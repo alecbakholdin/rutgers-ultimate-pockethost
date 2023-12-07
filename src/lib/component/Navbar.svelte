@@ -9,7 +9,7 @@
     <a href="/" class="navbar-start btn btn-ghost">
       <!-- <img src="/machine.png" width={50} height={50} alt="machine"/>
       <img src="/nightshade.png" width={50} height={50} alt="nightshade"/> -->
-      <img src="/machine-nightshade.png" class="h-[25px] -rotate-90" alt="machine-nightshade"/>
+      <img src="/machine-nightshade.png" class="h-[25px] transition-all sm:-rotate-90" alt="machine-nightshade"/>
       <span class="text-xl invisible sm:visible">Rutgers Ultimate</span>
     </a>
     <div class="navbar-end">
@@ -21,23 +21,30 @@
             </a>
           </li>
           <li>
-            <a href="/orders">
-              My Orders
-            </a>
-          </li>
-          <li>
-            <form
-              method="POST"
-              action="/logout"
-              use:enhance={() => {
-                return async ({ result }) => {
-                  pb.authStore.clear()
-                  await applyAction(result)
-                }
-              }}
-            >
-              <button>Log out</button>
-            </form>
+            <details>
+              <summary><Icon icon="mdi:menu"/></summary>
+              <ul class="p-2 bg-base-100 rounded-t-none">
+                  <li>
+                    <a href="/orders">
+                      My Orders
+                    </a>
+                  </li>
+                  <li>
+                    <form
+                      method="POST"
+                      action="/logout"
+                      use:enhance={() => {
+                        return async ({ result }) => {
+                          pb.authStore.clear()
+                          await applyAction(result)
+                        }
+                      }}
+                    >
+                      <button>Log out</button>
+                    </form>
+                  </li>
+                </ul>
+            </details>
           </li>
         {:else}
           <li><a href="/login">Log in</a></li>
