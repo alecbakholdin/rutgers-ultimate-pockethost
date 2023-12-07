@@ -4,8 +4,8 @@
 declare namespace App {
   // interface Error {}
   interface Locals {
-    pb: import('./lib/pocketbase-types').TypedPocketBase
-    user: import('pocketbase').default['authStore']['model']
+    pb: import('./lib/pocketbase/pocketbase-types').TypedPocketBase
+    user: import('./lib/pocketbase/pocketbase-types').UsersResponse
   }
   // interface PageData {}
   // interface Platform {}

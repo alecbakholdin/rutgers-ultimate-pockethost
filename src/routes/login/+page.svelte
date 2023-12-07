@@ -1,13 +1,19 @@
 <script lang="ts">
   import { applyAction, enhance } from '$app/forms'
-  import { pb } from '$lib/pocketbase'
+  import { pb } from '$lib/pocketbase/pb'
+  import { loadingButton } from '$lib/util/svelte-actions/loading-button'
+  import { writable } from 'svelte/store'
+
+  const loading = writable(false)
 </script>
 
 <form
   method="POST"
   class="card max-w-xl mx-auto"
   use:enhance={() => {
+    $loading = true
     return async ({ result }) => {
+      $loading = false
       pb.authStore.loadFromCookie(document.cookie)
       await applyAction(result)
     }
@@ -29,6 +35,6 @@
       autocomplete="current-password"
       class="input input-bordered"
     />
-    <button class="btn btn-primary">Log in</button>
+    <button class="btn btn-primary" use:loadingButton={loading}>Log in</button>
   </div>
 </form>

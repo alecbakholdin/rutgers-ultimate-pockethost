@@ -7,6 +7,9 @@ import type { RecordService } from 'pocketbase'
 
 export enum Collections {
 	Color = "color",
+	LineItem = "line_item",
+	Order = "order",
+	OrderLineItem = "order_line_item",
 	Product = "product",
 	ProductField = "product_field",
 	Users = "users",
@@ -41,17 +44,44 @@ export type ColorRecord = {
 	name: string
 }
 
+export type LineItemRecord<Tfields = unknown> = {
+	fields?: null | Tfields
+	product: RecordIdString
+	quantity: number
+	user?: RecordIdString
+}
+
+export type OrderRecord<TshippingAddress = unknown> = {
+	discountCode?: string
+	fulfilled?: IsoDateString
+	shippingAddress?: null | TshippingAddress
+	shippingCostInCents?: number
+	subtotal?: number
+	total?: number
+	user?: RecordIdString
+}
+
+export type OrderLineItemRecord<Tfields = unknown> = {
+	fields?: null | Tfields
+	order: RecordIdString
+	product: RecordIdString
+	quantity: number
+	totalCents?: number
+	unitPriceCents?: number
+}
+
 export type ProductRecord = {
 	enabled?: boolean
 	fields?: RecordIdString[]
 	galleryImages?: string[]
 	priceInCents: number
 	primaryImage?: string
+	slug: string
 	teamPriceInCents?: number
 	title: string
 }
 
-export enum ProductFieldFieldOptions {
+export enum ProductFieldTypeOptions {
 	"options" = "options",
 	"text" = "text",
 	"number" = "number",
@@ -59,9 +89,9 @@ export enum ProductFieldFieldOptions {
 }
 export type ProductFieldRecord = {
 	colors?: RecordIdString[]
-	field?: ProductFieldFieldOptions
 	options?: string
 	title?: string
+	type?: ProductFieldTypeOptions
 }
 
 export type UsersRecord = {
@@ -71,6 +101,9 @@ export type UsersRecord = {
 
 // Response types include system fields and match responses from the PocketBase API
 export type ColorResponse<Texpand = unknown> = Required<ColorRecord> & BaseSystemFields<Texpand>
+export type LineItemResponse<Tfields = unknown, Texpand = unknown> = Required<LineItemRecord<Tfields>> & BaseSystemFields<Texpand>
+export type OrderResponse<TshippingAddress = unknown, Texpand = unknown> = Required<OrderRecord<TshippingAddress>> & BaseSystemFields<Texpand>
+export type OrderLineItemResponse<Tfields = unknown, Texpand = unknown> = Required<OrderLineItemRecord<Tfields>> & BaseSystemFields<Texpand>
 export type ProductResponse<Texpand = unknown> = Required<ProductRecord> & BaseSystemFields<Texpand>
 export type ProductFieldResponse<Texpand = unknown> = Required<ProductFieldRecord> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
@@ -79,6 +112,9 @@ export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSyste
 
 export type CollectionRecords = {
 	color: ColorRecord
+	line_item: LineItemRecord
+	order: OrderRecord
+	order_line_item: OrderLineItemRecord
 	product: ProductRecord
 	product_field: ProductFieldRecord
 	users: UsersRecord
@@ -86,6 +122,9 @@ export type CollectionRecords = {
 
 export type CollectionResponses = {
 	color: ColorResponse
+	line_item: LineItemResponse
+	order: OrderResponse
+	order_line_item: OrderLineItemResponse
 	product: ProductResponse
 	product_field: ProductFieldResponse
 	users: UsersResponse
@@ -96,6 +135,9 @@ export type CollectionResponses = {
 
 export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'color'): RecordService<ColorResponse>
+	collection(idOrName: 'line_item'): RecordService<LineItemResponse>
+	collection(idOrName: 'order'): RecordService<OrderResponse>
+	collection(idOrName: 'order_line_item'): RecordService<OrderLineItemResponse>
 	collection(idOrName: 'product'): RecordService<ProductResponse>
 	collection(idOrName: 'product_field'): RecordService<ProductFieldResponse>
 	collection(idOrName: 'users'): RecordService<UsersResponse>

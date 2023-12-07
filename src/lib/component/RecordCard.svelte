@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { pb } from '$lib/pocketbase'
+  import { pb } from '$lib/pocketbase/pb'
 
   export let name: string
   export let artist: string
