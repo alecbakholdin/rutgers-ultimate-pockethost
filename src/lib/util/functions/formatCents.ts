@@ -4,3 +4,4 @@ export function formatCents(num: number, options?: {excludeDollar?: boolean}) {
     maximumFractionDigits: 2,
   })}`
 }
+
