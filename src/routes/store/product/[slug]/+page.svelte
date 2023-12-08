@@ -21,7 +21,7 @@
 
 <svelte:window bind:innerWidth={windowWidth} />
 {#await data.product then product}
-  <div class="flex flex-col md:flex-row max-w-4xl mx-auto">
+  <div class="flex flex-col md:flex-row max-w-md md:max-w-4xl mx-auto">
     <div class="flex-shrink-0">
       <ImageThumb
         class="rounded-md aspect-square object-scale-down"
@@ -51,7 +51,7 @@
       </div>
     </div>
 
-    <div class="w-full flex flex-col md:items-end prose max-w-md">
+    <div class="w-full flex flex-col md:items-end prose max-w-md mx-auto">
       <h2 class="mb-2">{product.title}</h2>
       <h3 class="text-base-content">
         ${(product.priceInCents / 100).toFixed(2)}

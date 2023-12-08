@@ -27,11 +27,11 @@
 
 {#if url}
   <img
-    class={clazz}
     src={url}
     {alt}
-    style:widht="{size}px"
+    style:width="{size}px"
     style:height="{size}px"
+    style:object-fit="scale-down"
   />
 {:else}
   <div
