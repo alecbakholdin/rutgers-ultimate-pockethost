@@ -1,28 +1,25 @@
+import { SERVER_SECRET } from '$env/static/private'
 import { getCartItems } from '$lib/pocketbase/cart.js'
 import type {
   LineItemResponse,
+  OrderLineItemRecord,
+  OrderRecord,
   ProductRecord,
   ProductResponse,
 } from '$lib/pocketbase/pocketbase-types'
-import { fail, error, redirect } from '@sveltejs/kit'
+import type { CompleteCheckoutType } from '$lib/schemas/completeCheckout'
+import type { ShippingAddressSchema } from '$lib/schemas/shipping'
 import { stripe } from '$lib/stripe/stripe'
+import { error, fail, redirect } from '@sveltejs/kit'
+import jwt from 'jsonwebtoken'
+import type Stripe from 'stripe'
 import { superValidate } from 'sveltekit-superforms/server'
-import { CreateCheckoutSchema } from './schemas'
 import type { z } from 'zod'
 import type {
   CalculateShipmentSchema,
   CalculatedShipmentSchema,
 } from '../api/shipment/calculate/schemas'
-import type { IRate } from '@easypost/api'
-import type {
-  OrderLineItemRecord,
-  OrderRecord,
-} from '$lib/pocketbase/pocketbase-types'
-import jwt from 'jsonwebtoken'
-import type { CompleteCheckoutType } from '$lib/schemas/completeCheckout'
-import { SERVER_SECRET } from '$env/static/private'
-import type { ShippingAddressSchema } from '$lib/schemas/shipping'
-import type Stripe from 'stripe'
+import { CreateCheckoutSchema } from './schemas'
 
 export async function load() {
   return {
@@ -62,9 +59,19 @@ export const actions = {
       }
     }
 
+    async function isDiscounted() {
+      if (form.data.discountCode) {
+        const response = await fetch(`/api/teamDiscount?code=${form.data.discountCode}`);
+        return response.status === 200
+      }
+      return false;
+    }
+    const discounted = await isDiscounted();
+
     const orderLineItems: OrderLineItemRecord<Record<string, string>>[] =
       cartItems.items.map((item) => {
-        const unitPriceCents = item.expand!.product.priceInCents
+        const product = item.expand!.product;
+        const unitPriceCents = (discounted ? product.teamPriceInCents : product.priceInCents) ?? product.priceInCents;
         return {
           order: '',
           quantity: item.quantity,
@@ -80,6 +87,7 @@ export const actions = {
     )
     const order: OrderRecord<z.infer<typeof ShippingAddressSchema>> = {
       user: user.id,
+      discountCode: form.data.discountCode,
       shippingAddress: form.data.shippingAddress,
       subtotal,
       shippingCostInCents,
@@ -104,26 +112,27 @@ export const actions = {
             ],
             metadata: item.fields,
           },
-          unit_amount: item.expand!.product.priceInCents,
+          unit_amount: discounted ? item.expand!.product.teamPriceInCents ?? item.expand!.product?.priceInCents : item.expand!.product.priceInCents,
         },
         quantity: item.quantity,
       }))
-    if(shippingCostInCents !== undefined) {
-        line_items.push({
-            price_data: {
-                currency: 'USD',
-                product_data: {
-                    name: 'Shipping',
-                    images: [
-                        'https://api.iconify.design/material-symbols/local-shipping.svg?color=white&width=80&height=80'
-                    ],
-                    description: 'Shipping Cost'
-                },
-                unit_amount: shippingCostInCents,
-            },
-            quantity: 1
-        })
+    if (shippingCostInCents !== undefined) {
+      line_items.push({
+        price_data: {
+          currency: 'USD',
+          product_data: {
+            name: 'Shipping',
+            images: [
+              'https://api.iconify.design/material-symbols/local-shipping.svg?color=white&width=80&height=80'
+            ],
+            description: 'Shipping Cost'
+          },
+          unit_amount: shippingCostInCents,
+        },
+        quantity: 1
+      })
     }
+    console.log(url);
     const response = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items,

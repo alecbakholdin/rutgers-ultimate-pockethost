@@ -1,20 +1,22 @@
 <script lang="ts">
   import ImageThumb from '$lib/component/ImageThumb.svelte'
-  import { superformToast } from '$lib/component/Toasts.svelte'
-  import { states } from '$lib/util/data/states.js'
+  import { superformToast, toast } from '$lib/component/Toasts.svelte'
   import { pb } from '$lib/pocketbase/pb.js'
   import type { LineItemResponse } from '$lib/pocketbase/pocketbase-types.js'
+  import { states } from '$lib/util/data/states.js'
+  import { formatCents } from '$lib/util/functions/formatCents'
   import { loadingButton } from '$lib/util/svelte-actions/loading-button'
   import { Form } from 'formsnap'
   import { writable } from 'svelte/store'
   import { slide } from 'svelte/transition'
   import CheckoutShippingCostEstimator from './__route/CheckoutShippingCostEstimator.svelte'
   import { CreateCheckoutSchema } from './schemas.js'
+  import DebugObject from '$lib/component/DebugObject.svelte'
 
   export let data
   const cartItems = writable(data.cart.items)
   $: total = $cartItems.reduce(
-    (total, item) => total + item.expand!.product.priceInCents * item.quantity,
+    (total, item) => total + getUnitPrice(item) * item.quantity,
     0,
   )
   async function updateQty(cartItemId: string, quantity: number) {
@@ -29,6 +31,45 @@
   }
 
   let requestShipment = false
+  let validDiscount = false
+  const discountsLoading = writable(false)
+  $: getUnitPrice = (item: (typeof $cartItems)[number]) => {
+    const product = item.expand?.product
+    return (
+      (validDiscount ? product?.teamPriceInCents : product?.priceInCents) ??
+      product?.priceInCents ??
+      0
+    )
+  }
+  async function applyDiscounts(code: string) {
+    $discountsLoading = true
+    try {
+      const response = await fetch(`/api/teamDiscount?code=${code}`, {
+        credentials: 'include',
+      })
+      if (response.status === 200) {
+        validDiscount = true
+        toast({ message: 'Discount applied', type: 'success' })
+      } else {
+        const data = await response.json()
+        console.error(data)
+        toast({ message: data.message, type: 'error' })
+        validDiscount = false;
+      }
+    } finally {
+      $discountsLoading = false
+    }
+  }
+  function inputKeypressHandler(discountCode?: string) {
+    return function (e: KeyboardEvent) {
+      console.log(e)
+      if ((e as any).key === 'Enter' && !(e as any).ctrlKey) {
+        e.stopPropagation()
+        e.preventDefault()
+        discountCode && applyDiscounts(discountCode)
+      }
+    }
+  }
 </script>
 
 <div class="flex flex-col gap-3 w-full max-w-lg items-center m-auto px-2">
@@ -37,6 +78,7 @@
   </div>
   {#each $cartItems as cartItem (cartItem.id)}
     {@const product = cartItem.expand?.product}
+    {@const price = getUnitPrice(cartItem)}
     {#if product}
       <div class="flex gap-1 w-full" out:slide>
         <ImageThumb
@@ -69,14 +111,24 @@
               <option value={qty}>{qty}</option>
             {/each}
           </select>
-          <p class="font-bold">
-            ${((product.priceInCents / 100) * cartItem.quantity).toFixed(2)}
-          </p>
+          <div class="relative">
+            <p class="font-bold">
+              {formatCents(product?.priceInCents)}
+            </p>
+            {#if validDiscount && price < (product.priceInCents ?? 0)}
+              <div
+                class="absolute w-[120%] h-[2px] left-[-10%] top-1/2 transform -translate-y-1/2 bg-red-700 rotate-12"
+              />
+              <span class="absolute left-[-110%] top-0 text-red-700">
+                {formatCents(price)}
+              </span>
+            {/if}
+          </div>
         </div>
       </div>
     {/if}
-    {:else}
-      <p class="text-neutral-content">You have no items in your cart</p>
+  {:else}
+    <p class="text-neutral-content">You have no items in your cart</p>
   {/each}
   <p class="self-end">
     <b>Total:</b> ${(total / 100).toLocaleString(undefined, {
@@ -95,6 +147,29 @@
   let:config
   class="flex flex-col w-full max-w-lg px-2 gap-2 m-auto"
 >
+  <Form.Field {config} name="discountCode" let:handlers>
+    <Form.Label>Discount Code</Form.Label>
+    <div class="flex gap-1 items-center">
+      <input
+        type="text"
+        class="input input-bordered"
+        placeholder="Discount Code"
+        autocomplete="off"
+        disabled={$discountsLoading}
+        on:keypress={inputKeypressHandler(formValues.discountCode)}
+        on:input={handlers.input}
+      />
+      <button
+        type="button"
+        class="btn btn-primary"
+        use:loadingButton={discountsLoading}
+        disabled={!formValues.discountCode}
+        on:click={() =>
+          formValues.discountCode && applyDiscounts(formValues.discountCode)}
+        >Apply</button
+      >
+    </div>
+  </Form.Field>
   <label for="requestShipment" class="prose col-span-full">
     <input
       class="checkbox checkbox-primary"

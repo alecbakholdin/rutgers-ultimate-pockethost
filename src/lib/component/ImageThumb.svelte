@@ -21,7 +21,7 @@
     pb.getFileUrl(
       record,
       image,
-      size !== undefined ? { thumb: `${size}x${size}` } : undefined,
+      size !== undefined ? { thumb: `${size}x${size}f` } : undefined,
     )
 </script>
 

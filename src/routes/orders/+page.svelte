@@ -4,6 +4,7 @@
   import { shortMonths } from '$lib/util/data/months.js'
   import { formatCents } from '$lib/util/functions/formatCents.js'
   import Icon from '@iconify/svelte'
+  import _ from 'lodash'
   import { slide } from 'svelte/transition'
 
   export let data
@@ -18,6 +19,7 @@
       : 'Unfulfilled'}
     {@const totalFormatted = formatCents(order.total, { excludeDollar: true })}
     {@const lineItems = order.expand?.['order_line_item(order)'] || []}
+    {@const numItems = _.sumBy(lineItems, 'quantity')}
     <button
       type="button"
       class="w-full bg-base-100 border rounded-xl p-4 grid grid-cols-[auto_1fr] gap-2"
@@ -49,7 +51,7 @@
       <div />
       <div class="text-sm text-left flex gap-2">
         <div>
-          {#each [['mdi:dollar', totalFormatted], ['mdi:done', fulfilledDate], ['ant-design:number-outlined', `${lineItems.length} items`]] as [icon, text]}
+          {#each [['mdi:dollar', totalFormatted], ['mdi:done', fulfilledDate], ['ant-design:number-outlined', `${numItems} items`]] as [icon, text]}
             <div class="flex items-center w-fit gap-1">
               <Icon {icon} />
               <p>{text}</p>
@@ -88,7 +90,9 @@
                   class="rounded-sm"
                 />
                 <div class="flex-grow text-left">
-                  <p class="font-semibold">{product.title}</p>
+                  <p class="font-semibold">
+                    {lineItem.quantity} x {product.title}
+                  </p>
                   {#each Object.entries(lineItem.fields || {}) as [key, value]}
                     <p>{key}: {value}</p>
                   {/each}
