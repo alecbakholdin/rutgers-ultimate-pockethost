@@ -15,8 +15,8 @@
   function forceAny(input: any) {
     return input as any
   }
-  let windowWidth: number;
-  $: imageThumbSize = windowWidth < 500 ? 300 : 480;
+  let windowWidth: number
+  $: imageThumbSize = windowWidth < 500 ? 300 : 480
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
@@ -53,9 +53,12 @@
 
     <div class="w-full flex flex-col md:items-end prose max-w-md mx-auto">
       <h2 class="mb-2">{product.title}</h2>
-      <h3 class="text-base-content">
+      <h3 class="text-base-content m-0 p-0">
         ${(product.priceInCents / 100).toFixed(2)}
       </h3>
+      {#if product.required_for_team}
+        <p class="text-error m-0 p-0">* Required for Players</p>
+      {/if}
       <Form.Root
         options={{
           dataType: 'json',
@@ -70,7 +73,9 @@
       >
         {#each product.expand?.fields ?? [] as field, i}
           {@const name = `fields.${field.title}`}
-          {@const label = `${field.title}${field.optional ? " (optional)" : ""}`}
+          {@const label = `${field.title}${
+            field.optional ? ' (optional)' : ''
+          }`}
           {#if field.type === 'color'}
             <Form.Field {config} name={forceAny(name)} let:handlers>
               <span>{label}</span>
