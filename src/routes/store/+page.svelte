@@ -1,6 +1,7 @@
 <script lang="ts">
   import ImageThumb from '$lib/component/ImageThumb.svelte'
   import { pb } from '$lib/pocketbase/pb.js'
+    import { formatCents } from '$lib/util/functions/formatCents.js'
 
   export let data
 </script>
@@ -22,7 +23,10 @@
         </figure>
         <div class="card-body">
           <h4 class="card-title">{product.title}</h4>
-          <p>${(product.priceInCents / 100).toFixed(2)}</p>
+          <p>{formatCents(product.priceInCents)}</p>
+          {#if product.required_for_team}
+            <p class="text-error">* Required for Players</p>
+          {/if} 
         </div>
       </a>
     {/each}
