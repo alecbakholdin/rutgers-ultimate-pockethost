@@ -70,9 +70,10 @@
       >
         {#each product.expand?.fields ?? [] as field, i}
           {@const name = `fields.${field.title}`}
+          {@const label = `${field.title}${field.optional ? " (optional)" : ""}`}
           {#if field.type === 'color'}
             <Form.Field {config} name={forceAny(name)} let:handlers>
-              <span>{field.title}</span>
+              <span>{label}</span>
               <div class="flex gap-1">
                 {#each field.expand?.colors ?? [] as color, j}
                   {@const id = `field-${i}-${j}`}
@@ -100,12 +101,13 @@
             </Form.Field>
           {:else if field.type === 'options'}
             <Form.Field {config} name={forceAny(name)} let:handlers>
-              <Form.Label for="field-{i}">{field.title}</Form.Label>
+              <Form.Label for="field-{i}">{label}</Form.Label>
               <select
                 id="field-{i}"
                 class="select select-bordered"
                 name={field.title}
                 placeholder={field.title}
+                value={undefined}
                 on:change={handlers.select}
               >
                 {#each field.options.split(',') as value}
@@ -118,7 +120,7 @@
             </Form.Field>
           {:else if field.type === 'text'}
             <Form.Field {config} name={forceAny(name)}>
-              <Form.Label>{field.title}</Form.Label>
+              <Form.Label>{label}</Form.Label>
               <Form.Input
                 class="input input-bordered"
                 placeholder={field.title}
@@ -127,7 +129,7 @@
             </Form.Field>
           {:else if field.type === 'number'}
             <Form.Field {config} name={forceAny(name)}>
-              <Form.Label>{field.title}</Form.Label>
+              <Form.Label>{label}</Form.Label>
               <FormNumberInput
                 class="input input-bordered"
                 placeholder={field.title}

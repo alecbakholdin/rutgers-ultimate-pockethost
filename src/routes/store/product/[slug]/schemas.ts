@@ -42,5 +42,8 @@ function getSchemaForField(field: ExpandedField) {
     default:
       return z.string()
   }
+  if(field.optional) {
+    return schema.optional();
+  }
   return schema
 }

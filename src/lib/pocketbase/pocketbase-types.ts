@@ -89,6 +89,7 @@ export enum ProductFieldTypeOptions {
 }
 export type ProductFieldRecord = {
 	colors?: RecordIdString[]
+	optional?: boolean
 	options?: string
 	title?: string
 	type?: ProductFieldTypeOptions
