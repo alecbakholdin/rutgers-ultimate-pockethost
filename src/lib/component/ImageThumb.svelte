@@ -2,16 +2,16 @@
   import { pb } from '$lib/pocketbase/pb'
 
   interface $$Props {
-    size: number;
+    size?: number;
     record: any;
     alt: string;
     image: string | undefined;
     class?: string | undefined;
   }
 
-  export let size: number
   export let record: any
   export let alt: string
+  export let size: number | undefined = undefined;
   export let image: string | undefined
   let clazz: string | undefined = undefined;
   export { clazz as class }
@@ -29,6 +29,7 @@
   <img
     src={url}
     {alt}
+    class={clazz}
     style:width="{size}px"
     style:height="{size}px"
     style:object-fit="scale-down"

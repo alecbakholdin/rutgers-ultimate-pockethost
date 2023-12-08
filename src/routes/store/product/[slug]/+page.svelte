@@ -24,11 +24,10 @@
   <div class="flex flex-col md:flex-row max-w-md md:max-w-4xl mx-auto">
     <div class="flex-shrink-0">
       <ImageThumb
-        class="rounded-md aspect-square object-scale-down"
+        class="rounded-md w-[480px] h-[480px] aspect-square object-scale-down"
         record={product}
         image={currentImage}
         alt={product.title}
-        size={imageThumbSize}
       />
       <div class="w-full overflow-x-auto flex mt-2">
         {#each [product.primaryImage, ...product.galleryImages].filter((x) => x) as image, i}
