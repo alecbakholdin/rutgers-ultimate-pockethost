@@ -9,10 +9,10 @@
     <a href="/" class="btn btn-ghost">
       <img
         src="/machine-nightshade.png"
-        class="h-[25px] transition-all sm:-rotate-90"
+        class="h-[30px] transition-all"
         alt="machine-nightshade"
       />
-      <span class="text-xl invisible sm:visible">Rutgers Ultimate</span></a
+      <span class="text-xl hidden sm:inline">Rutgers Ultimate</span></a
     >
   </div>
   <div class="flex-none">
