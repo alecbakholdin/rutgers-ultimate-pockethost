@@ -24,9 +24,16 @@
           </a>
         </li>
         <li>
-          <details>
+          <details class="relative">
             <summary> More </summary>
-            <ul class="p-2 bg-base-100 rounded-t-none">
+            <ul class="absolute right-0 z-[1] w-fit p-2 bg-base-100 rounded-t-none">
+              <!-- {#if $currentUser.isManager}
+                <li>
+                  <a href="/orders/manager" class="whitespace-nowrap">
+                    Manage Orders
+                  </a>
+                </li>
+              {/if} -->
               <li>
                 <a href="/orders"> Orders </a>
               </li>

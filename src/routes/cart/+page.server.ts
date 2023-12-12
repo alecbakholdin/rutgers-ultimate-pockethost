@@ -1,6 +1,6 @@
 import { SERVER_SECRET } from '$env/static/private'
 import { getCartItems } from '$lib/pocketbase/cart.js'
-import type { LineItemWithProduct } from '$lib/pocketbase/derived-pocketbase-types'
+import { lineItemExpansionString, type ExpandedLineItem } from '$lib/pocketbase/derived-pocketbase-types'
 import type {
   OrderLineItemRecord,
   OrderRecord
@@ -8,6 +8,7 @@ import type {
 import type { CompleteCheckoutType } from '$lib/schemas/completeCheckout'
 import type { ShippingAddressSchema } from '$lib/schemas/shipping'
 import { stripe } from '$lib/stripe/stripe'
+import { getCartWeight, getUnitPriceWithFields, validDiscount } from '$lib/util/functions/cartUtils'
 import { error, fail, redirect } from '@sveltejs/kit'
 import jwt from 'jsonwebtoken'
 import _ from 'lodash'
@@ -18,12 +19,11 @@ import type {
   CalculateShipmentSchema,
   CalculatedShipmentSchema,
 } from '../api/shipment/calculate/schemas'
-import { getCartWeight, getUnitPrice, validDiscount } from './__route/cartUtils'
 import { CreateCheckoutSchema } from './schemas'
 
 export async function load() {
   return {
-    cart: await getCartItems<LineItemWithProduct>('product'),
+    cart: await getCartItems<ExpandedLineItem>(lineItemExpansionString),
     createCheckoutForm: await superValidate(CreateCheckoutSchema),
   }
 }
@@ -33,7 +33,7 @@ export const actions = {
     const form = await superValidate(request, CreateCheckoutSchema)
     if (!form.valid) return fail(400, { form })
 
-    const cartItems = await getCartItems<LineItemWithProduct>('product')
+    const cartItems = await getCartItems<ExpandedLineItem>(lineItemExpansionString)
     if (cartItems.items.length === 0) {
       throw error(400, { message: 'No items included' })
     }
@@ -55,25 +55,21 @@ export const actions = {
       }
     }
 
-    async function isDiscounted() {
-      if (form.data.discountCode) {
-        const response = await fetch(
-          `/api/teamDiscount?code=${form.data.discountCode}`,
-        )
-        return response.status === 200
-      }
-      return false
+    if (form.data.discountCode) {
+      const response = await fetch(
+        `/api/teamDiscount?code=${form.data.discountCode}`,
+      )
+      validDiscount.set(response.status === 200);
     }
     
-    validDiscount.set(await isDiscounted());
     const orderLineItems: OrderLineItemRecord<Record<string, string>>[] =
       cartItems.items.map((item) => ({
           order: '',
           quantity: item.quantity,
           product: item.product,
           fields: item.fields,
-          unitPriceCents: getUnitPrice(item.expand?.product),
-          totalCents: getUnitPrice(item.expand?.product) * item.quantity,
+          unitPriceCents: getUnitPriceWithFields(item.expand?.product, item.fields),
+          totalCents: getUnitPriceWithFields(item.expand?.product, item.fields) * item.quantity,
       }))
     const subtotal = _.sumBy(orderLineItems, item => item.totalCents ?? 0)
     const order: OrderRecord<z.infer<typeof ShippingAddressSchema>> = {
@@ -103,7 +99,7 @@ export const actions = {
             ],
             metadata: item.fields ?? {},
           },
-          unit_amount: getUnitPrice(item.expand?.product)
+          unit_amount: getUnitPriceWithFields(item.expand?.product, item.fields)
         },
         quantity: item.quantity,
       }))

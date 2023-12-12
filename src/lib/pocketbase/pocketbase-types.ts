@@ -89,17 +89,19 @@ export enum ProductFieldTypeOptions {
 	"number" = "number",
 	"color" = "color",
 }
-export type ProductFieldRecord = {
+export type ProductFieldRecord<TpriceIncreaseArray = unknown> = {
 	colors?: RecordIdString[]
 	internal_name?: string
 	optional?: boolean
 	options?: string
+	priceIncreaseArray?: null | TpriceIncreaseArray
 	title?: string
 	type?: ProductFieldTypeOptions
 }
 
 export type UsersRecord = {
 	avatar?: string
+	isManager?: boolean
 	name?: string
 }
 
@@ -109,7 +111,7 @@ export type LineItemResponse<Tfields = unknown, Texpand = unknown> = Required<Li
 export type OrderResponse<TshippingAddress = unknown, Texpand = unknown> = Required<OrderRecord<TshippingAddress>> & BaseSystemFields<Texpand>
 export type OrderLineItemResponse<Tfields = unknown, Texpand = unknown> = Required<OrderLineItemRecord<Tfields>> & BaseSystemFields<Texpand>
 export type ProductResponse<Texpand = unknown> = Required<ProductRecord> & BaseSystemFields<Texpand>
-export type ProductFieldResponse<Texpand = unknown> = Required<ProductFieldRecord> & BaseSystemFields<Texpand>
+export type ProductFieldResponse<TpriceIncreaseArray = unknown, Texpand = unknown> = Required<ProductFieldRecord<TpriceIncreaseArray>> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions

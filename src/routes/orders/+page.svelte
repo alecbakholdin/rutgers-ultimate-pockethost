@@ -36,10 +36,10 @@
       </div>
       <div class="flex gap-2 items-center">
         <div
-          class="bg-base-200 w-[40px] h-[40px] rounded-md flex flex-col items-center text-sm font-semibold"
+          class="bg-base-200 w-[40px] h-[40px] rounded-md flex flex-col items-center text-sm font-semibold p-[2.5px]"
         >
-          <p>{createdDate.getDate()}</p>
-          <p class="text-xs">{shortMonths[createdDate.getMonth()]}</p>
+          <p class="m-0 p-0">{createdDate.getDate()}</p>
+          <p class="text-xs m-[-3px]">{shortMonths[createdDate.getMonth()]}</p>
         </div>
         <!-- <div
           class="border w-[40px] h-[40px] rounded-md flex flex-col items-center text-sm font-semibold"
@@ -64,8 +64,8 @@
         </div>
         {#if order.shippingAddress && order.shippingCostInCents}
           {@const addr = order.shippingAddress}
-          <div class="flex items-center w-fit border p-1 rounded-md">
-            <Icon icon="material-symbols:local-shipping" class="text-3xl" />
+          <div class="flex items-start gap-1 w-fit border p-1 rounded-md">
+            <Icon icon="material-symbols:local-shipping" class="text-3xl p-1" />
             <div>
               <p>{addr.line1}</p>
               <p>{addr.line2}</p>

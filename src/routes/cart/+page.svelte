@@ -9,8 +9,8 @@
   import { Form } from 'formsnap'
   import { writable } from 'svelte/store'
   import { slide } from 'svelte/transition'
+  import { getCartTotal, getCartWeight, getLineItemPrice, validDiscount } from '$lib/util/functions/cartUtils'
   import CheckoutShippingCostEstimator from './__route/CheckoutShippingCostEstimator.svelte'
-  import { getCartTotal, getCartWeight, getLineItemPrice, validDiscount } from './__route/cartUtils'
   import { CreateCheckoutSchema } from './schemas.js'
 
   export let data
