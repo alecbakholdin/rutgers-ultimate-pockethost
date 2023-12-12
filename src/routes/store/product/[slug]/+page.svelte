@@ -55,7 +55,7 @@
       <h3 class="text-base-content m-0 p-0">
         ${(product.priceInCents / 100).toFixed(2)}
       </h3>
-      {#if product.required_for_team}
+      {#if product.requiredForPlayers}
         <p class="text-error m-0 p-0">* Required for Players</p>
       {/if}
       <Form.Root

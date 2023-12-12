@@ -1,17 +1,16 @@
 import { SERVER_SECRET } from '$env/static/private'
 import { getCartItems } from '$lib/pocketbase/cart.js'
+import type { LineItemWithProduct } from '$lib/pocketbase/derived-pocketbase-types'
 import type {
-  LineItemResponse,
   OrderLineItemRecord,
-  OrderRecord,
-  ProductRecord,
-  ProductResponse,
+  OrderRecord
 } from '$lib/pocketbase/pocketbase-types'
 import type { CompleteCheckoutType } from '$lib/schemas/completeCheckout'
 import type { ShippingAddressSchema } from '$lib/schemas/shipping'
 import { stripe } from '$lib/stripe/stripe'
 import { error, fail, redirect } from '@sveltejs/kit'
 import jwt from 'jsonwebtoken'
+import _ from 'lodash'
 import type Stripe from 'stripe'
 import { superValidate } from 'sveltekit-superforms/server'
 import type { z } from 'zod'
@@ -19,13 +18,12 @@ import type {
   CalculateShipmentSchema,
   CalculatedShipmentSchema,
 } from '../api/shipment/calculate/schemas'
+import { getCartWeight, getUnitPrice, validDiscount } from './__route/cartUtils'
 import { CreateCheckoutSchema } from './schemas'
 
 export async function load() {
   return {
-    cart: await getCartItems<LineItemResponse<any, { product: ProductRecord }>>(
-      'product',
-    ),
+    cart: await getCartItems<LineItemWithProduct>('product'),
     createCheckoutForm: await superValidate(CreateCheckoutSchema),
   }
 }
@@ -35,10 +33,7 @@ export const actions = {
     const form = await superValidate(request, CreateCheckoutSchema)
     if (!form.valid) return fail(400, { form })
 
-    const cartItems =
-      await getCartItems<LineItemResponse<any, { product: ProductResponse }>>(
-        'product',
-      )
+    const cartItems = await getCartItems<LineItemWithProduct>('product')
     if (cartItems.items.length === 0) {
       throw error(400, { message: 'No items included' })
     }
@@ -50,6 +45,7 @@ export const actions = {
         method: 'POST',
         body: JSON.stringify({
           shippingAddress,
+          weightInOz: getCartWeight(cartItems.items),
         } satisfies z.infer<typeof CalculateShipmentSchema>),
       })
       if (response.status === 200) {
@@ -61,30 +57,25 @@ export const actions = {
 
     async function isDiscounted() {
       if (form.data.discountCode) {
-        const response = await fetch(`/api/teamDiscount?code=${form.data.discountCode}`);
+        const response = await fetch(
+          `/api/teamDiscount?code=${form.data.discountCode}`,
+        )
         return response.status === 200
       }
-      return false;
+      return false
     }
-    const discounted = await isDiscounted();
-
+    
+    validDiscount.set(await isDiscounted());
     const orderLineItems: OrderLineItemRecord<Record<string, string>>[] =
-      cartItems.items.map((item) => {
-        const product = item.expand!.product;
-        const unitPriceCents = (discounted ? product.teamPriceInCents : product.priceInCents) ?? product.priceInCents;
-        return {
+      cartItems.items.map((item) => ({
           order: '',
           quantity: item.quantity,
           product: item.product,
           fields: item.fields,
-          unitPriceCents,
-          totalCents: unitPriceCents * item.quantity,
-        }
-      })
-    const subtotal = orderLineItems.reduce(
-      (prev, item) => prev + item.totalCents!,
-      0,
-    )
+          unitPriceCents: getUnitPrice(item.expand?.product),
+          totalCents: getUnitPrice(item.expand?.product) * item.quantity,
+      }))
+    const subtotal = _.sumBy(orderLineItems, item => item.totalCents ?? 0)
     const order: OrderRecord<z.infer<typeof ShippingAddressSchema>> = {
       user: user.id,
       discountCode: form.data.discountCode,
@@ -110,9 +101,9 @@ export const actions = {
                 item.expand!.product.primaryImage,
               ),
             ],
-            metadata: item.fields,
+            metadata: item.fields ?? {},
           },
-          unit_amount: discounted ? item.expand!.product.teamPriceInCents ?? item.expand!.product?.priceInCents : item.expand!.product.priceInCents,
+          unit_amount: getUnitPrice(item.expand?.product)
         },
         quantity: item.quantity,
       }))
@@ -123,16 +114,16 @@ export const actions = {
           product_data: {
             name: 'Shipping',
             images: [
-              'https://api.iconify.design/material-symbols/local-shipping.svg?color=white&width=80&height=80'
+              'https://api.iconify.design/material-symbols/local-shipping.svg?color=white&width=80&height=80',
             ],
-            description: 'Shipping Cost'
+            description: 'Shipping Cost',
           },
           unit_amount: shippingCostInCents,
         },
-        quantity: 1
+        quantity: 1,
       })
     }
-    console.log(url);
+    console.log(url)
     const response = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items,

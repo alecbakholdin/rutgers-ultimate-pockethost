@@ -10,15 +10,12 @@
   import { writable } from 'svelte/store'
   import { slide } from 'svelte/transition'
   import CheckoutShippingCostEstimator from './__route/CheckoutShippingCostEstimator.svelte'
+  import { getCartTotal, getCartWeight, getLineItemPrice, validDiscount } from './__route/cartUtils'
   import { CreateCheckoutSchema } from './schemas.js'
-  import DebugObject from '$lib/component/DebugObject.svelte'
 
   export let data
   const cartItems = writable(data.cart.items)
-  $: total = $cartItems.reduce(
-    (total, item) => total + getUnitPrice(item) * item.quantity,
-    0,
-  )
+  $: total = getCartTotal($cartItems, $validDiscount);
   async function updateQty(cartItemId: string, quantity: number) {
     if (quantity === 0) {
       await pb.collection('line_item').delete(cartItemId)
@@ -31,16 +28,7 @@
   }
 
   let requestShipment = false
-  let validDiscount = false
   const discountsLoading = writable(false)
-  $: getUnitPrice = (item: (typeof $cartItems)[number]) => {
-    const product = item.expand?.product
-    return (
-      (validDiscount ? product?.teamPriceInCents : product?.priceInCents) ??
-      product?.priceInCents ??
-      0
-    )
-  }
   async function applyDiscounts(code: string) {
     $discountsLoading = true
     try {
@@ -48,13 +36,13 @@
         credentials: 'include',
       })
       if (response.status === 200) {
-        validDiscount = true
+        $validDiscount = true
         toast({ message: 'Discount applied', type: 'success' })
       } else {
         const data = await response.json()
         console.error(data)
         toast({ message: data.message, type: 'error' })
-        validDiscount = false;
+        $validDiscount = false
       }
     } finally {
       $discountsLoading = false
@@ -62,7 +50,6 @@
   }
   function inputKeypressHandler(discountCode?: string) {
     return function (e: KeyboardEvent) {
-      console.log(e)
       if ((e as any).key === 'Enter' && !(e as any).ctrlKey) {
         e.stopPropagation()
         e.preventDefault()
@@ -78,7 +65,7 @@
   </div>
   {#each $cartItems as cartItem (cartItem.id)}
     {@const product = cartItem.expand?.product}
-    {@const price = getUnitPrice(cartItem)}
+    {@const price = getLineItemPrice(cartItem)}
     {#if product}
       <div class="flex gap-1 w-full" out:slide>
         <ImageThumb
@@ -92,7 +79,7 @@
           <p class="font-bold">
             {product.title}
           </p>
-          {#each Object.entries(cartItem.fields) as [field, value]}
+          {#each Object.entries(cartItem.fields ?? {}) as [field, value]}
             <p class="text-sm">
               {field}:
               {value}
@@ -113,14 +100,14 @@
           </select>
           <div class="relative">
             <p class="font-bold">
-              {formatCents(product?.priceInCents)}
+              {formatCents(getLineItemPrice(cartItem, false))}
             </p>
-            {#if validDiscount && price < (product.priceInCents ?? 0)}
+            {#if $validDiscount && product.teamPriceInCents !== undefined}
               <div
                 class="absolute w-[120%] h-[2px] left-[-10%] top-1/2 transform -translate-y-1/2 bg-red-700 rotate-12"
               />
-              <span class="absolute left-[-110%] top-0 text-red-700">
-                {formatCents(price)}
+              <span class="absolute top-full text-red-700">
+                {formatCents(getLineItemPrice(cartItem, true))}
               </span>
             {/if}
           </div>
@@ -220,7 +207,7 @@
         <div class="col-span-3 grid pr-2">
           <Form.Label>City</Form.Label>
           <Form.Input
-            class="input input-bordered"
+            class="input input-bordered w-full"
             placeholder="City"
             autocomplete="city locality"
           />
@@ -256,6 +243,7 @@
       </Form.Field>
       <CheckoutShippingCostEstimator
         shippingAddress={formValues.shippingAddress}
+        weightInOz={getCartWeight($cartItems)}
       />
     </div>
   {/if}

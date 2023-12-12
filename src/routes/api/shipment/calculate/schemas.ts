@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 export const CalculateShipmentSchema = z.object({
   shippingAddress: ShippingAddressSchema,
+  weightInOz: z.number().nonnegative()
 })
 
 export interface CalculatedShipmentSchema {

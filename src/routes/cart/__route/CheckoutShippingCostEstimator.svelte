@@ -10,17 +10,19 @@
 
   type ShippingAddress = z.infer<typeof CreateCheckoutSchema>['shippingAddress']
   export let shippingAddress: ShippingAddress
+  export let weightInOz: number;
   let shippingAmount: string | undefined = undefined
   let shippingLoading = false
-  const calculateShipping = _.debounce(async (address: ShippingAddress) => {
+  const calculateShipping = _.debounce(async (address: ShippingAddress, weight: number) => {
     try {
-      if (!address) return
+      if (!address?.postal_code) return
       console.log('Calculating shipping')
       const response = await fetch('/api/shipment/calculate', {
         method: 'POST',
         credentials: 'include',
         body: JSON.stringify({
           shippingAddress: address,
+          weightInOz: weight
         } satisfies z.infer<typeof CalculateShipmentSchema>),
       })
       if (response.status !== 200) {
@@ -37,7 +39,7 @@
   $: {
     shippingLoading = true
     shippingAmount = undefined
-    calculateShipping(shippingAddress)
+    calculateShipping(shippingAddress, weightInOz)
   }
 </script>
 

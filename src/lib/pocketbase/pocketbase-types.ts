@@ -76,10 +76,11 @@ export type ProductRecord = {
 	galleryImages?: string[]
 	priceInCents: number
 	primaryImage?: string
-	required_for_team?: boolean
+	requiredForPlayers?: boolean
 	slug: string
 	teamPriceInCents?: number
 	title: string
+	weightInOz?: number
 }
 
 export enum ProductFieldTypeOptions {

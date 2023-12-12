@@ -1,14 +1,15 @@
+import { easyPost } from '$lib/easyPost/easyPost'
+import type { IShipmentCreateParameters } from '@easypost/api/types'
 import { error, json } from '@sveltejs/kit'
 import {
   CalculateShipmentSchema,
   type CalculatedShipmentSchema,
 } from './schemas'
-import { easyPost } from '$lib/easyPost/easyPost'
-import type { IShipmentCreateParameters } from '@easypost/api/types'
 
 export async function POST({ request }) {
   const {
     shippingAddress: { line1, line2, city, state, postal_code },
+    weightInOz
   } = CalculateShipmentSchema.parse(await request.json())
   const shipment = await easyPost.Shipment.create({
     from_address: {
@@ -25,10 +26,10 @@ export async function POST({ request }) {
       zip: postal_code,
     },
     parcel: {
-      length: 8,
-      width: 5,
-      height: 5,
-      weight: 5,
+      length: 15.5,
+      width: 12,
+      height: 6,
+      weight: weightInOz,
     },
   } satisfies IShipmentCreateParameters)
   if(!shipment.rates) throw error(400, {message: "No viable shipments found"})
