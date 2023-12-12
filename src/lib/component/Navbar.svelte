@@ -2,7 +2,12 @@
   import { applyAction, enhance } from '$app/forms'
   import { currentUser, pb } from '$lib/pocketbase/pb'
   import Icon from '@iconify/svelte'
+
+  let open = false
+  let summaryEl: HTMLElement
 </script>
+
+<svelte:window on:click={(e) => e.target !== summaryEl && (open = false)} />
 
 <div class="navbar bg-base-200">
   <div class="flex-1">
@@ -24,9 +29,11 @@
           </a>
         </li>
         <li>
-          <details class="relative">
-            <summary> More </summary>
-            <ul class="absolute right-0 z-[1] w-fit p-2 bg-base-100 rounded-t-none">
+          <details class="relative" bind:open>
+            <summary bind:this={summaryEl}> More </summary>
+            <ul
+              class="absolute right-0 z-[1] w-fit p-2 bg-base-100 rounded-t-none"
+            >
               <!-- {#if $currentUser.isManager}
                 <li>
                   <a href="/orders/manager" class="whitespace-nowrap">
