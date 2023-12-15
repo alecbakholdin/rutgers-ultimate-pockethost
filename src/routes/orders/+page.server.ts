@@ -19,7 +19,7 @@ export async function load({ locals: { pb, user } }) {
         }
       >
     >(0, 5, {
-      filter: `user='${user.id}'`,
+      filter: `user='${user?.id ?? ''}'`,
       expand: 'order_line_item(order).product',
       sort: '-created'
     }),

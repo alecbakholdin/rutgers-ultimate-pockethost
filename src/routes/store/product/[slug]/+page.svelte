@@ -20,22 +20,18 @@
   function forceAny(input: any) {
     return input as any
   }
-  let windowWidth: number
-  $: imageThumbSize = windowWidth < 500 ? 300 : 480
 </script>
 
-<svelte:window bind:innerWidth={windowWidth} />
 {#await data.product then product}
-  <div class="flex flex-col md:flex-row max-w-md md:max-w-4xl mx-auto">
+  <div class="flex flex-col gap-4 md:flex-row max-w-md md:max-w-4xl mx-auto">
     <div class="flex-shrink-0">
       <ImageThumb
         class="rounded-md w-[480px] h-[480px] aspect-square object-scale-down"
         record={product}
         image={currentImage}
         alt={product.title}
-        size={imageThumbSize}
       />
-      <div class="w-full overflow-x-auto flex mt-2">
+      <div class="w-full overflow-x-auto flex justify-center mt-2">
         {#each [product.primaryImage, ...product.galleryImages].filter((x) => x) as image, i}
           <button
             type="button"
@@ -67,6 +63,7 @@
       let:config
       let:form
       let:formValues
+      class="w-full"
     >
       <div class="w-full flex flex-col md:items-end prose max-w-md mx-auto">
         <h2 class="mb-2">{product.title}</h2>
@@ -77,7 +74,7 @@
           <p class="text-error m-0 p-0">* Required for Players</p>
         {/if}
 
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1 w-full md:max-w-[300px] max-w-full">
           {#each product.expand?.fields ?? [] as field, i}
             {@const name = `fields.${field.title}`}
             {@const label = `${field.title}${
@@ -168,7 +165,7 @@
           </Form.Field>
           <button
             type="submit"
-            class="btn btn-primary"
+            class="btn btn-primary mt-2"
             use:loadingButton={form.submitting}
           >
             Add To Cart

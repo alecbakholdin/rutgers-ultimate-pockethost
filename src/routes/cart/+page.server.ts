@@ -122,6 +122,7 @@ export const actions = {
     console.log(url)
     const response = await stripe.checkout.sessions.create({
       mode: 'payment',
+      customer_email: user.email,
       line_items,
       success_url: `${url.origin}/checkout/success?c=${token}`,
     })

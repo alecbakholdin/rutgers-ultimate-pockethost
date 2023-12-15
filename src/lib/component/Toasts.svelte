@@ -64,7 +64,7 @@
   {#each $toasts as toastData (toastData.id)}
     <div
       id={toastData.id}
-      class="alert"
+      class="alert flex justify-center"
       class:alert-success={toastData.type === 'success'}
       class:alert-info={toastData.type === 'info'}
       class:alert-error={toastData.type === 'error'}

@@ -9,13 +9,19 @@
   import { Form } from 'formsnap'
   import { writable } from 'svelte/store'
   import { slide } from 'svelte/transition'
-  import { getCartTotal, getCartWeight, getLineItemPrice, validDiscount } from '$lib/util/functions/cartUtils'
+  import {
+    getCartTotal,
+    getCartWeight,
+    getLineItemPrice,
+    validDiscount,
+  } from '../../lib/util/functions/cartUtils'
   import CheckoutShippingCostEstimator from './__route/CheckoutShippingCostEstimator.svelte'
   import { CreateCheckoutSchema } from './schemas.js'
+  import Icon from '@iconify/svelte'
 
   export let data
   const cartItems = writable(data.cart.items)
-  $: total = getCartTotal($cartItems, $validDiscount);
+  $: total = getCartTotal($cartItems, $validDiscount)
   async function updateQty(cartItemId: string, quantity: number) {
     if (quantity === 0) {
       await pb.collection('line_item').delete(cartItemId)
@@ -112,6 +118,26 @@
             {/if}
           </div>
         </div>
+
+        <details class="extra-actions relative h-full flex items-center">
+          <summary class="cursor-pointer">
+            <Icon icon="ph:dots-three-vertical-bold"></Icon>
+          </summary>
+          <ul
+            class="absolute right-0 shadow-xl z-[1] w-fit bg-base-100 border rounded-md"
+          >
+            <li>
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm text-error rounded-md flex-row flex-nowrap gap-1"
+                on:click={() => updateQty(cartItem.id, 0)}
+              >
+                <Icon icon="mdi:delete"></Icon>
+                <span>Delete</span>
+              </button>
+            </li>
+          </ul>
+        </details>
       </div>
     {/if}
   {:else}
@@ -157,10 +183,13 @@
       >
     </div>
   </Form.Field>
-  <label for="requestShipment" class="prose col-span-full">
+  <label
+    for="requestShipment"
+    class="prose col-span-full flex items-center gap-1 cursor-pointer"
+  >
     <input
-      class="checkbox checkbox-primary"
-      id="reqeustShipment"
+      class="checkbox checkbox-primary checkbox-sm rounded-md"
+      id="requestShipment"
       type="checkbox"
       bind:checked={requestShipment}
       on:change={() =>
@@ -258,3 +287,12 @@
     </button>
   </div>
 </Form.Root>
+
+<style>
+  .extra-actions > summary {
+    list-style: none;
+  }
+  .extra-actions summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
