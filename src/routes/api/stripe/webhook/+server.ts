@@ -1,20 +1,18 @@
 import { dev } from '$app/environment'
 import {
-    POCKETBASE_ADMIN_EMAIL,
-    POCKETBASE_ADMIN_PASSWORD,
-    STRIPE_WEBHOOK_SIGNING_SECRET,
+  POCKETBASE_ADMIN_EMAIL,
+  POCKETBASE_ADMIN_PASSWORD,
+  STRIPE_WEBHOOK_SIGNING_SECRET,
 } from '$env/static/private'
 import type {
-    OrderLineItemRecordTyped,
-    OrderRecordTyped
+  OrderLineItemRecordTyped,
+  OrderRecordTyped,
 } from '$lib/pocketbase/derived-pocketbase-types.js'
+import type { TypedPocketBase } from '$lib/pocketbase/pocketbase-types.js'
 import type {
-    TypedPocketBase
-} from '$lib/pocketbase/pocketbase-types.js'
-import type {
-    StripeLineItemMetadata,
-    StripeOrderMetadata,
-    StripeShippingMetadata,
+  StripeLineItemMetadata,
+  StripeOrderMetadata,
+  StripeShippingMetadata,
 } from '$lib/stripe/checkout.js'
 import { stripe } from '$lib/stripe/stripe'
 import { error, json } from '@sveltejs/kit'
@@ -57,18 +55,35 @@ async function createOrder(
   checkout: Stripe.Checkout.Session,
   pb: TypedPocketBase,
 ) {
-  const order = await createOrderObject(checkout)
-  const lineItems = await createOrderLineItems(checkout)
+  const { userId } = checkout.metadata as StripeOrderMetadata
+  const [order, lineItems, cartItems] = await Promise.all([
+    createOrderObject(checkout),
+    createOrderLineItems(checkout),
+    pb.collection('line_item').getFullList({
+      filter: `user='${userId}'`,
+    }),
+  ])
 
-  const { id: orderId } = await pb.collection('order').create(order)
-  for (const lineItem of lineItems) {
-    await pb
-      .collection('order_line_item')
-      .create({
-        ...lineItem,
-        order: orderId,
-      } satisfies OrderLineItemRecordTyped)
-  }
+  const cartDeletion = Promise.all(
+    cartItems.map(({ id }) =>
+      pb.collection('line_item').delete(id, { requestKey: null }),
+    ),
+  )
+
+  const { id: orderId } = await pb.collection('order').create(order, {requestKey: null})
+  await Promise.all(
+    lineItems.map((lineItem) =>
+      pb.collection('order_line_item').create(
+        {
+          ...lineItem,
+          order: orderId,
+        } satisfies OrderLineItemRecordTyped,
+        { requestKey: null },
+      ),
+    ),
+  )
+
+  await cartDeletion
 }
 
 async function createOrderObject(checkout: Stripe.Checkout.Session) {

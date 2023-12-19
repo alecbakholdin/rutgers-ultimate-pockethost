@@ -112,7 +112,7 @@ export const actions = {
           shipping_options: [
             {
               shipping_rate_data: {
-                display_name: 'testing',
+                display_name: "Shipped Once Ready",
                 type: 'fixed_amount',
                 fixed_amount: {
                   amount: shippingCostInCents,
