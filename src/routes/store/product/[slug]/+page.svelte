@@ -24,14 +24,14 @@
 
 {#await data.product then product}
   <div class="flex flex-col gap-4 md:flex-row max-w-md md:max-w-4xl mx-auto">
-    <div class="flex-shrink-0">
+    <div class="flex-shrink-0 flex flex-col items-center">
       <ImageThumb
         class="rounded-md w-[480px] h-[480px] aspect-square object-scale-down"
         record={product}
         image={currentImage}
         alt={product.title}
       />
-      <div class="w-full overflow-x-auto flex justify-center mt-2">
+      <div class="w-fit overflow-x-auto flex mt-2">
         {#each [product.primaryImage, ...product.galleryImages].filter((x) => x) as image, i}
           <button
             type="button"
