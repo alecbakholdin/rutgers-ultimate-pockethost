@@ -1,6 +1,5 @@
-import type { OrderResponseTyped } from '$lib/pocketbase/derived-pocketbase-types.js';
+import { fullOrderResponseExpansionString, type FullOrderResponse } from '$lib/pocketbase/derived-pocketbase-types.js';
 import { pb } from '$lib/pocketbase/pb.js';
-import type { UsersResponse } from '$lib/pocketbase/pocketbase-types.js';
 
 export async function load({ url: { searchParams } }) {
     const page = parseInt(searchParams.get('page') ?? '0');
@@ -9,10 +8,10 @@ export async function load({ url: { searchParams } }) {
     const search = searchParams.get('search');
 
     return {
-        orders: await pb.collection('order').getList<OrderResponseTyped<{ user: UsersResponse }>>(page, pageSize, {
+        orders: await pb.collection('order').getList<FullOrderResponse>(page, pageSize, {
             ...(sortBy && { sort: sortBy }),
             ...(search && { filter: pb.filter("(user.name ~ {:search} || user.email ~ {:search})", { search }) }),
-            expand: "user"
+            expand: fullOrderResponseExpansionString
         }),
         search,
         page,

@@ -1,5 +1,8 @@
 <script lang="ts">
-    import { formatCents } from '$lib/util/functions/formatCents.js'
+  import OrderManagerRow from './__route/OrderManagerRow.svelte';
+
+  import { formatCents } from '$lib/util/functions/formatCents.js'
+  import Icon from '@iconify/svelte'
 
   export let data
   $: orders = data.orders
@@ -8,7 +11,7 @@
 <div class="mx-auto">
   <h2 class="text-lg font-semibold">Order Manager</h2>
   <div class="overflow-x-auto">
-    <table class="table table-pin-rows">
+    <table class="table">
       <thead>
         <tr>
           <th>ID</th>
@@ -17,33 +20,16 @@
           <th>Shipping</th>
           <th>Fulfilled</th>
           <th>Total</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         {#each orders.items as order}
-          {@const user = order.expand?.user}
-          <tr>
-            <td>
-              <a href="/manager/orders/{order.id}" class="badge badge-ghost">
-                {order.id}
-              </a>
-            </td>
-            <td>
-              <a href="/manager/users/{user?.id}" class="badge badge-ghost">
-                {user?.email}
-              </a>
-            </td>
-            <td>{user?.name}</td>
-            <td>{order.shippingCostInCents ? "Yes" : "No"}</td>
-            <td>{order.fulfilled ? "Yes" : "No"}</td>
-            <td>{formatCents(order.totalInCents)}</td>
-          </tr>
+          <OrderManagerRow {order}></OrderManagerRow>
         {/each}
       </tbody>
       <tfoot>
-        <div class="join">
-            
-        </div>
+        <div class="join"></div>
       </tfoot>
     </table>
   </div>

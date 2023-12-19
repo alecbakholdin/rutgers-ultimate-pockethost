@@ -8,6 +8,7 @@ import type {
   OrderResponse,
   ProductFieldResponse,
   ProductResponse,
+  UsersResponse,
 } from './pocketbase-types'
 import type { ShippingAddressSchema } from '$lib/schemas/shipping'
 
@@ -38,6 +39,7 @@ export type OrderRecordTyped = OrderRecord<
   z.infer<typeof ShippingAddressSchema>
 >
 export type FullOrderResponse<TProductExpand = unknown> = OrderResponseTyped<{
+  'user': UsersResponse,
   'order_line_item(order)': OrderLineItemResponse<
     Record<string, string>,
     { product: ProductResponse<TProductExpand> }
@@ -46,4 +48,4 @@ export type FullOrderResponse<TProductExpand = unknown> = OrderResponseTyped<{
 export type OrderLineItemRecordTyped = OrderLineItemRecord<
   Record<string, string>
 >
-export const fullOrderResponseExpansionString = 'order_line_item(order).product'
+export const fullOrderResponseExpansionString = 'order_line_item(order).product,user'

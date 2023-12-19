@@ -22,7 +22,6 @@
     "@tailwindcss/typography": "^0.5.10",
     "@types/jsonwebtoken": "^9.0.5",
     "autoprefixer": "^10.4.16",
-    "daisyui": "^4.4.14",
     "eslint": "^8.54.0",
     "eslint-config-prettier": "^9.0.0",
     "formsnap": "^0.4.1",
@@ -42,6 +41,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.202",
+    "daisyui": "^4.4.20",
     "lodash": "^4.17.21",
     "stripe": "^14.7.0",
     "sveltekit-superforms": "^1.11.0",
