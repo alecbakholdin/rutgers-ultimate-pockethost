@@ -16,7 +16,6 @@
     {@const createdDate = new Date(order.created)}
     {@const fulfillIcon = order.fulfilled ? 'mdi:done' : 'mdi:remove'}
     {@const fulfilledDate = order.fulfilled ? 'Fulfilled' : 'Unfulfilled'}
-    {@const totalFormatted = formatCents(order.total, { excludeDollar: true })}
     {@const lineItems = order.expand?.['order_line_item(order)'] || []}
     {@const numItems = _.sumBy(lineItems, 'quantity')}
     <button
@@ -40,7 +39,7 @@
           <p class="m-0 p-0">{createdDate.getDate()}</p>
           <p class="text-xs m-[-3px]">{shortMonths[createdDate.getMonth()]}</p>
         </div>
-        <p class="font-semibold flex-grow text-end">{formatCents(order.total)}</p>
+        <p class="font-semibold flex-grow text-end">{formatCents(order.totalInCents)}</p>
         <!-- <button type="button" class="btn btn-ghost btn-xs" on:click|stopPropagation={() => {}}>
           <Icon icon="ph:dots-three-vertical-bold" class="flex-shrink text-lg"/>
         </button> -->

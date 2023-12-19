@@ -1,14 +1,22 @@
 import { SERVER_SECRET } from '$env/static/private'
 import { getCartItems } from '$lib/pocketbase/cart.js'
-import { lineItemExpansionString, type ExpandedLineItem } from '$lib/pocketbase/derived-pocketbase-types'
+import {
+  lineItemExpansionString,
+  type ExpandedLineItem,
+} from '$lib/pocketbase/derived-pocketbase-types'
 import type {
+  LineItemRecord,
   OrderLineItemRecord,
-  OrderRecord
+  OrderRecord,
 } from '$lib/pocketbase/pocketbase-types'
 import type { CompleteCheckoutType } from '$lib/schemas/completeCheckout'
 import type { ShippingAddressSchema } from '$lib/schemas/shipping'
 import { stripe } from '$lib/stripe/stripe'
-import { getCartWeight, getUnitPriceWithFields, validDiscount } from '$lib/util/functions/cartUtils'
+import {
+  getCartWeight,
+  getUnitPriceWithFields,
+  validDiscount,
+} from '$lib/util/functions/cartUtils'
 import { error, fail, redirect } from '@sveltejs/kit'
 import jwt from 'jsonwebtoken'
 import _ from 'lodash'
@@ -20,6 +28,11 @@ import type {
   CalculatedShipmentSchema,
 } from '../api/shipment/calculate/schemas'
 import { CreateCheckoutSchema } from './schemas'
+import type {
+  StripeLineItemMetadata,
+  StripeOrderMetadata,
+  StripeShippingMetadata,
+} from '$lib/stripe/checkout'
 
 export async function load() {
   return {
@@ -33,7 +46,9 @@ export const actions = {
     const form = await superValidate(request, CreateCheckoutSchema)
     if (!form.valid) return fail(400, { form })
 
-    const cartItems = await getCartItems<ExpandedLineItem>(lineItemExpansionString)
+    const cartItems = await getCartItems<ExpandedLineItem>(
+      lineItemExpansionString,
+    )
     if (cartItems.items.length === 0) {
       throw error(400, { message: 'No items included' })
     }
@@ -59,31 +74,8 @@ export const actions = {
       const response = await fetch(
         `/api/teamDiscount?code=${form.data.discountCode}`,
       )
-      validDiscount.set(response.status === 200);
+      validDiscount.set(response.status === 200)
     }
-    
-    const orderLineItems: OrderLineItemRecord<Record<string, string>>[] =
-      cartItems.items.map((item) => ({
-          order: '',
-          quantity: item.quantity,
-          product: item.product,
-          fields: item.fields,
-          unitPriceCents: getUnitPriceWithFields(item.expand?.product, item.fields),
-          totalCents: getUnitPriceWithFields(item.expand?.product, item.fields) * item.quantity,
-      }))
-    const subtotal = _.sumBy(orderLineItems, item => item.totalCents ?? 0)
-    const order: OrderRecord<z.infer<typeof ShippingAddressSchema>> = {
-      user: user.id,
-      discountCode: form.data.discountCode,
-      shippingAddress: form.data.shippingAddress,
-      subtotal,
-      shippingCostInCents,
-      total: subtotal + (shippingCostInCents ?? 0),
-    }
-    const token = jwt.sign(
-      { order, lineItems: orderLineItems } satisfies CompleteCheckoutType,
-      SERVER_SECRET,
-    )
 
     const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] =
       cartItems.items.map((item) => ({
@@ -97,34 +89,47 @@ export const actions = {
                 item.expand!.product.primaryImage,
               ),
             ],
-            metadata: item.fields ?? {},
+            metadata: {
+              _productId: item.product,
+              ...(item.fields && item.fields),
+            } satisfies StripeLineItemMetadata,
           },
-          unit_amount: getUnitPriceWithFields(item.expand?.product, item.fields)
+          unit_amount: getUnitPriceWithFields(
+            item.expand?.product,
+            item.fields,
+          ),
         },
         quantity: item.quantity,
       }))
-    if (shippingCostInCents !== undefined) {
-      line_items.push({
-        price_data: {
-          currency: 'USD',
-          product_data: {
-            name: 'Shipping',
-            images: [
-              'https://api.iconify.design/material-symbols/local-shipping.svg?color=white&width=80&height=80',
-            ],
-            description: 'Shipping Cost',
-          },
-          unit_amount: shippingCostInCents,
-        },
-        quantity: 1,
-      })
-    }
-    console.log(url)
+
     const response = await stripe.checkout.sessions.create({
       mode: 'payment',
       customer_email: user.email,
       line_items,
-      success_url: `${url.origin}/checkout/success?c=${token}`,
+      success_url: `${url.origin}/checkout/success`,
+      ...(shippingCostInCents !== undefined &&
+        shippingAddress && {
+          shipping_options: [
+            {
+              shipping_rate_data: {
+                display_name: 'testing',
+                type: 'fixed_amount',
+                fixed_amount: {
+                  amount: shippingCostInCents,
+                  currency: 'USD',
+                },
+                metadata: shippingAddress satisfies StripeShippingMetadata,
+              },
+            },
+          ],
+        }),
+      metadata: {
+        userId: user.id,
+        ...(validDiscount &&
+          form.data.discountCode && {
+            discountCode: form.data.discountCode,
+          }),
+      } satisfies StripeOrderMetadata,
     })
     if (response.url) {
       throw redirect(308, response.url)

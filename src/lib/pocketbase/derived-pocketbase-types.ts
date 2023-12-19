@@ -2,7 +2,9 @@ import type { z } from 'zod'
 import type {
   ColorResponse,
   LineItemResponse,
+  OrderLineItemRecord,
   OrderLineItemResponse,
+  OrderRecord,
   OrderResponse,
   ProductFieldResponse,
   ProductResponse,
@@ -23,12 +25,17 @@ export type LineItemResponseTyped<Texpand = unknown> = LineItemResponse<
 >
 export type LineItemWithProduct<TProductExpand = unknown> =
   LineItemResponseTyped<{ product: ProductResponse<TProductExpand> }>
-export type ExpandedLineItem = LineItemResponseTyped<{product: ExpandedProduct}>
+export type ExpandedLineItem = LineItemResponseTyped<{
+  product: ExpandedProduct
+}>
 export const lineItemExpansionString = `product.fields.colors`
 
-export type OrderResponseTyped<Texpand> = OrderResponse<
+export type OrderResponseTyped<Texpand = unknown> = OrderResponse<
   z.infer<typeof ShippingAddressSchema>,
   Texpand
+>
+export type OrderRecordTyped = OrderRecord<
+  z.infer<typeof ShippingAddressSchema>
 >
 export type FullOrderResponse<TProductExpand = unknown> = OrderResponseTyped<{
   'order_line_item(order)': OrderLineItemResponse<
@@ -36,4 +43,7 @@ export type FullOrderResponse<TProductExpand = unknown> = OrderResponseTyped<{
     { product: ProductResponse<TProductExpand> }
   >[]
 }>
+export type OrderLineItemRecordTyped = OrderLineItemRecord<
+  Record<string, string>
+>
 export const fullOrderResponseExpansionString = 'order_line_item(order).product'

@@ -57,7 +57,8 @@ export type OrderRecord<TshippingAddress = unknown> = {
 	shippingAddress?: null | TshippingAddress
 	shippingCostInCents?: number
 	subtotal?: number
-	total?: number
+	testOrder?: boolean
+	totalInCents?: number
 	user?: RecordIdString
 }
 
