@@ -1,11 +1,15 @@
 <script lang="ts">
   import { applyAction, enhance } from '$app/forms'
   import { goto } from '$app/navigation'
+  import { superformToast } from '$lib/component/Toasts.svelte'
   import { pb } from '$lib/pocketbase/pb'
   import { loadingButton } from '$lib/util/svelte-actions/loading-button'
   import Icon from '@iconify/svelte'
+  import { Form } from 'formsnap'
   import { writable } from 'svelte/store'
+  import { LoginWithPasswordSchema } from './schemas.js'
 
+  export let data
   const loading = writable(false)
 
   async function signInWithGoogle() {
@@ -17,38 +21,51 @@
 </script>
 
 <div class="max-w-md mx-auto">
-  <form
+  <Form.Root
     method="POST"
-    use:enhance={() => {
-      $loading = true
-      return async ({ result }) => {
-        $loading = false
-        pb.authStore.loadFromCookie(document.cookie)
-        await applyAction(result)
-      }
+    options={{
+      onResult: superformToast({
+        onRedirect: async (result) => {
+          pb.authStore.loadFromCookie(document.cookie)
+          await applyAction(result)
+        },
+      }),
     }}
+    form={data.loginForm}
+    schema={LoginWithPasswordSchema}
+    let:config
+    let:form
   >
     <h1 class="text-2xl mb-8">Log in</h1>
     <div class="form-control gap-2 mb-4">
-      <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        autocomplete="email"
-        class="input input-bordered"
-      />
-      <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        autocomplete="current-password"
-        class="input input-bordered"
-      />
-      <button class="btn btn-primary" use:loadingButton={loading}>
+      <Form.Field {config} name="email">
+        <Form.Label class="hidden">Email</Form.Label>
+        <Form.Input
+          type="email"
+          name="email"
+          placeholder="Email"
+          autocomplete="email"
+          class="input input-bordered"
+        />
+        <Form.Validation />
+      </Form.Field>
+      <Form.Field {config} name="password">
+        <Form.Label class="hidden">Password</Form.Label>
+        <Form.Input
+          type="password"
+          name="password"
+          placeholder="Password"
+          autocomplete="current-password"
+          class="input input-bordered"
+        />
+        <Form.Validation />
+      </Form.Field>
+
+      <button class="btn btn-primary" use:loadingButton={form.submitting}>
         Log in
       </button>
     </div>
-  </form>
+  </Form.Root>
 
   <div class="divider">
     <span class="text-thin text-gray-400">Don't have an account?</span>

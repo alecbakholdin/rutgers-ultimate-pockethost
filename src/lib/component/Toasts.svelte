@@ -1,6 +1,5 @@
 <script context="module" lang="ts">
   import type { ActionResult, MaybePromise } from '@sveltejs/kit'
-  import type { SvelteActionResult } from 'formsnap/dist/internal'
   import { writable } from 'svelte/store'
 
   export interface ToastData {
@@ -25,8 +24,15 @@
     formEl: HTMLFormElement
     cancel: () => void
   }) => MaybePromise<unknown | void>
+  type ResultAction = (result: ActionResult) => unknown
+  type ResultActions = {
+    onSuccess?: ResultAction
+    onFailure?: ResultAction
+    onError?: ResultAction
+    onRedirect?: ResultAction
+  }
 
-  export function superformToast(): SuperformOnResult {
+  export function superformToast(options?: ResultActions): SuperformOnResult {
     function toastMsgObj(
       type: ToastData['type'],
       obj?: string | { message?: string },
@@ -43,17 +49,23 @@
       }
     }
 
-    return ({ result }) => {
+    return async ({ result }) => {
       console.log(result)
       switch (result.type) {
         case 'error':
           toastMsgObj('error', result.error)
+          await options?.onError?.(result)
           break
         case 'failure':
           toastMsgObj('error', (result as any)?.data?.form?.message)
+          await options?.onFailure?.(result)
           break
         case 'success':
           toastMsgObj('success', (result as any)?.data?.form?.message)
+          await options?.onSuccess?.(result)
+          break
+        case 'redirect':
+          await options?.onRedirect?.(result)
           break
       }
     }
