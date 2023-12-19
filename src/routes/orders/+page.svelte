@@ -118,6 +118,6 @@
       {/if}
     </button>
     {:else}
-      <p class="text-gray-400">You have no orders right now</p>
+      <p class="text-neutral-content">You have no orders right now</p>
     {/each}
 </div>
