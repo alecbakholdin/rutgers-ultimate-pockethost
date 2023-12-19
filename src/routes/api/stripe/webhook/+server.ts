@@ -1,31 +1,28 @@
 import { dev } from '$app/environment'
 import {
-  POCKETBASE_ADMIN_EMAIL,
-  POCKETBASE_ADMIN_PASSWORD,
+    POCKETBASE_ADMIN_EMAIL,
+    POCKETBASE_ADMIN_PASSWORD,
+    STRIPE_WEBHOOK_SIGNING_SECRET,
 } from '$env/static/private'
 import type {
-  OrderLineItemRecordTyped,
-  OrderRecordTyped,
-  OrderResponseTyped,
+    OrderLineItemRecordTyped,
+    OrderRecordTyped
 } from '$lib/pocketbase/derived-pocketbase-types.js'
 import type {
-  OrderLineItemRecord,
-  TypedPocketBase,
-  UsersResponse,
+    TypedPocketBase
 } from '$lib/pocketbase/pocketbase-types.js'
 import type {
-  StripeLineItemMetadata,
-  StripeOrderMetadata,
-  StripeShippingMetadata,
+    StripeLineItemMetadata,
+    StripeOrderMetadata,
+    StripeShippingMetadata,
 } from '$lib/stripe/checkout.js'
 import { stripe } from '$lib/stripe/stripe'
 import { error, json } from '@sveltejs/kit'
 import type { Stripe } from 'stripe'
 
-const endpointSecret =
-  'whsec_013d80e0b6c0db349aff1e68bbb60c18257d87be183d861ffe47b6bfabc5a943'
+const endpointSecret = STRIPE_WEBHOOK_SIGNING_SECRET
 
-export async function POST({ request, locals: { pb, user } }) {
+export async function POST({ request, locals: { pb } }) {
   console.log('POSTING RIGHT NOW')
   const admin = await pb.admins.authWithPassword(
     POCKETBASE_ADMIN_EMAIL,
@@ -67,7 +64,10 @@ async function createOrder(
   for (const lineItem of lineItems) {
     await pb
       .collection('order_line_item')
-      .create({ ...lineItem, order: orderId } satisfies OrderLineItemRecordTyped)
+      .create({
+        ...lineItem,
+        order: orderId,
+      } satisfies OrderLineItemRecordTyped)
   }
 }
 
