@@ -1,5 +1,8 @@
 <script lang="ts">
-  export let data
+  import { pb } from '$lib/pocketbase/pb'
+  import type { UsersResponse } from '$lib/pocketbase/pocketbase-types'
+
+  $: email = (pb.authStore.model as UsersResponse).email
 </script>
 
 <div
@@ -14,12 +17,9 @@
     Your order has been received
   </h2>
   <p>
-    Thank you for your order. We will begin processing it right away.
-    {#if data.order}
-      You will receive an order confirmation email shortly at
-      <strong>
-        {data.order.expand?.user.email}
-      </strong>
-    {/if}
+    Thank you for your order. We will begin processing it right away. You can
+    see your past orders <a href="/orders">here</a>{#if email}, and you will
+      receive an order confirmation email shortly at
+      <strong>{email}</strong>{/if}.
   </p>
 </div>
