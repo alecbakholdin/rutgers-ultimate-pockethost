@@ -57,7 +57,10 @@
           await options?.onError?.(result)
           break
         case 'failure':
-          toastMsgObj('error', (result as any)?.data?.form?.message)
+          const message = (result as any)?.data?.form?.message;
+          if(message) {
+            toastMsgObj('error', message)
+          }
           await options?.onFailure?.(result)
           break
         case 'success':
