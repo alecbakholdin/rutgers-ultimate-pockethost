@@ -12,6 +12,7 @@
 </script>
 
 <div class="max-w-lg m-auto flex flex-col gap-2">
+  <h2 class="font-semibold text-lg">Orders</h2>
   {#each data.orders.items as order, i (order.id)}
     {@const createdDate = new Date(order.created)}
     {@const fulfillIcon = order.fulfilled ? 'mdi:done' : 'mdi:remove'}
@@ -116,5 +117,7 @@
         </div>
       {/if}
     </button>
-  {/each}
+    {:else}
+      <p class="text-gray-400">You have no orders right now</p>
+    {/each}
 </div>
