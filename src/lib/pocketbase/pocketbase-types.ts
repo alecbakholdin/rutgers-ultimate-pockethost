@@ -60,8 +60,10 @@ export type LineItemRecord<Tfields = unknown> = {
 export type OrderRecord<TshippingAddress = unknown> = {
 	discountCode?: string
 	fulfilled?: IsoDateString
+	profitInCents?: number
 	shippingAddress?: null | TshippingAddress
 	shippingCostInCents?: number
+	stripePaymentId?: string
 	subtotal?: number
 	testOrder?: boolean
 	totalInCents?: number
@@ -72,6 +74,7 @@ export type OrderLineItemRecord<Tfields = unknown> = {
 	fields?: null | Tfields
 	order: RecordIdString
 	product: RecordIdString
+	profitCents?: number
 	quantity: number
 	totalCents?: number
 	unitPriceCents?: number

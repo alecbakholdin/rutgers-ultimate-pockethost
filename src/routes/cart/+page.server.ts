@@ -10,7 +10,9 @@ import type {
 } from '$lib/stripe/checkout'
 import { stripe } from '$lib/stripe/stripe'
 import {
+  getCartTotal,
   getCartWeight,
+  getLineItemPrice,
   getUnitPriceWithFields,
   validDiscount,
 } from '$lib/util/functions/cartUtils'
@@ -67,6 +69,11 @@ export const actions = {
       validDiscount.set(response.status === 200)
     }
 
+    const totalInCents = getCartTotal(cartItems.items)
+    const processingFee = 0.022 * totalInCents + 0.3
+    const profitInCents =
+      totalInCents - getCartTotal(cartItems.items, true) - processingFee
+
     const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] =
       cartItems.items.map((item) => ({
         price_data: {
@@ -81,6 +88,9 @@ export const actions = {
             ],
             metadata: {
               _productId: item.product,
+              _profitInCents: Math.floor(
+                (profitInCents * getLineItemPrice(item)) / totalInCents,
+              ).toFixed(0),
               ...(item.fields && item.fields),
             } satisfies StripeLineItemMetadata,
           },
@@ -102,7 +112,7 @@ export const actions = {
           shipping_options: [
             {
               shipping_rate_data: {
-                display_name: "Shipped Once Ready",
+                display_name: 'Shipped Once Ready',
                 type: 'fixed_amount',
                 fixed_amount: {
                   amount: shippingCostInCents,
@@ -114,7 +124,8 @@ export const actions = {
           ],
         }),
       metadata: {
-        isRutgersWebsiteOrder: "true",
+        isRutgersWebsiteOrder: 'true',
+        profitInCents: profitInCents.toFixed(0),
         userId: user.id,
         ...(validDiscount &&
           form.data.discountCode && {

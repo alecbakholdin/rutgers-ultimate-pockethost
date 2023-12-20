@@ -21,7 +21,6 @@ import type { Stripe } from 'stripe'
 const endpointSecret = STRIPE_WEBHOOK_SIGNING_SECRET
 
 export async function POST({ request, locals: { pb } }) {
-  console.log('POSTING RIGHT NOW')
   const admin = await pb.admins.authWithPassword(
     POCKETBASE_ADMIN_EMAIL,
     POCKETBASE_ADMIN_PASSWORD,
@@ -47,7 +46,11 @@ export async function POST({ request, locals: { pb } }) {
         (checkoutSessionCompleted.metadata as StripeOrderMetadata)
           .isRutgersWebsiteOrder === 'true'
       ) {
+        console.log("Creating order")
         await createOrder(checkoutSessionCompleted, pb)
+        console.log("Finished creating order")
+      } else {
+        console.log('Non Rutgers website checkout session found');
       }
       break
     default:
@@ -95,14 +98,16 @@ async function createOrder(
 
 async function createOrderObject(checkout: Stripe.Checkout.Session) {
   const { shippingAddress, shippingCostInCents } = await getShipping(checkout)
-  const { discountCode, userId } = checkout.metadata as StripeOrderMetadata
+  const { discountCode, userId, profitInCents } = checkout.metadata as StripeOrderMetadata
   return {
     user: userId,
     discountCode,
     shippingAddress,
     shippingCostInCents,
     totalInCents: checkout.amount_total ?? 0,
+    profitInCents: parseInt(profitInCents),
     subtotal: checkout.amount_subtotal ?? 0,
+    stripePaymentId: checkout.payment_intent?.toString(),
     testOrder: dev,
   } satisfies OrderRecordTyped
 }
@@ -127,14 +132,16 @@ async function createOrderLineItems(checkout: Stripe.Checkout.Session) {
     const product = await stripe.products.retrieve(
       stripeLineItem.price.product.toString(),
     )
-    const { _productId, ...fields } = product.metadata as StripeLineItemMetadata
+    const { _productId, _profitInCents: profitInCentsStr, ...fields } = product.metadata as StripeLineItemMetadata
     const quantity = stripeLineItem.quantity ?? 1
     const unitPriceCents = stripeLineItem.price.unit_amount ?? 0
+    const totalCents = quantity * unitPriceCents;
     list.push({
       product: _productId,
       quantity,
       fields,
-      totalCents: unitPriceCents * quantity,
+      totalCents,
+      profitCents: parseInt(profitInCentsStr),
       unitPriceCents,
     })
   }

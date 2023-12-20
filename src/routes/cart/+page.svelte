@@ -283,14 +283,6 @@
     >
       Go to Payment
     </button>
+    <span class="text-neutral-content">1972 Ultimate is our non-profit</span>
   </div>
 </Form.Root>
-
-<style>
-  .extra-actions > summary {
-    list-style: none;
-  }
-  .extra-actions summary::-webkit-details-marker {
-    display: none;
-  }
-</style>
