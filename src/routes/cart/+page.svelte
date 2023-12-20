@@ -274,15 +274,15 @@
       />
     </div>
   {/if}
-  <div>
+  <div class="flex flex-col items-end w-full gap-2">
     <button
       type="submit"
-      class="float-right btn btn-primary"
+      class="btn btn-primary"
       disabled={!$cartItems.length}
       use:loadingButton={form.submitting}
     >
       Go to Payment
     </button>
-    <span class="text-neutral-content">1972 Ultimate is our non-profit</span>
+    <span class="text-gray-400 w-[200px] text-right">You will be directed to send payment to 1972 Ultimate Alumni Club, our nonprofit</span>
   </div>
 </Form.Root>
