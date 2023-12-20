@@ -64,6 +64,9 @@
       <button class="btn btn-primary" use:loadingButton={form.submitting}>
         Log in
       </button>
+      <span class="text-neutral-content">
+        You may need to recreate your account since last time. Apologies for any inconvenience
+      </span>
     </div>
   </Form.Root>
 
