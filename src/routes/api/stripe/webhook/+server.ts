@@ -43,7 +43,12 @@ export async function POST({ request, locals: { pb } }) {
   switch (event.type) {
     case 'checkout.session.completed':
       const checkoutSessionCompleted = event.data.object
-      await createOrder(checkoutSessionCompleted, pb)
+      if (
+        (checkoutSessionCompleted.metadata as StripeOrderMetadata)
+          .isRutgersWebsiteOrder === 'true'
+      ) {
+        await createOrder(checkoutSessionCompleted, pb)
+      }
       break
     default:
       console.log(`Unhandled event type ${event.type}`)
@@ -70,7 +75,9 @@ async function createOrder(
     ),
   )
 
-  const { id: orderId } = await pb.collection('order').create(order, {requestKey: null})
+  const { id: orderId } = await pb
+    .collection('order')
+    .create(order, { requestKey: null })
   await Promise.all(
     lineItems.map((lineItem) =>
       pb.collection('order_line_item').create(

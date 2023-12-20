@@ -114,6 +114,7 @@ export const actions = {
           ],
         }),
       metadata: {
+        isRutgersWebsiteOrder: "true",
         userId: user.id,
         ...(validDiscount &&
           form.data.discountCode && {
