@@ -3,12 +3,8 @@
   import { cartItemCount } from '$lib/pocketbase/cart'
   import { currentUser, pb } from '$lib/pocketbase/pb'
   import Icon from '@iconify/svelte'
-
-  let open = false
-  let summaryEl: HTMLElement
+  import Dropdown from './Dropdown.svelte'
 </script>
-
-<svelte:window on:click={(e) => e.target !== summaryEl && (open = false)} />
 
 <div class="navbar bg-base-200">
   <div class="flex-1">
@@ -41,35 +37,32 @@
           </a>
         </li>
         <li>
-          <details class="relative" bind:open>
-            <summary bind:this={summaryEl}> More </summary>
-            <ul
-              class="absolute right-0 z-[1] w-fit p-2 bg-base-100 rounded-t-none"
-            >
-              {#if $currentUser.isManager}
-                <li>
-                  <a href="/manage" class="whitespace-nowrap"> Admin </a>
-                </li>
-              {/if}
+          <Dropdown>
+            <svelte:fragment slot="trigger">More</svelte:fragment>
+
+            {#if $currentUser.isManager}
               <li>
-                <a href="/orders"> Orders </a>
+                <a href="/manage" class="whitespace-nowrap"> Admin </a>
               </li>
-              <li>
-                <form
-                  method="POST"
-                  action="/logout"
-                  use:enhance={() => {
-                    return async ({ result }) => {
-                      pb.authStore.clear()
-                      await applyAction(result)
-                    }
-                  }}
-                >
-                  <button>Logout</button>
-                </form>
-              </li>
-            </ul>
-          </details>
+            {/if}
+            <li>
+              <a href="/orders"> Orders </a>
+            </li>
+            <li>
+              <form
+                method="POST"
+                action="/logout"
+                use:enhance={() => {
+                  return async ({ result }) => {
+                    pb.authStore.clear()
+                    await applyAction(result)
+                  }
+                }}
+              >
+                <button>Logout</button>
+              </form>
+            </li>
+          </Dropdown>
         </li>
       {:else}
         <li><a href="/login">Log in</a></li>

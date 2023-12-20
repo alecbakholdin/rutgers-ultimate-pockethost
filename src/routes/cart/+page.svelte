@@ -18,7 +18,8 @@
   import CheckoutShippingCostEstimator from './__route/CheckoutShippingCostEstimator.svelte'
   import { CreateCheckoutSchema } from './schemas.js'
   import Icon from '@iconify/svelte'
-    import { refreshCartItemCount } from '$lib/pocketbase/cart'
+  import { refreshCartItemCount } from '$lib/pocketbase/cart'
+  import Dropdown from '$lib/component/Dropdown.svelte'
 
   export let data
   const cartItems = writable(data.cart.items)
@@ -32,7 +33,7 @@
         quantity,
       } satisfies Partial<LineItemResponse>)
     }
-    await refreshCartItemCount();
+    await refreshCartItemCount()
   }
 
   let requestShipment = false
@@ -73,7 +74,6 @@
   </div>
   {#each $cartItems as cartItem (cartItem.id)}
     {@const product = cartItem.expand?.product}
-    {@const price = getLineItemPrice(cartItem)}
     {#if product}
       <div class="flex gap-1 w-full" out:slide>
         <ImageThumb
@@ -121,25 +121,21 @@
           </div>
         </div>
 
-        <details class="extra-actions relative h-full flex items-center">
-          <summary class="cursor-pointer">
+        <Dropdown>
+          <svelte:fragment slot="trigger">
             <Icon icon="ph:dots-three-vertical-bold"></Icon>
-          </summary>
-          <ul
-            class="absolute right-0 shadow-xl z-[1] w-fit bg-base-100 border rounded-md"
-          >
-            <li>
-              <button
-                type="button"
-                class="btn btn-ghost btn-sm text-error rounded-md flex-row flex-nowrap gap-1"
-                on:click={() => updateQty(cartItem.id, 0)}
-              >
-                <Icon icon="mdi:delete"></Icon>
-                <span>Delete</span>
-              </button>
-            </li>
-          </ul>
-        </details>
+          </svelte:fragment>
+          <li>
+            <button
+              type="button"
+              class="btn btn-ghost btn-sm text-error rounded-md flex-row flex-nowrap gap-1"
+              on:click={() => updateQty(cartItem.id, 0)}
+            >
+              <Icon icon="mdi:delete"></Icon>
+              <span>Delete</span>
+            </button>
+          </li>
+        </Dropdown>
       </div>
     {/if}
   {:else}
