@@ -30,7 +30,7 @@
   $: if (url && typeof window !== 'undefined') {
     const img = new Image()
     img.src = url
-    const timeout = setTimeout(() => (status = 'loading'), 25)
+    const timeout = setTimeout(() => (status = 'loading'), 50)
 
     img.onload = () => {
       clearTimeout(timeout)
