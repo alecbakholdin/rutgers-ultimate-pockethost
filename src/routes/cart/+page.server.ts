@@ -1,16 +1,13 @@
-import { SERVER_SECRET } from '$env/static/private'
 import { getCartItems } from '$lib/pocketbase/cart.js'
 import {
   lineItemExpansionString,
   type ExpandedLineItem,
 } from '$lib/pocketbase/derived-pocketbase-types'
 import type {
-  LineItemRecord,
-  OrderLineItemRecord,
-  OrderRecord,
-} from '$lib/pocketbase/pocketbase-types'
-import type { CompleteCheckoutType } from '$lib/schemas/completeCheckout'
-import type { ShippingAddressSchema } from '$lib/schemas/shipping'
+  StripeLineItemMetadata,
+  StripeOrderMetadata,
+  StripeShippingMetadata,
+} from '$lib/stripe/checkout'
 import { stripe } from '$lib/stripe/stripe'
 import {
   getCartWeight,
@@ -18,8 +15,6 @@ import {
   validDiscount,
 } from '$lib/util/functions/cartUtils'
 import { error, fail, redirect } from '@sveltejs/kit'
-import jwt from 'jsonwebtoken'
-import _ from 'lodash'
 import type Stripe from 'stripe'
 import { superValidate } from 'sveltekit-superforms/server'
 import type { z } from 'zod'
@@ -28,11 +23,6 @@ import type {
   CalculatedShipmentSchema,
 } from '../api/shipment/calculate/schemas'
 import { CreateCheckoutSchema } from './schemas'
-import type {
-  StripeLineItemMetadata,
-  StripeOrderMetadata,
-  StripeShippingMetadata,
-} from '$lib/stripe/checkout'
 
 export async function load() {
   return {
