@@ -120,6 +120,7 @@
                   value={undefined}
                   on:change={handlers.select}
                 >
+                  <option value={undefined} disabled selected class="hidden">{field.title}</option>
                   {#each field.options.split(',') as value}
                     {@const priceIncrease = getProductFieldPriceIncrease(
                       field,
