@@ -18,6 +18,7 @@
   import CheckoutShippingCostEstimator from './__route/CheckoutShippingCostEstimator.svelte'
   import { CreateCheckoutSchema } from './schemas.js'
   import Icon from '@iconify/svelte'
+    import { refreshCartItemCount } from '$lib/pocketbase/cart'
 
   export let data
   const cartItems = writable(data.cart.items)
@@ -31,6 +32,7 @@
         quantity,
       } satisfies Partial<LineItemResponse>)
     }
+    await refreshCartItemCount();
   }
 
   let requestShipment = false

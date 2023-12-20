@@ -1,5 +1,6 @@
 <script lang="ts">
   import { applyAction, enhance } from '$app/forms'
+  import { cartItemCount } from '$lib/pocketbase/cart'
   import { currentUser, pb } from '$lib/pocketbase/pb'
   import Icon from '@iconify/svelte'
 
@@ -26,9 +27,17 @@
         <li>
           <a href="/cart" class="relative">
             <Icon icon="mdi:cart" class="text-base-content text-xl" />
-            <!-- <div class="absolute h-5 w-5 rounded-full grid place-items-center bottom-[2px] right-[4px] p-[1px] bg-base-200">
-              <span class="bg-neutral w-full h-full grid place-items-center rounded-full text-neutral-content text-xs"><span class="text-center">2</span></span>
-            </div> -->
+            {#if $cartItemCount}
+              <div
+                class="absolute h-5 w-5 rounded-full grid place-items-center bottom-[2px] right-[4px] p-[0.5px] bg-base-200"
+              >
+                <span
+                  class="bg-neutral w-full h-full grid place-items-center rounded-full text-neutral-content text-xs"
+                >
+                  <span class="text-center"> {$cartItemCount}</span>
+                </span>
+              </div>
+            {/if}
           </a>
         </li>
         <li>
@@ -39,9 +48,7 @@
             >
               {#if $currentUser.isManager}
                 <li>
-                  <a href="/manage" class="whitespace-nowrap">
-                    Admin
-                  </a>
+                  <a href="/manage" class="whitespace-nowrap"> Admin </a>
                 </li>
               {/if}
               <li>
@@ -66,7 +73,6 @@
         </li>
       {:else}
         <li><a href="/login">Log in</a></li>
-        <li><a href="/register">Register</a></li>
       {/if}
     </ul>
   </div>

@@ -10,7 +10,7 @@ const config = {
   },
 
   daisyui: {
-    themes: ["light"]
+    themes: ["light", "dark"]
   },
 
   plugins: [forms, typography, daisyui],

@@ -6,6 +6,7 @@ import type PocketBase from 'pocketbase'
 import type { RecordService } from 'pocketbase'
 
 export enum Collections {
+	CartSize = "cart_size",
 	Color = "color",
 	LineItem = "line_item",
 	Order = "order",
@@ -38,6 +39,11 @@ export type AuthSystemFields<T = never> = {
 } & BaseSystemFields<T>
 
 // Record types for each collection
+
+export type CartSizeRecord<TsumQuantity = unknown> = {
+	numLineItems?: number
+	sumQuantity?: null | TsumQuantity
+}
 
 export type ColorRecord = {
 	color: string
@@ -107,6 +113,7 @@ export type UsersRecord = {
 }
 
 // Response types include system fields and match responses from the PocketBase API
+export type CartSizeResponse<TsumQuantity = unknown, Texpand = unknown> = Required<CartSizeRecord<TsumQuantity>> & BaseSystemFields<Texpand>
 export type ColorResponse<Texpand = unknown> = Required<ColorRecord> & BaseSystemFields<Texpand>
 export type LineItemResponse<Tfields = unknown, Texpand = unknown> = Required<LineItemRecord<Tfields>> & BaseSystemFields<Texpand>
 export type OrderResponse<TshippingAddress = unknown, Texpand = unknown> = Required<OrderRecord<TshippingAddress>> & BaseSystemFields<Texpand>
@@ -118,6 +125,7 @@ export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSyste
 // Types containing all Records and Responses, useful for creating typing helper functions
 
 export type CollectionRecords = {
+	cart_size: CartSizeRecord
 	color: ColorRecord
 	line_item: LineItemRecord
 	order: OrderRecord
@@ -128,6 +136,7 @@ export type CollectionRecords = {
 }
 
 export type CollectionResponses = {
+	cart_size: CartSizeResponse
 	color: ColorResponse
 	line_item: LineItemResponse
 	order: OrderResponse
@@ -141,6 +150,7 @@ export type CollectionResponses = {
 // https://github.com/pocketbase/js-sdk#specify-typescript-definitions
 
 export type TypedPocketBase = PocketBase & {
+	collection(idOrName: 'cart_size'): RecordService<CartSizeResponse>
 	collection(idOrName: 'color'): RecordService<ColorResponse>
 	collection(idOrName: 'line_item'): RecordService<LineItemResponse>
 	collection(idOrName: 'order'): RecordService<OrderResponse>

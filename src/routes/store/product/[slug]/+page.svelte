@@ -11,6 +11,7 @@
     getProductFieldPriceIncrease,
     getUnitPriceWithFields,
   } from '$lib/util/functions/cartUtils.js'
+  import { refreshCartItemCount } from '$lib/pocketbase/cart.js'
 
   export let data
   data.addToCartForm.data.quantity = 1
@@ -56,7 +57,7 @@
       options={{
         dataType: 'json',
         resetForm: false,
-        onResult: superformToast(),
+        onResult: superformToast({ onSuccess: refreshCartItemCount }),
       }}
       {schema}
       form={data.addToCartForm}
