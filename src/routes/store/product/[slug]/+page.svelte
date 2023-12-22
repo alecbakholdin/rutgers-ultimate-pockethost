@@ -12,11 +12,12 @@
     getUnitPriceWithFields,
   } from '$lib/util/functions/cartUtils.js'
   import { refreshCartItemCount } from '$lib/pocketbase/cart.js'
+  import { getContrastColor } from '$lib/util/functions/getContrastColor.js'
 
   export let data
   data.addToCartForm.data.quantity = 1
   $: schema = getAddToCartSchema(data.product)
-  $: product = data.product;
+  $: product = data.product
 
   let currentImage = data.product.primaryImage
   function forceAny(input: any) {
@@ -93,6 +94,7 @@
                     <div
                       class="w-10 h-10 relative grid place-items-center rounded-full border"
                       style:background-color={color.color}
+                      style:color={getContrastColor(color.color)}
                     >
                       <input
                         class="hidden"
