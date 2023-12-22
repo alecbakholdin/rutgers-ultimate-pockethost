@@ -1,19 +1,22 @@
+import type { ExpandedStoreSection } from "$lib/pocketbase/derived-pocketbase-types";
 import { pb } from "$lib/pocketbase/pb";
-import type { ProductResponse } from "$lib/pocketbase/pocketbase-types";
+import type { ProductResponse, StoreSectionResponse } from "$lib/pocketbase/pocketbase-types";
 import { get, writable } from "svelte/store";
 
-const products = writable<ProductResponse[]>()
+type StoreSectionExpanded = StoreSectionResponse<{products: ProductResponse[]}>;
+const storeSections = writable<StoreSectionExpanded[]>();
 
 export async function load(){
 
-    if(!get(products)) {
-        products.set(await pb.collection('product').getFullList({
-            sort: 'title',
-            filter: 'enabled = true'
-        }))
+    if(!get(storeSections)) {
+        const resp = await pb.collection('store_section').getFullList<StoreSectionExpanded>({
+            filter: 'enabled=true',
+            sort: '+order',
+            expand: 'products'
+        })
+        storeSections.set(resp);
     }
-
     return {
-        products: get(products)
+        sections: get(storeSections)
     }
 }

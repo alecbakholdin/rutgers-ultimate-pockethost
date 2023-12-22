@@ -42,7 +42,7 @@
 
             {#if $currentUser.isManager}
               <li>
-                <a href="/manage" class="whitespace-nowrap"> Admin </a>
+                <a href="/manager" class="whitespace-nowrap"> Admin </a>
               </li>
             {/if}
             <li>

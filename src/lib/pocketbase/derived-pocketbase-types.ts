@@ -9,6 +9,7 @@ import type {
   ProductFieldResponse,
   ProductResponse,
   UsersResponse,
+  StoreSectionResponse
 } from './pocketbase-types'
 import type { ShippingAddressSchema } from '$lib/schemas/shipping'
 
@@ -19,6 +20,9 @@ export type ProductFieldTyped<Texpand = unknown> = ProductFieldResponse<
 export type ExpandedField = ProductFieldTyped<{ colors: ColorResponse[] }>
 export type ExpandedProduct = ProductResponse<{ fields: ExpandedField[] }>
 export const productExpansionString = 'fields.colors'
+
+export type ExpandedStoreSection = StoreSectionResponse<{products: ExpandedProduct[]}>
+export const storeSectionExpansionString = "products." + productExpansionString
 
 export type LineItemResponseTyped<Texpand = unknown> = LineItemResponse<
   Record<string, string>,

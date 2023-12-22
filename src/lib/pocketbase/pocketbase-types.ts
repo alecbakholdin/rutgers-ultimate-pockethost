@@ -13,6 +13,7 @@ export enum Collections {
 	OrderLineItem = "order_line_item",
 	Product = "product",
 	ProductField = "product_field",
+	StoreSection = "store_section",
 	Users = "users",
 }
 
@@ -81,6 +82,7 @@ export type OrderLineItemRecord<Tfields = unknown> = {
 }
 
 export type ProductRecord = {
+	description?: string
 	enabled?: boolean
 	fields?: RecordIdString[]
 	galleryImages?: string[]
@@ -109,6 +111,12 @@ export type ProductFieldRecord<TpriceIncreaseArray = unknown> = {
 	type?: ProductFieldTypeOptions
 }
 
+export type StoreSectionRecord = {
+	enabled?: boolean
+	products?: RecordIdString[]
+	title?: string
+}
+
 export type UsersRecord = {
 	avatar?: string
 	isManager?: boolean
@@ -123,6 +131,7 @@ export type OrderResponse<TshippingAddress = unknown, Texpand = unknown> = Requi
 export type OrderLineItemResponse<Tfields = unknown, Texpand = unknown> = Required<OrderLineItemRecord<Tfields>> & BaseSystemFields<Texpand>
 export type ProductResponse<Texpand = unknown> = Required<ProductRecord> & BaseSystemFields<Texpand>
 export type ProductFieldResponse<TpriceIncreaseArray = unknown, Texpand = unknown> = Required<ProductFieldRecord<TpriceIncreaseArray>> & BaseSystemFields<Texpand>
+export type StoreSectionResponse<Texpand = unknown> = Required<StoreSectionRecord> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
@@ -135,6 +144,7 @@ export type CollectionRecords = {
 	order_line_item: OrderLineItemRecord
 	product: ProductRecord
 	product_field: ProductFieldRecord
+	store_section: StoreSectionRecord
 	users: UsersRecord
 }
 
@@ -146,6 +156,7 @@ export type CollectionResponses = {
 	order_line_item: OrderLineItemResponse
 	product: ProductResponse
 	product_field: ProductFieldResponse
+	store_section: StoreSectionResponse
 	users: UsersResponse
 }
 
@@ -160,5 +171,6 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'order_line_item'): RecordService<OrderLineItemResponse>
 	collection(idOrName: 'product'): RecordService<ProductResponse>
 	collection(idOrName: 'product_field'): RecordService<ProductFieldResponse>
+	collection(idOrName: 'store_section'): RecordService<StoreSectionResponse>
 	collection(idOrName: 'users'): RecordService<UsersResponse>
 }
