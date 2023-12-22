@@ -1,4 +1,3 @@
-import type { ExpandedStoreSection } from "$lib/pocketbase/derived-pocketbase-types";
 import { pb } from "$lib/pocketbase/pb";
 import type { ProductResponse, StoreSectionResponse } from "$lib/pocketbase/pocketbase-types";
 import { get, writable } from "svelte/store";
