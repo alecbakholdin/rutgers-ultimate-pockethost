@@ -74,7 +74,7 @@
         <Icon icon="mdi:location" class="pt-1 text-lg flex-shrink-0" />
         <div>
           <p>{addr.line1}</p>
-          <p>{addr.line2}</p>
+          <p>{addr.line2 ?? ''}</p>
           <p>{addr.city}, {addr.state} {addr.postal_code}</p>
         </div>
       </div>
