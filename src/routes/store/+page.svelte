@@ -2,6 +2,7 @@
   import ImageThumb from '$lib/component/ImageThumb.svelte'
   import { getUnitPrice } from '$lib/util/functions/cartUtils.js'
   import { formatCents } from '$lib/util/functions/formatCents.js'
+    import _ from 'lodash'
 
   export let data
 </script>
@@ -15,7 +16,7 @@
   <div
     class="mx-auto grid grid-cols-2 md:grid-cols-3 place-items-center gap-2 max-w-[95vw]"
   >
-    {#each section.expand?.products ?? [] as product}
+    {#each _.sortBy(section.expand?.products ?? [], "title") as product}
       <a class="max-w-[250px]" href="/store/product/{product.slug}">
         <figure
           class="product-image"
