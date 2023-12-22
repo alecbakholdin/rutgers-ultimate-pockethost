@@ -1,17 +1,22 @@
 <script lang="ts">
-  import DebugObject from '$lib/component/DebugObject.svelte'
   import ImageThumb from '$lib/component/ImageThumb.svelte'
-    import { getUnitPrice } from '$lib/util/functions/cartUtils.js'
+  import { getUnitPrice } from '$lib/util/functions/cartUtils.js'
   import { formatCents } from '$lib/util/functions/formatCents.js'
 
   export let data
 </script>
 
+<svelte:head>
+  R Ultimate Store
+</svelte:head>
+
 {#each data.sections as section}
   <div class="divider mt-16 first:mt-0 text-gray-400">{section.title}</div>
-  <div class="mx-auto grid grid-cols-2 md:grid-cols-3 place-items-center gap-2">
+  <div
+    class="mx-auto grid grid-cols-2 md:grid-cols-3 place-items-center gap-2 max-w-[95vw]"
+  >
     {#each section.expand?.products ?? [] as product}
-      <a class="w-[250px]" href="/store/product/{product.slug}">
+      <a class="max-w-[250px]" href="/store/product/{product.slug}">
         <figure
           class="product-image"
           data-flip-id="product-image-{product.primaryImage}"

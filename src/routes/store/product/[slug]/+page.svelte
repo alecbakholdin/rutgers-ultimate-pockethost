@@ -13,6 +13,7 @@
   } from '$lib/util/functions/cartUtils.js'
   import { refreshCartItemCount } from '$lib/pocketbase/cart.js'
   import { getContrastColor } from '$lib/util/functions/getContrastColor.js'
+    import { pb } from '$lib/pocketbase/pb.js'
 
   export let data
   data.addToCartForm.data.quantity = 1
@@ -24,6 +25,12 @@
     return input as any
   }
 </script>
+
+<svelte:head>
+  <title>{product.title}</title>
+  <meta property="og:title" content={product.title}/>
+  <meta property="og:image" content={pb.getFileUrl(product, product.primaryImage)}/>
+</svelte:head>
 
 <div class="flex flex-col gap-4 md:flex-row max-w-md md:max-w-4xl mx-auto">
   <div class="flex-shrink-0 flex flex-col items-center">

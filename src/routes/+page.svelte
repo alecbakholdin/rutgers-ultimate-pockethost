@@ -15,6 +15,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>R Ultimate</title>
+</svelte:head>
+
 <div>
   {#if $currentUser}
     <div class="hero p-10 bg-base-200">
