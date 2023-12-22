@@ -2,6 +2,7 @@ import { dev } from '$app/environment'
 import {
   POCKETBASE_ADMIN_EMAIL,
   POCKETBASE_ADMIN_PASSWORD,
+  STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SIGNING_SECRET,
 } from '$env/static/private'
 import type {
@@ -108,7 +109,7 @@ async function createOrderObject(checkout: Stripe.Checkout.Session) {
     profitInCents: parseInt(profitInCents),
     subtotal: checkout.amount_subtotal ?? 0,
     stripePaymentId: checkout.payment_intent?.toString(),
-    testOrder: dev,
+    testOrder: STRIPE_SECRET_KEY.startsWith('sk_test'),
   } satisfies OrderRecordTyped
 }
 

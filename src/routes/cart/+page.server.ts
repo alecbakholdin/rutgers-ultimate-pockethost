@@ -103,12 +103,6 @@ export const actions = {
         quantity: item.quantity,
       }))
 
-    const total =
-      _.sumBy(
-        line_items,
-        (item) => (item.quantity ?? 0) * (item.price_data?.unit_amount ?? 0),
-      ) + (shippingCostInCents ?? 0)
-
     const response = await stripe.checkout.sessions.create({
       mode: 'payment',
       customer_email: user.email,
