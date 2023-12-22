@@ -83,7 +83,7 @@
 
   {#if expanded}
     <div class="flex flex-col col-span-full gap-2" transition:slide>
-      <div class="divider !h-[1px] mb-4 mt-0"></div>
+      <div class="divider !h-[1.5px] mb-4 mt-0"></div>
       {#each lineItems as lineItem (lineItem.id)}
         {@const product = lineItem.expand?.product}
         {#if product}
@@ -112,7 +112,7 @@
         {/if}
       {/each}
       {#if order.shippingCostInCents}
-        <div class="divider !h-[1px] mt-4"></div>
+        <div class="divider !h-[1.5px] mt-4"></div>
         <div class="flex gap-2 w-full items-center mb-2">
           <div class="w-[100px] flex-shrink-0 flex justify-center">
             <Icon icon="material-symbols:local-shipping" class="text-3xl" />
