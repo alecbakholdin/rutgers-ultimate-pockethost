@@ -83,7 +83,7 @@
 
   {#if expanded}
     <div class="flex flex-col col-span-full gap-2" transition:slide>
-      <div class="divider h-[1px] mb-4 mt-0"></div>
+      <div class="divider !h-[1px] mb-4 mt-0"></div>
       {#each lineItems as lineItem (lineItem.id)}
         {@const product = lineItem.expand?.product}
         {#if product}
@@ -98,21 +98,21 @@
             <div
               class="grid grid-cols-[1fr_auto] place-items-start h-fit w-full"
             >
-              <p class="font-semibold">
+              <p class="font-semibold text-sm text-left">
                 {lineItem.quantity} x {product.title}
               </p>
-              <p class="font-semibold text-sm place-self-end">
+              <p class="font-semibold text-sm place-self-start">
                 {formatCents(lineItem.totalCents)}
               </p>
               {#each Object.entries(lineItem.fields || {}) as [key, value]}
-                <p class="col-span-full">{key}: {value}</p>
+                <p class="col-span-full text-xs">{key}: {value}</p>
               {/each}
             </div>
           </div>
         {/if}
       {/each}
       {#if order.shippingCostInCents}
-        <div class="divider h-[1px] mt-4"></div>
+        <div class="divider !h-[1px] mt-4"></div>
         <div class="flex gap-2 w-full items-center mb-2">
           <div class="w-[100px] flex-shrink-0 flex justify-center">
             <Icon icon="material-symbols:local-shipping" class="text-3xl" />
