@@ -16,6 +16,12 @@
     const result = await pb
       .collection('users')
       .authWithOAuth2({ provider: 'google' })
+    if(!result.record.name_manually_set) {
+      pb.collection('users').update(result.record.id, {
+        name: result.meta?.name,
+      })
+    }
+  
     goto('/')
   }
 </script>

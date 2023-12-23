@@ -113,6 +113,7 @@ export type ProductFieldRecord<TpriceIncreaseArray = unknown> = {
 
 export type StoreSectionRecord = {
 	enabled?: boolean
+	order?: number
 	products?: RecordIdString[]
 	title?: string
 }
@@ -121,6 +122,7 @@ export type UsersRecord = {
 	avatar?: string
 	isManager?: boolean
 	name?: string
+	name_manually_set?: boolean
 }
 
 // Response types include system fields and match responses from the PocketBase API
