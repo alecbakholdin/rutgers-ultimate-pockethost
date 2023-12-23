@@ -1,4 +1,5 @@
-import { redirect } from "@sveltejs/kit";
-import type { PageServerLoad } from "./$types";
+import { redirect } from '@sveltejs/kit'
 
-export const load: PageServerLoad = () => { throw redirect(308, '/store') }
+export async function load() {
+  throw redirect(308, '/store')
+}
