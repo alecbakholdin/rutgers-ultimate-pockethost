@@ -12,11 +12,12 @@
   export let data
   const loading = writable(false)
 
+let w = typeof window !== 'undefined' && window.open()
   async function signInWithGoogle() {
     const result = await pb
       .collection('users')
       .authWithOAuth2({ provider: 'google', urlCallback: (url) => {
-                  window.location.href = url
+                  if(w) w.location.href = url
                         },
       } )
     if(!result.record.name_manually_set) {
@@ -24,7 +25,7 @@
         name: result.meta?.name,
       })
     }
-  
+
     goto('/')
   }
 </script>
