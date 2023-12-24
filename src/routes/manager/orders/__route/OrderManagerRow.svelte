@@ -49,12 +49,14 @@
           </tr>
         </thead>
         {#each lineItems as lineItem}
-          <td class="col-span-3 columns-3">
-            {lineItem.expand?.product.title}
-          </td>
-          <td>{formatCents(lineItem.unitPriceCents)}</td>
-          <td>{lineItem.quantity}</td>
-          <td>{formatCents(lineItem.totalCents)}</td>
+          <tr>
+            <td class="col-span-3 columns-3">
+              {lineItem.expand?.product.title}
+            </td>
+            <td>{formatCents(lineItem.unitPriceCents)}</td>
+            <td>{lineItem.quantity}</td>
+            <td>{formatCents(lineItem.totalCents)}</td>
+          </tr>
         {/each}
         {#if order.shippingCostInCents}
           <tr>
