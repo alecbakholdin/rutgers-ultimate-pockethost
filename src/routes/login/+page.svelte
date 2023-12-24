@@ -12,19 +12,16 @@
   export let data
   const loading = writable(false)
 
-let w = typeof window !== 'undefined' && window.open()
-  async function signInWithGoogle() {
-    const result = await pb
-      .collection('users')
-      .authWithOAuth2({ provider: 'google', urlCallback: (url) => {
-                  if(w) w.location.href = url
-                        },
-      } )
-    if(!result.record.name_manually_set) {
-      pb.collection('users').update(result.record.id, {
-        name: result.meta?.name,
-      })
-    }
+  function signInWithGoogle() {
+    let w = window.open()
+    pb.collection('users').authWithOAuth2({
+      provider: 'google',
+      urlCallback: (url) => {
+        if (w) {
+          w.location.href = url
+        }
+      },
+    }).then(() => goto('/'))
 
     goto('/')
   }
@@ -75,7 +72,8 @@ let w = typeof window !== 'undefined' && window.open()
         Log in
       </button>
       <span class="text-neutral-content">
-        You may need to recreate your account since last time. Apologies for any inconvenience
+        You may need to recreate your account since last time. Apologies for any
+        inconvenience
       </span>
     </div>
   </Form.Root>
