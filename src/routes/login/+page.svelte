@@ -14,14 +14,23 @@
 
   function signInWithGoogle() {
     let w = window.open()
-    pb.collection('users').authWithOAuth2({
-      provider: 'google',
-      urlCallback: (url) => {
-        if (w) {
-          w.location.href = url
+    pb.collection('users')
+      .authWithOAuth2({
+        provider: 'google',
+        urlCallback: (url) => {
+          if (w) {
+            w.location.href = url
+          }
+        },
+      })
+      .then((result) => {
+        if (!result.record.name_manually_set) {
+          pb.collection('users').update(result.record.id, {
+            name: result.meta?.name,
+          })
         }
-      },
-    }).then(() => goto('/'))
+        goto('/')
+      })
 
     goto('/')
   }
