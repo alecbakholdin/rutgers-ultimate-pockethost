@@ -27,6 +27,7 @@
         if (!result.record.name_manually_set) {
           pb.collection('users').update(result.record.id, {
             name: result.meta?.name,
+            emailVisibility: true,
           })
         }
         goto('/')
