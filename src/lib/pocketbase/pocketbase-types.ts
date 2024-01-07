@@ -9,6 +9,7 @@ export enum Collections {
 	CartSize = "cart_size",
 	Color = "color",
 	LineItem = "line_item",
+	NonRUltimateOrders = "non_r_ultimate_orders",
 	Order = "order",
 	OrderLineItem = "order_line_item",
 	Product = "product",
@@ -56,6 +57,14 @@ export type LineItemRecord<Tfields = unknown> = {
 	product: RecordIdString
 	quantity: number
 	user?: RecordIdString
+}
+
+export type NonRUltimateOrdersRecord<Tdark = unknown, Tdark_shorts = unknown, Twhite = unknown> = {
+	dark?: null | Tdark
+	dark_shorts?: null | Tdark_shorts
+	email?: string
+	name?: string
+	white?: null | Twhite
 }
 
 export type OrderRecord<TshippingAddress = unknown> = {
@@ -129,6 +138,7 @@ export type UsersRecord = {
 export type CartSizeResponse<TsumQuantity = unknown, Texpand = unknown> = Required<CartSizeRecord<TsumQuantity>> & BaseSystemFields<Texpand>
 export type ColorResponse<Texpand = unknown> = Required<ColorRecord> & BaseSystemFields<Texpand>
 export type LineItemResponse<Tfields = unknown, Texpand = unknown> = Required<LineItemRecord<Tfields>> & BaseSystemFields<Texpand>
+export type NonRUltimateOrdersResponse<Tdark = unknown, Tdark_shorts = unknown, Twhite = unknown, Texpand = unknown> = Required<NonRUltimateOrdersRecord<Tdark, Tdark_shorts, Twhite>> & BaseSystemFields<Texpand>
 export type OrderResponse<TshippingAddress = unknown, Texpand = unknown> = Required<OrderRecord<TshippingAddress>> & BaseSystemFields<Texpand>
 export type OrderLineItemResponse<Tfields = unknown, Texpand = unknown> = Required<OrderLineItemRecord<Tfields>> & BaseSystemFields<Texpand>
 export type ProductResponse<Texpand = unknown> = Required<ProductRecord> & BaseSystemFields<Texpand>
@@ -142,6 +152,7 @@ export type CollectionRecords = {
 	cart_size: CartSizeRecord
 	color: ColorRecord
 	line_item: LineItemRecord
+	non_r_ultimate_orders: NonRUltimateOrdersRecord
 	order: OrderRecord
 	order_line_item: OrderLineItemRecord
 	product: ProductRecord
@@ -154,6 +165,7 @@ export type CollectionResponses = {
 	cart_size: CartSizeResponse
 	color: ColorResponse
 	line_item: LineItemResponse
+	non_r_ultimate_orders: NonRUltimateOrdersResponse
 	order: OrderResponse
 	order_line_item: OrderLineItemResponse
 	product: ProductResponse
@@ -169,6 +181,7 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'cart_size'): RecordService<CartSizeResponse>
 	collection(idOrName: 'color'): RecordService<ColorResponse>
 	collection(idOrName: 'line_item'): RecordService<LineItemResponse>
+	collection(idOrName: 'non_r_ultimate_orders'): RecordService<NonRUltimateOrdersResponse>
 	collection(idOrName: 'order'): RecordService<OrderResponse>
 	collection(idOrName: 'order_line_item'): RecordService<OrderLineItemResponse>
 	collection(idOrName: 'product'): RecordService<ProductResponse>
