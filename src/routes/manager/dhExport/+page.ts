@@ -8,13 +8,23 @@ import type {
   UsersResponse,
 } from '$lib/pocketbase/pocketbase-types.js'
 
-const machineJersysId = 'i79vnh3trmzgmva'
+const machineJerseysId = 'i79vnh3trmzgmva'
 export async function load({ url }) {
+  const sectionId = (() => {
+    const urlSectionId = url.searchParams.get('sectionId');
+    if(typeof localStorage === 'undefined') return urlSectionId ?? machineJerseysId;
+    if(urlSectionId) {
+      localStorage.setItem('managerSectionId', urlSectionId);
+    }
+    return localStorage.getItem('managerSectionId') ?? machineJerseysId;
+  })()
   const productId = url.searchParams.get('productId')
+
+  const storeSections = await pb.collection('store_section').getFullList();
   const storeSection = await pb
     .collection('store_section')
     .getOne<StoreSectionResponse<{ products: ProductResponse<{fields: ProductFieldResponse[]}>[] }>>(
-      machineJersysId,
+      sectionId,
       { expand: 'products.fields' },
     )
   const products = storeSection.expand!.products
@@ -34,6 +44,9 @@ export async function load({ url }) {
     })
 
   return {
+    sectionId,
+    storeSections,
+    storeSection,
     products,
     productId,
     product,
