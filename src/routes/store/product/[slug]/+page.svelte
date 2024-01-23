@@ -13,7 +13,7 @@
   } from '$lib/util/functions/cartUtils.js'
   import { refreshCartItemCount } from '$lib/pocketbase/cart.js'
   import { getContrastColor } from '$lib/util/functions/getContrastColor.js'
-    import { pb } from '$lib/pocketbase/pb.js'
+  import { pb } from '$lib/pocketbase/pb.js'
 
   export let data
   data.addToCartForm.data.quantity = 1
@@ -28,8 +28,11 @@
 
 <svelte:head>
   <title>{product.title}</title>
-  <meta property="og:title" content={product.title}/>
-  <meta property="og:image" content={pb.getFileUrl(product, product.primaryImage)}/>
+  <meta property="og:title" content={product.title} />
+  <meta
+    property="og:image"
+    content={pb.getFileUrl(product, product.primaryImage)}
+  />
 </svelte:head>
 
 <div class="flex flex-col gap-4 md:flex-row max-w-md md:max-w-4xl mx-auto">
@@ -134,7 +137,9 @@
                 <option value={undefined} disabled selected class="hidden"
                   >{field.title}</option
                 >
-                {#each field.options.split(',') as value}
+                {#each field.options
+                  .split(',')
+                  .map((val) => val.trim()) as value}
                   {@const priceIncrease = getProductFieldPriceIncrease(
                     field,
                     value,

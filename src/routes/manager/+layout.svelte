@@ -1,6 +1,6 @@
 <script context="module">
   export const adminPages = [
-    { path: '/dhExport', title: 'DH Export' },
+    {path: '/storeOrders', title: 'Store Orders'}
     /* { path: '/orders', title: 'Orders' },
     { path: '/products', title: 'Products' }, */
   ]
