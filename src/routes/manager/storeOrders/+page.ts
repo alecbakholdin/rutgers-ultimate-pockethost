@@ -20,12 +20,12 @@ export async function load({ url }) {
   })()
   const productId = url.searchParams.get('productId')
 
-  const storeSections = await pb.collection('store_section').getFullList();
+  const storeSections = await pb.collection('store_section').getFullList({requestKey: null});
   const storeSection = await pb
     .collection('store_section')
     .getOne<StoreSectionResponse<{ products: ProductResponse<{fields: ProductFieldResponse[]}>[] }>>(
       sectionId,
-      { expand: 'products.fields' },
+      { expand: 'products.fields', requestKey: null },
     )
   const products = storeSection.expand!.products
   const product =
