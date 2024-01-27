@@ -24,6 +24,10 @@ export async function refreshCartItemCount() {
     cartItemCount.set(0)
     return
   }
-  const cartSize = await pb.collection('cart_size').getOne(user.id, {requestKey: null});
-  cartItemCount.set(cartSize.sumQuantity as number)
+  try {
+    const cartSize = await pb.collection('cart_size').getOne(user.id, { requestKey: null });
+    cartItemCount.set(cartSize.sumQuantity as number)
+  } catch {
+    cartItemCount.set(0);
+  }
 }
