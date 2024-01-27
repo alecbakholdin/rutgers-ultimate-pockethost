@@ -33,7 +33,7 @@ function getSchemaForField(field: ExpandedField) {
       schema = z.number()
       break
     case ProductFieldTypeOptions.options:
-      const options = field.options.split(',')
+      const options = field.options.split(',').map(x => x.trim())
       schema = options.length ? z.enum(options as any) : z.string()
       break
     case ProductFieldTypeOptions.color:
