@@ -52,8 +52,9 @@
       <thead>
         <tr>
           <th>Name</th>
+          <th>Quantity</th>
           {#each fieldNames as field}
-            <td>{field}</td>
+          <td>{field}</td>
           {/each}
         </tr>
       </thead>
@@ -61,6 +62,7 @@
         {#each data.productLineItems as lineItem}
           <tr>
             <td>{lineItem.expand?.order.expand?.user.name}</td>
+            <td>{lineItem.quantity}</td>
             {#each fieldNames as field}
               <td>{lineItem.fields[field] ?? ''}</td>
             {/each}
