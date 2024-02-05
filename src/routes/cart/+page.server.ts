@@ -108,6 +108,7 @@ export const actions = {
       customer_email: user.email,
       line_items,
       payment_intent_data: {
+        receipt_email: user.email,
         description: 'R Ultimate Merchandise'
       },
       success_url: `${url.origin}/checkout/success`,
