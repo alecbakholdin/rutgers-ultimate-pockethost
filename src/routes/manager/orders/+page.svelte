@@ -79,12 +79,13 @@
                     return async ({ update }) => {
                       await update()
                       receivedLoading = receivedLoading.filter((x) => x !== lineItem.id)
+                      lineItem.received = !lineItem.received
                     }
                   }}
                 >
                   <input type="hidden" name="id" value={lineItem.id} />
                   <div class="w-full h-full grid place-items-center">
-                    {#if fulfilledLoading.includes(lineItem.id)}
+                    {#if receivedLoading.includes(lineItem.id)}
                       <Icon icon="mdi:loading" class="animate-spin" />
                     {:else}
                       <input
@@ -108,6 +109,7 @@
                   return async ({ update }) => {
                     await update()
                     fulfilledLoading = fulfilledLoading.filter((x) => x !== lineItem.id)
+                    lineItem.fulfilled = !lineItem.fulfilled
                   }
                 }}
               >
