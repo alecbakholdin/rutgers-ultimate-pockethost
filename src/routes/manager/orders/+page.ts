@@ -7,7 +7,7 @@ import { pb } from '$lib/pocketbase/pb.js'
 export async function load({ url }) {
   const search = url.searchParams.get('q') || ''
 
-  const r = /^(?:fields)|f\.([\w\s]+)=(.*)$/
+  const r = /^(?:fields)|f\.([\w\s]+)(=|~)(.*)$/
   const searchTerms = search.split(/\s+/g)
   const stringSearchClauses = searchTerms
     .filter((s) => !s.match(r))
@@ -24,10 +24,10 @@ export async function load({ url }) {
 
   const fieldFilters = searchTerms.map((s) => s.match(r)).filter(Boolean)
   const fieldFilterClauses = fieldFilters.map(
-    (f, i) => `fields.${f![1]} = {:f${i}}`,
+    (f, i) => `fields.${f![1]} ${f![2]} {:f${i}}`,
   )
   const fieldFilterObj = fieldFilters.reduce(
-    (acc, f, i) => ({ ...acc, [`f${i}`]: f![2] }),
+    (acc, f, i) => ({ ...acc, [`f${i}`]: f![3] }),
     {},
   )
   const filterStr = [...fieldFilterClauses, ...stringSearchClauses].join(' && ')
