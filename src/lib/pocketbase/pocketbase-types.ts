@@ -54,8 +54,8 @@ export type ColorRecord = {
 }
 
 export type DiscountCodesRecord = {
+	active?: boolean
 	code?: string
-	team_discount?: boolean
 }
 
 export type LineItemRecord<Tfields = unknown> = {
@@ -75,7 +75,6 @@ export type NonRUltimateOrdersRecord<Tdark = unknown, Tdark_shorts = unknown, Tw
 
 export type OrderRecord<TshippingAddress = unknown> = {
 	discountCode?: string
-	fulfilled?: IsoDateString
 	profitInCents?: number
 	shippingAddress?: null | TshippingAddress
 	shippingCostInCents?: number
@@ -88,6 +87,7 @@ export type OrderRecord<TshippingAddress = unknown> = {
 
 export type OrderLineItemRecord<Tfields = unknown> = {
 	fields?: null | Tfields
+	fulfilled?: boolean
 	order: RecordIdString
 	product: RecordIdString
 	profitCents?: number
@@ -127,6 +127,7 @@ export type ProductFieldRecord<TpriceIncreaseArray = unknown> = {
 }
 
 export type StoreSectionRecord = {
+	allow_preview?: RecordIdString[]
 	enabled?: boolean
 	order?: number
 	products?: RecordIdString[]

@@ -1,8 +1,11 @@
 <script lang="ts">
+  import OrderComponent from '$lib/component/order/OrderComponent.svelte'
 
-    import { page } from "$app/stores"
-    
-
+  export let data
 </script>
 
-{$page.params.orderId}
+{#if !data.order}
+  Order not found
+{:else}
+  <OrderComponent order={data.order} />
+{/if}

@@ -1,21 +1,39 @@
-import { fullOrderResponseExpansionString, type FullOrderResponse } from '$lib/pocketbase/derived-pocketbase-types.js';
-import { pb } from '$lib/pocketbase/pb.js';
+import {
+  fullOrderLineItemResponseExpansionString,
+  type FullOrderLineItemResponse,
+} from '$lib/pocketbase/derived-pocketbase-types.js'
+import { pb } from '$lib/pocketbase/pb.js'
 
-export async function load({ url: { searchParams } }) {
-    const page = parseInt(searchParams.get('page') ?? '0');
-    const pageSize = parseInt(searchParams.get('pageSize') ?? '10');
-    const sortBy = searchParams.get('sortBy');
-    const search = searchParams.get('search');
+export async function load({ url }) {
+  const search = url.searchParams.get('q')
 
+  if (!search) {
     return {
-        orders: await pb.collection('order').getList<FullOrderResponse>(page, pageSize, {
-            ...(sortBy && { sort: sortBy }),
-            ...(search && { filter: pb.filter("(user.name ~ {:search} || user.email ~ {:search})", { search }) }),
-            expand: fullOrderResponseExpansionString
-        }),
-        search,
-        page,
-        pageSize,
-        sortBy
+      orders: [],
     }
+  }
+
+  const searchTerms = search.split(/\s+/g)
+  const filterStr = searchTerms
+    .map((_, i) => `(${
+      ['order.user.name', 'order.user.email', 'product.title', 'fields'].map(
+        (field) => `${field} ~ {:q${i}}`,
+      ).join(' || ')})`,
+    )
+    .join(' && ')
+  const filterObj = searchTerms.reduce(
+    (acc, _, i) => ({ ...acc, [`q${i}`]: searchTerms[i] }),
+    {},
+  )
+
+  const filter = pb.filter(filterStr, filterObj)
+  console.log(filter)
+  return {
+    orders: await pb
+      .collection('order_line_item')
+      .getFullList<FullOrderLineItemResponse>({
+        filter,
+        expand: fullOrderLineItemResponseExpansionString,
+      }),
+  }
 }

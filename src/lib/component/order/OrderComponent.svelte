@@ -13,9 +13,10 @@
   export let showAdminControls: boolean | undefined = false
   const dispatch = createEventDispatcher<{ expand: void }>()
 
+  $: orderFulfilled = !order.expand?.['order_line_item(order)'].find(x => !x.fulfilled)
   $: createdDate = new Date(order.created)
-  $: fulfillIcon = order.fulfilled ? 'mdi:done' : 'mdi:remove'
-  $: fulfilledDate = order.fulfilled ? 'Fulfilled' : 'Unfulfilled'
+  $: fulfillIcon = orderFulfilled ? 'mdi:done' : 'mdi:remove'
+  $: fulfilledDate = orderFulfilled ? 'Fulfilled' : 'Unfulfilled'
   $: numItems = _.sumBy(lineItems, 'quantity')
   $: lineItems = order.expand?.['order_line_item(order)'] || []
 </script>
@@ -88,6 +89,13 @@
         {@const product = lineItem.expand?.product}
         {#if product}
           <div class="flex gap-2">
+            <div class="flex flex-col justify-center">
+              {#if lineItem.fulfilled}
+                <Icon icon="mdi:check"/>
+              {:else}
+                <Icon icon="mdi:remove"/>
+              {/if}
+            </div>
             <ImageThumb
               record={product}
               alt={product.title}
