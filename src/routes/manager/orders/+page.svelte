@@ -55,7 +55,8 @@
     <table class="table">
       <thead>
         <tr>
-          <th></th>
+          <th>Received</th>
+          <th>Fulfilled</th>
           <td>Order</td>
           <th>User</th>
           <th>Product</th>
@@ -69,8 +70,37 @@
         {#each data.orders as lineItem (lineItem.id)}
           <tr>
             <td>
+                <form
+                  action="?/markReceived"
+                  method="POST"
+                  use:enhance={() => {
+                    loading = [...loading, lineItem.id]
+                    return async ({ update }) => {
+                      await update()
+                      loading = loading.filter((x) => x !== lineItem.id)
+                    }
+                  }}
+                >
+                  <input type="hidden" name="id" value={lineItem.id} />
+                  <div class="w-full h-full grid place-items-center">
+                    {#if loading.includes(lineItem.id)}
+                      <Icon icon="mdi:loading" class="animate-spin" />
+                    {:else}
+                      <input
+                        type="checkbox"
+                        name="received"
+                        id="{lineItem.id}-submit"
+                        class="checkbox"
+                        checked={lineItem.received}
+                        on:change={(e) => e.currentTarget.form?.requestSubmit()}
+                      />
+                    {/if}
+                  </div>
+                </form>
+              </td>
+            <td>
               <form
-                action="?/markCompleted"
+                action="?/markFulfilled"
                 method="POST"
                 use:enhance={() => {
                   loading = [...loading, lineItem.id]

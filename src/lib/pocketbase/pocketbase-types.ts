@@ -17,6 +17,7 @@ export enum Collections {
 	ProductField = "product_field",
 	StoreSection = "store_section",
 	Users = "users",
+	VendorOrder = "vendor_order",
 }
 
 // Alias types for improved usability
@@ -92,6 +93,7 @@ export type OrderLineItemRecord<Tfields = unknown> = {
 	product: RecordIdString
 	profitCents?: number
 	quantity: number
+	received?: boolean
 	totalCents?: number
 	unitPriceCents?: number
 }
@@ -141,6 +143,14 @@ export type UsersRecord = {
 	name_manually_set?: boolean
 }
 
+export type VendorOrderRecord = {
+	end_date?: IsoDateString
+	managers?: RecordIdString[]
+	products?: RecordIdString[]
+	start_date?: IsoDateString
+	title?: string
+}
+
 // Response types include system fields and match responses from the PocketBase API
 export type CartSizeResponse<TsumQuantity = unknown, Texpand = unknown> = Required<CartSizeRecord<TsumQuantity>> & BaseSystemFields<Texpand>
 export type ColorResponse<Texpand = unknown> = Required<ColorRecord> & BaseSystemFields<Texpand>
@@ -153,6 +163,7 @@ export type ProductResponse<Texpand = unknown> = Required<ProductRecord> & BaseS
 export type ProductFieldResponse<TpriceIncreaseArray = unknown, Texpand = unknown> = Required<ProductFieldRecord<TpriceIncreaseArray>> & BaseSystemFields<Texpand>
 export type StoreSectionResponse<Texpand = unknown> = Required<StoreSectionRecord> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
+export type VendorOrderResponse<Texpand = unknown> = Required<VendorOrderRecord> & BaseSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
 
@@ -168,6 +179,7 @@ export type CollectionRecords = {
 	product_field: ProductFieldRecord
 	store_section: StoreSectionRecord
 	users: UsersRecord
+	vendor_order: VendorOrderRecord
 }
 
 export type CollectionResponses = {
@@ -182,6 +194,7 @@ export type CollectionResponses = {
 	product_field: ProductFieldResponse
 	store_section: StoreSectionResponse
 	users: UsersResponse
+	vendor_order: VendorOrderResponse
 }
 
 // Type for usage with type asserted PocketBase instance
@@ -199,4 +212,5 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'product_field'): RecordService<ProductFieldResponse>
 	collection(idOrName: 'store_section'): RecordService<StoreSectionResponse>
 	collection(idOrName: 'users'): RecordService<UsersResponse>
+	collection(idOrName: 'vendor_order'): RecordService<VendorOrderResponse>
 }
