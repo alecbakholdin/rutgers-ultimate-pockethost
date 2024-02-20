@@ -1,8 +1,25 @@
 <script lang="ts">
   import { enhance } from '$app/forms'
   import Icon from '@iconify/svelte'
+  import { page } from '$app/stores'
+  import _ from 'lodash'
 
   export let data
+
+  let previousSearches: string[] = []
+  $: searchStr = $page.url.searchParams.get('q')
+  $: if (typeof window !== 'undefined') {
+    const key = 'order_manager_order_search'
+    const localData: string[] = JSON.parse(localStorage.getItem(key) || '[]');
+    previousSearches = _.uniq(
+      [
+        searchStr || '',
+        ...localData,
+      ].filter((x) => x),
+    ).slice(0, 5)
+    localStorage.setItem(key, JSON.stringify(previousSearches))
+    console.log(searchStr, previousSearches, localStorage.getItem(key))
+  }
 
   $: fields = [
     ...new Set(data.orders.flatMap((x) => Object.keys(x.fields ?? {}))),
@@ -11,8 +28,32 @@
 
   let receivedLoading: string[] = []
   let fulfilledLoading: string[] = []
+
+  let sortBy: { field: string; asc: boolean } | undefined
+
+  $: lineItems = sortBy
+    ? (() => {
+        const orders = [...data.orders]
+        orders.sort((a, b) => {
+          const valA = a.fields?.[sortBy!.field]?.trim() || ''
+          const valB = b.fields?.[sortBy!.field]?.trim() || ''
+
+          const numCompare =
+            typeof valA === 'number' && typeof valB === 'number'
+          const factor = sortBy!.asc ? 1 : -1
+          return (
+            factor *
+            (numCompare
+              ? parseFloat(valA) - parseFloat(valB)
+              : valA.localeCompare(valB))
+          )
+        })
+        return orders
+      })()
+    : data.orders
 </script>
 
+<!-- svelte-ignore missing-declaration -->
 <form method="GET">
   <input
     class="input input-bordered"
@@ -22,6 +63,13 @@
   />
   <submit class="btn">Go</submit>
 </form>
+<div class="flex mt-4 gap-2">
+    {#each previousSearches as search}
+        <a href="?q={search}" class="badge badge-ghost badge-lg">
+            {search}
+        </a>
+    {/each}
+</div>
 
 <div class="my-4">
   <p class="text-xl font-semibold">Shown Fields</p>
@@ -58,48 +106,73 @@
         <tr>
           <th>Received</th>
           <th>Fulfilled</th>
-          <td>Order</td>
+          <th>Order</th>
           <th>User</th>
           <th>Product</th>
           <th>Quantity</th>
           {#each shownFields as field}
-            <td>{field}</td>
+            <td>
+              <button
+                class="flex flex-row items-center w-full"
+                type="button"
+                on:click={() => {
+                  if (!sortBy || sortBy.field !== field) {
+                    sortBy = { field, asc: true }
+                  } else if (sortBy.asc) {
+                    sortBy = { field, asc: false }
+                  } else {
+                    sortBy = undefined
+                  }
+                }}
+              >
+                {#if sortBy?.field === field}
+                  {#if sortBy.asc}
+                    <Icon icon="mdi:chevron-up" />
+                  {:else}
+                    <Icon icon="mdi:chevron-down" />
+                  {/if}
+                {/if}
+                {field}
+              </button>
+            </td>
           {/each}
         </tr>
       </thead>
       <tbody>
-        {#each data.orders as lineItem (lineItem.id)}
+        {#each lineItems as lineItem (lineItem.id)}
           <tr>
             <td>
-                <form
-                  action="?/markReceived"
-                  method="POST"
-                  use:enhance={() => {
-                    receivedLoading = [...receivedLoading, lineItem.id]
-                    return async ({ update }) => {
-                      await update()
-                      receivedLoading = receivedLoading.filter((x) => x !== lineItem.id)
-                      lineItem.received = !lineItem.received
-                    }
-                  }}
-                >
-                  <input type="hidden" name="id" value={lineItem.id} />
-                  <div class="w-full h-full grid place-items-center">
-                    {#if receivedLoading.includes(lineItem.id)}
-                      <Icon icon="mdi:loading" class="animate-spin" />
-                    {:else}
-                      <input
-                        type="checkbox"
-                        name="received"
-                        id="{lineItem.id}-submit"
-                        class="checkbox"
-                        checked={lineItem.received}
-                        on:change={(e) => e.currentTarget.form?.requestSubmit()}
-                      />
-                    {/if}
-                  </div>
-                </form>
-              </td>
+              <form
+                action="?/markReceived"
+                method="POST"
+                use:enhance={() => {
+                  receivedLoading = [...receivedLoading, lineItem.id]
+                  return async ({ update }) => {
+                    await update()
+                    receivedLoading = receivedLoading.filter(
+                      (x) => x !== lineItem.id,
+                    )
+                    lineItem.received = !lineItem.received
+                  }
+                }}
+              >
+                <input type="hidden" name="id" value={lineItem.id} />
+                <div class="w-full h-full grid place-items-center">
+                  {#if receivedLoading.includes(lineItem.id)}
+                    <Icon icon="mdi:loading" class="animate-spin" />
+                  {:else}
+                    <input
+                      type="checkbox"
+                      name="received"
+                      id="{lineItem.id}-submit"
+                      class="checkbox"
+                      checked={lineItem.received}
+                      on:change={(e) => e.currentTarget.form?.requestSubmit()}
+                    />
+                  {/if}
+                </div>
+              </form>
+            </td>
             <td>
               <form
                 action="?/markFulfilled"
@@ -108,7 +181,9 @@
                   fulfilledLoading = [...fulfilledLoading, lineItem.id]
                   return async ({ update }) => {
                     await update()
-                    fulfilledLoading = fulfilledLoading.filter((x) => x !== lineItem.id)
+                    fulfilledLoading = fulfilledLoading.filter(
+                      (x) => x !== lineItem.id,
+                    )
                     lineItem.fulfilled = !lineItem.fulfilled
                   }
                 }}
