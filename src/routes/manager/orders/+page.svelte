@@ -9,7 +9,8 @@
   ]
   $: shownFields = [...fields]
 
-  let loading: string[] = []
+  let receivedLoading: string[] = []
+  let fulfilledLoading: string[] = []
 </script>
 
 <form method="GET">
@@ -74,16 +75,16 @@
                   action="?/markReceived"
                   method="POST"
                   use:enhance={() => {
-                    loading = [...loading, lineItem.id]
+                    receivedLoading = [...receivedLoading, lineItem.id]
                     return async ({ update }) => {
                       await update()
-                      loading = loading.filter((x) => x !== lineItem.id)
+                      receivedLoading = receivedLoading.filter((x) => x !== lineItem.id)
                     }
                   }}
                 >
                   <input type="hidden" name="id" value={lineItem.id} />
                   <div class="w-full h-full grid place-items-center">
-                    {#if loading.includes(lineItem.id)}
+                    {#if fulfilledLoading.includes(lineItem.id)}
                       <Icon icon="mdi:loading" class="animate-spin" />
                     {:else}
                       <input
@@ -103,16 +104,16 @@
                 action="?/markFulfilled"
                 method="POST"
                 use:enhance={() => {
-                  loading = [...loading, lineItem.id]
+                  fulfilledLoading = [...fulfilledLoading, lineItem.id]
                   return async ({ update }) => {
                     await update()
-                    loading = loading.filter((x) => x !== lineItem.id)
+                    fulfilledLoading = fulfilledLoading.filter((x) => x !== lineItem.id)
                   }
                 }}
               >
                 <input type="hidden" name="id" value={lineItem.id} />
                 <div class="w-full h-full grid place-items-center">
-                  {#if loading.includes(lineItem.id)}
+                  {#if fulfilledLoading.includes(lineItem.id)}
                     <Icon icon="mdi:loading" class="animate-spin" />
                   {:else}
                     <input
