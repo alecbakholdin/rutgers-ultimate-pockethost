@@ -61,7 +61,7 @@
     type="search"
     placeholder="Search"
   />
-  <submit class="btn">Go</submit>
+  <button type="submit" class="btn">Go</button>
 </form>
 <div class="flex mt-4 gap-2">
     {#each previousSearches as search}
