@@ -4,7 +4,7 @@
   import { getLiveGameContext } from './gamePointType'
 
   const { gamePoints, game, team } = getLiveGameContext()
-    /* type LiveFeedEvent = {
+  /* type LiveFeedEvent = {
         type: LiveEvent['$$prop_def']['type']
         time: LiveEvent['$$prop_def']['time']
     }
@@ -29,14 +29,11 @@
         <span>{$game?.opponent} {point.type === 'D' ? 'Hold' : 'Break'}</span>
       </LiveEvent>
     {/if}
-    {#each _.sortBy(
-        point.expand?.['game_point_event(game_point)'] ?? [],
-        'created',
-      ).reverse() as event}
+    {#each _.sortBy(point.expand?.['game_point_event(game_point)'] ?? [], 'created').reverse() as event}
       {#if ['Drop', 'Turn', 'Block'].includes(event.type)}
         <LiveEvent
           type={event.type === 'Block' ||
-          (event.type === 'Turn' && event.opponent)
+          (['Turn', 'Drop'].includes(event.type) && event.opponent)
             ? 'info'
             : 'warning'}
           time={event.created}
