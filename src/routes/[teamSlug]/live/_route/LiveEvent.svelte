@@ -1,10 +1,48 @@
+<script context="module" lang="ts">
+  const now = writable(new Date().getTime())
+  function updateTime() {
+    now.set(new Date().getTime())
+    setTimeout(updateTime, 1000)
+  }
+  updateTime()
+</script>
+
 <script lang="ts">
+  import _ from 'lodash'
+  import { writable } from 'svelte/store'
   import { fly } from 'svelte/transition'
 
   export let type: 'success' | 'warning' | 'error' | 'info' | 'neutral'
-  /* export let time: Date | undefined = undefined; */
+  export let time: Date | string | undefined = undefined
+
+  $: timeAsDate =
+    time !== undefined && typeof time === 'string' ? new Date(time) : time
+  $: timeNum = timeAsDate?.getTime()
+  $: timeDiffNum = timeNum && $now - timeNum
+  $: timeDiffStr = timeDiffNum && getTimeDiffString(timeDiffNum)
 
   const id = crypto.randomUUID()
+
+  function getTimeDiffString(diff: number) {
+    const second = 1000
+    const minute = 60 * second
+    const hour = 60 * minute
+    const day = 24 * hour
+    const month = 28 * day
+    if (diff < minute) {
+      return `${Math.floor(diff / second)}s ago`
+    }
+    if (diff < hour) {
+      return `${Math.floor(diff / minute)}m ago`
+    } else if (diff < day) {
+      return `${Math.floor(diff / hour)}h${Math.floor(
+        (diff % hour) / minute,
+      )}m ago`
+    } else if (diff < month) {
+      return `${Math.floor(diff / day)}d ago`
+    }
+    return 'A while ago'
+  }
 </script>
 
 <div
@@ -23,8 +61,12 @@
 >
   <div class="card-body">
     <div class="card-title !mb-0 flex w-full">
-      <slot
-      /><!-- <span class="flex-grow text-right text-xs opacity-40">3m ago</span> -->
+      <slot />
+      {#if timeDiffStr}
+        <span class="flex-grow text-right text-xs opacity-40">
+          {timeDiffStr}
+        </span>
+      {/if}
     </div>
     <slot name="body" />
   </div>

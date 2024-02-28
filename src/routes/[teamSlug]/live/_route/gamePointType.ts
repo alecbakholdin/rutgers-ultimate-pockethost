@@ -8,7 +8,13 @@ import type {
 } from '$lib/pocketbase/pocketbase-types'
 import _ from 'lodash'
 import { getContext, onMount, setContext } from 'svelte'
-import { derived, get, writable, type Readable, type Unsubscriber } from 'svelte/store'
+import {
+  derived,
+  get,
+  writable,
+  type Readable,
+  type Unsubscriber,
+} from 'svelte/store'
 
 export type LiveFeedGamePointEvent = GamePointEventResponse<{
   player: PlayerResponse
@@ -24,7 +30,7 @@ export async function getPointsForGame(gameId: string) {
   return pb.collection('game_point').getFullList<LiveFeedGamePoint>({
     filter: pb.filter('game={:gameId}', { gameId }),
     expand: expansionString,
-    sort: '+created',
+    sort: '-created',
   })
 }
 
@@ -42,10 +48,12 @@ export async function getPointEvent(id: string) {
 
 type GameWithTeam = GameResponse<{ team: TeamResponse }>
 type TeamWithGame = TeamResponse<{
-  live_game: GameWithTeam
+  live_game: GameResponse<{ team: TeamResponse }>
+  'player(team)': PlayerResponse[]
 }>
 export type LiveGameContext = {
   team: Readable<TeamWithGame | undefined>
+  players: Readable<PlayerResponse[]>
   game: Readable<GameWithTeam | undefined>
   gamePoints: Readable<LiveFeedGamePoint[]>
 }
@@ -58,9 +66,9 @@ export function initLiveGameContext(team: TeamWithGame) {
   const gamePointsStore = writable<LiveFeedGamePoint[]>()
   async function updateTeamStore() {
     teamStore.set(
-      await pb
-        .collection('team')
-        .getOne<TeamWithGame>(team.id, { expand: 'live_game.team' }),
+      await pb.collection('team').getOne<TeamWithGame>(team.id, {
+        expand: 'live_game.team,player(team)',
+      }),
     )
   }
 
@@ -73,7 +81,7 @@ export function initLiveGameContext(team: TeamWithGame) {
       gamePointsStore.update((pe) => {
         pe = pe.filter((x) => x.id !== id)
         pe.push(newVal)
-        return _.sortBy(pe, 'created')
+        return _.sortBy(pe, 'created').reverse()
       })
     } catch (e) {
       console.error(e)
@@ -85,6 +93,12 @@ export function initLiveGameContext(team: TeamWithGame) {
       .collection('team')
       .subscribe(team.id, async (e) =>
         e.action === 'update' ? updateTeamStore() : teamStore.set(undefined),
+      )
+    const playerUnsub = pb
+      .collection('player')
+      .subscribe(
+        team.id,
+        async (e) => e.record.team === get(teamStore)?.id && updateTeamStore(),
       )
     const gameUnsub = pb
       .collection('game')
@@ -105,14 +119,28 @@ export function initLiveGameContext(team: TeamWithGame) {
     const gamePointEventsUnsub = pb
       .collection('game_point_event')
       .subscribe('*', async (e) => updatePointEvent(e.record.game_point))
-    const gameStoreUnsub = gameStore.subscribe(async game => gamePointsStore.set(game ? await getPointsForGame(game.id) : []));
-    const gsuPromise = new Promise<Unsubscriber>(res => res(gameStoreUnsub))
-    return () => [teamUnsub, gameUnsub, gamePointsUnsub, gamePointEventsUnsub, gsuPromise].forEach(x => x.then(f => f()))
+    const gameStoreUnsub = gameStore.subscribe(async (game) =>
+      gamePointsStore.set(game ? await getPointsForGame(game.id) : []),
+    )
+    const gsuPromise = new Promise<Unsubscriber>((res) => res(gameStoreUnsub))
+    return () =>
+      [
+        teamUnsub,
+        playerUnsub,
+        gameUnsub,
+        gamePointsUnsub,
+        gamePointEventsUnsub,
+        gsuPromise,
+      ].forEach((x) => x.then((f) => f()))
   })
 
   const context = {
     team: teamStore,
     game: gameStore,
+    players: derived(
+      teamStore,
+      ($team) => $team?.expand?.['player(team)'] || [],
+    ),
     gamePoints: gamePointsStore,
   } satisfies LiveGameContext
   setContext('liveGame', context)
