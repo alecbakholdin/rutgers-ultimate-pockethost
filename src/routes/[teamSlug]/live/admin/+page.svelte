@@ -1,5 +1,6 @@
 <script lang="ts">
   import LineCreator from './_route/LineCreator.svelte'
+  import CurrentPoint from './_route/CurrentPoint.svelte'
 
   import LiveFeed from '../_route/LiveFeed.svelte'
   import { getLiveGameContext } from '../_route/gamePointType'
@@ -27,8 +28,9 @@
     {/each}
   </div>
   {#if activeTab === 'Lines'}
-    <LineCreator></LineCreator>
+    <LineCreator on:startPoint={() => (activeTab = 'Current Point')} />
   {:else if activeTab === 'Current Point'}
+    <CurrentPoint on:pointOver={() => (activeTab = 'Lines')} />
   {:else if activeTab === 'Feed'}
     <LiveFeed />
   {/if}

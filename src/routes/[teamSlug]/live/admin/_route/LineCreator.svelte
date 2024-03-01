@@ -1,3 +1,8 @@
+<script context="module" lang="ts">
+  import { writable } from 'svelte/store'
+  const selectedPlayers = writable<string[]>([])
+</script>
+
 <script lang="ts">
   import { scale } from 'svelte/transition'
   import {
@@ -6,19 +11,19 @@
   } from '../../_route/gamePointType'
   import Icon from '@iconify/svelte'
   import { pb } from '$lib/pocketbase/pb'
-  import type {
-    GamePointRecord,
+  import {
     GamePointTypeOptions,
-    TeamGroupRecord,
-    TeamGroupResponse,
+    type GamePointRecord,
+    type TeamGroupRecord,
+    type TeamGroupResponse,
   } from '$lib/pocketbase/pocketbase-types'
   import { toggleArray } from '$lib/util/functions/toggleArray'
   import _ from 'lodash'
-    import { newShade } from '$lib/util/functions/changeShade'
+  import { newShade } from '$lib/util/functions/changeShade'
+    import { createEventDispatcher } from 'svelte'
 
   const { game, players, gamePoints, team } = getLiveGameContext()
   $: groups = $team?.expand?.['team_group(team)'] || []
-  let selectedPlayers: string[] = []
   $: calculatedPlayers = $players.map((player) => ({
     ...player,
     lastPlayedPoint:
@@ -43,7 +48,7 @@
   }
 
   function openModal(id: string) {
-    ;(document.getElementById(id) as HTMLDialogElement)?.showModal()
+    (document.getElementById(id) as HTMLDialogElement)?.showModal()
   }
 
   const colorOptions = [
@@ -72,26 +77,47 @@
     }
   }
 
-  $: pointInProgress = !!$gamePoints.find(x => !x.goal && x.opponent_goal);
+  const dispatch = createEventDispatcher<{startPoint: void}>()
+  $: pointInProgress = !!$gamePoints?.find((x) => !x.goal && x.opponent_goal)
   async function submitToPoint() {
-    if(!$game) return;
+    if (!$game) return
+    const O = GamePointTypeOptions.O
+    const D = GamePointTypeOptions.D
     const point: GamePointRecord = {
       game: $game.id,
-      starting_line: selectedPlayers,
-      type: $gamePoints.length && $gamePoints[0].type === 'O' && 'D' || 'O'
+      starting_line: $selectedPlayers,
+      type: ($gamePoints.length && $gamePoints[0].type === O && D) || O,
     }
-    pb.collection('game_point').create()
+    await pb.collection('game_point').create(point)
+    $selectedPlayers = []
+    dispatch('startPoint')
   }
+
+  $: atLeastOnePlayerSelected = Boolean(
+    filteredPlayers.find((x) => $selectedPlayers.includes(x.id)),
+  )
+  $: allPlayersSelected = !filteredPlayers.find(
+    (x) => !$selectedPlayers.includes(x.id),
+  )
+  $: somePlayersSelected = !allPlayersSelected && atLeastOnePlayerSelected
+  $: noPlayersSelected = !atLeastOnePlayerSelected
 </script>
 
 {#if !pointInProgress}
-  <button type="button" disabled={selectedPlayers.length !== 7} on:click={submitToPoint}>
-    Submit to point ({selectedPlayers.length}/7)
+  <button
+    type="button"
+    class="btn btn-primary w-full mb-2"
+    disabled={$selectedPlayers.length !== 7}
+    on:click={submitToPoint}
+  >
+    Submit to point ({$selectedPlayers.length}/7)
   </button>
 {/if}
 
 <dialog id="group_modal" class="modal">
-  <form method="dialog" class="modal-backdrop"><button class="pointer-default"></button></form>
+  <form method="dialog" class="modal-backdrop">
+    <button class="pointer-default"></button>
+  </form>
   <div class="modal-box flex flex-col">
     <h3 class="font-bold text-lg">Configure your group</h3>
     <label for="group_name" class="label mt-2">Group Name</label>
@@ -197,11 +223,9 @@
             type="button"
             class="badge badge-lg pointer-cursor"
             on:click={() =>
-              pb
-                .collection('team_group')
-                .update(group.id, {
-                  players: _.uniq([...group.players, ...selectedPlayers]),
-                })}
+              pb.collection('team_group').update(group.id, {
+                players: _.uniq([...group.players, ...$selectedPlayers]),
+              })}
           >
             {group.name}
           </button>
@@ -217,9 +241,9 @@
       modalGroup = {
         team: $team?.id ?? '',
         name: '',
-        players: [...selectedPlayers],
+        players: [...$selectedPlayers],
       }
-      modalPlayerOptions = [...selectedPlayers]
+      modalPlayerOptions = [...$selectedPlayers]
       openModal('group_modal')
     }}>+ Create new Group</button
   >
@@ -247,7 +271,24 @@
     </button>
   {/each}
 </div>
-<div class="flex flex-col gap-1 mt-4">
+<div class="flex flex-col gap-1 mt-6">
+  <div class="flex items-center gap-3 pb-2 border-b-neutral-content border-b-2">
+    <input
+      type="checkbox"
+      name="select_all"
+      id="select_all"
+      class="checkbox"
+      checked={allPlayersSelected}
+      indeterminate={somePlayersSelected}
+      on:change={(e) =>
+        e.currentTarget.checked
+          ? ($selectedPlayers = filteredPlayers.map((x) => x.id))
+          : ($selectedPlayers = $selectedPlayers.filter(
+              (x) => !filteredPlayers.find((f) => f.id === x),
+            ))}
+    />
+    <span class="text-lg font-semibold">Player</span>
+  </div>
   {#each filteredPlayers as player}
     {@const checkboxId = `player-${player.id}`}
     <label for={checkboxId} class="flex items-center gap-3 cursor-pointer">
@@ -256,9 +297,9 @@
         name={checkboxId}
         id={checkboxId}
         class="checkbox"
-        checked={selectedPlayers.includes(player.id)}
+        checked={$selectedPlayers.includes(player.id)}
         on:click={() =>
-          (selectedPlayers = toggleArray(selectedPlayers, player.id))}
+          ($selectedPlayers = toggleArray($selectedPlayers, player.id))}
       />
       <div>
         <p>{player.name}</p>

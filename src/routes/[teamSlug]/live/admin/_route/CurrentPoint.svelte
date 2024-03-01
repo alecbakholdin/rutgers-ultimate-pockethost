@@ -1,0 +1,225 @@
+<script lang="ts">
+  import { pb } from '$lib/pocketbase/pb'
+  import {
+    GamePointTypeOptions,
+    type GamePointRecord,
+    GamePointEventTypeOptions,
+    type GamePointEventRecord,
+  } from '$lib/pocketbase/pocketbase-types'
+  import { createEventDispatcher } from 'svelte'
+  import {
+    type LiveFeedGamePointEvent,
+    getLiveGameContext,
+  } from '../../_route/gamePointType'
+  import Icon from '@iconify/svelte'
+
+  const { game, gamePoints } = getLiveGameContext()
+  $: lastPoint = ($gamePoints?.length && $gamePoints[0]) || undefined
+  $: livePoint = $gamePoints?.find(
+    (x) => !x.opponent_goal && !x.goal && x.type !== GamePointTypeOptions.Final,
+  )
+  async function updatePointType(type: GamePointTypeOptions) {
+    if (livePoint && livePoint.type !== type) {
+      pb.collection('game_point').update(livePoint.id, {
+        type,
+      } satisfies Partial<GamePointRecord>)
+    }
+  }
+
+  $: startedWithPossession = livePoint?.type === GamePointTypeOptions.O
+  $: numberOfTurns =
+    livePoint?.expand?.['game_point_event(game_point)']?.filter(
+      (x) =>
+        x.type === GamePointEventTypeOptions.Turn ||
+        x.type === GamePointEventTypeOptions.Drop ||
+        x.type === GamePointEventTypeOptions.Block,
+    ).length || 0
+  $: currentlyInPossession = Boolean(
+    (startedWithPossession && !(numberOfTurns % 2)) ||
+      (!startedWithPossession && numberOfTurns % 2),
+  )
+
+  async function createNewEvent(
+    type: GamePointEventTypeOptions,
+    player?: string,
+  ) {
+    if (!livePoint) return
+    const pointEvent: GamePointEventRecord = {
+      type,
+      game_point: livePoint.id,
+      opponent: !player,
+      player,
+    }
+    const event = await pb
+      .collection('game_point_event')
+      .create<LiveFeedGamePointEvent>(pointEvent, { expand: 'player' })
+    livePoint.expand?.['game_point_event(game_point)']?.unshift(event)
+    if (
+      !livePoint.expand?.['game_point_event(game_point)'] &&
+      livePoint.expand
+    ) {
+      livePoint.expand = {
+        ...livePoint.expand,
+        'game_point_event(game_point)': [event],
+      }
+    }
+  }
+
+  async function setPointValue<T extends keyof GamePointRecord>(
+    key: T,
+    value: GamePointRecord[T],
+  ) {
+    if (!livePoint) return
+    const resp = await pb.collection('game_point').update(livePoint.id, {
+      [key]: value,
+    })
+    const { expand, ...rest } = resp
+    livePoint = { ...livePoint, ...rest }
+  }
+  const dispatch = createEventDispatcher<{ pointOver: void }>()
+
+  async function undo() {
+    if (!lastPoint) return
+    const gamePointEvents =
+      lastPoint.expand?.['game_point_event(game_point)'] || []
+    if (lastPoint.opponent_goal) {
+      await pb.collection('game_point').update(lastPoint.id, {
+        opponent_goal: false,
+      } satisfies Partial<GamePointRecord>)
+      await pb.collection('game').update(lastPoint.game, {
+        'opponent_score-': 1,
+      })
+    } else if (lastPoint.goal) {
+      await pb.collection('game_point').update(lastPoint.id, {
+        goal: '',
+      } satisfies Partial<GamePointRecord>)
+      await pb.collection('game').update(lastPoint.game, {
+        'team_score-': 1,
+      })
+    } else if (lastPoint.assist) {
+      await pb.collection('game_point').update(lastPoint.id, {
+        assist: '',
+      } satisfies Partial<GamePointRecord>)
+    } else if (gamePointEvents.length) {
+      await pb.collection('game_point_event').delete(gamePointEvents[0].id)
+    } else {
+      await pb.collection('game_point').delete(lastPoint.id)
+    }
+  }
+</script>
+
+{#if livePoint}
+  <div class="flex justify-between">
+    <div>
+      <span>Started on</span>
+      <div class="flex gap-1">
+        <button
+          type="button"
+          class="btn btn-sm"
+          class:pointer-events-none={livePoint.type === GamePointTypeOptions.O}
+          class:btn-primary={livePoint.type === GamePointTypeOptions.O}
+          on:click={() => updatePointType(GamePointTypeOptions.O)}
+        >
+          O
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm"
+          class:pointer-events-none={livePoint.type === GamePointTypeOptions.D}
+          class:btn-primary={livePoint.type === GamePointTypeOptions.D}
+          on:click={() => updatePointType(GamePointTypeOptions.D)}
+        >
+          D
+        </button>
+      </div>
+    </div>
+    <button type="button" class="btn" on:click={undo}>
+      <Icon icon="mdi:undo" />
+      Undo
+    </button>
+  </div>
+  <div class="flex flex-col gap-2">
+    {#if currentlyInPossession}
+      {#each livePoint.expand?.starting_line || [] as player}
+        <div class="flex items-center gap-1">
+          <span class="flex-grow">{player.name}</span>
+          {#if !livePoint.assist}
+            <button
+              type="button"
+              class="btn btn-sm btn-error bg-opacity-30"
+              on:click={() =>
+                createNewEvent(GamePointEventTypeOptions.Turn, player.id)}
+            >
+              Turn
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-error bg-opacity-30"
+              on:click={() =>
+                createNewEvent(GamePointEventTypeOptions.Drop, player.id)}
+            >
+              Drop
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-success bg-opacity-30"
+              on:click={() => setPointValue('assist', player.id)}
+            >
+              Assist
+            </button>
+          {:else}
+            <button
+              type="button"
+              class="btn btn-sm btn-success bg-opacity-30"
+              on:click={() => {
+                setPointValue('goal', player.id)
+                if (!livePoint) return
+                pb.collection('game').update(livePoint.game, {
+                  'team_score+': 1,
+                })
+                dispatch('pointOver')
+              }}
+            >
+              {#if player.id === livePoint.assist}
+                Callahan
+              {:else}
+                Goal
+              {/if}
+            </button>
+          {/if}
+        </div>
+      {/each}
+    {:else}
+      <div class="w-full my-8 flex flex-col gap-2">
+        <button
+          type="button"
+          class="btn btn-info bg-opacity-30 w-full"
+          on:click={() => createNewEvent(GamePointEventTypeOptions.Turn)}
+        >
+          {$game?.opponent ?? 'Opponent'} Turn
+        </button>
+        <button
+          type="button"
+          class="btn btn-error bg-opacity-30 w-full"
+          on:click={() => {
+            setPointValue('opponent_goal', true)
+            if (!livePoint) return
+            pb.collection('game').update(livePoint.game, {
+              'opponent_score+': 1,
+            })
+            dispatch('pointOver')
+          }}
+        >
+          {$game?.opponent ?? 'Opponent'} Goal
+        </button>
+      </div>
+    {/if}
+  </div>
+{:else}
+  <div class="flex flex-col gap-2 w-full">
+    <button type="button" class="btn btn-neutral" on:click={undo}>
+      <Icon icon="mdi:undo" />
+      Undo
+    </button>
+  </div>
+{/if}

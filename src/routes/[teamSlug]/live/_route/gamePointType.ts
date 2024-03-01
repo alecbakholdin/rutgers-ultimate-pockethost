@@ -19,13 +19,14 @@ import {
 
 export type LiveFeedGamePointEvent = GamePointEventResponse<{
   player: PlayerResponse
-}>[]
+}>
 export type LiveFeedGamePoint = GamePointResponse<{
-  'game_point_event(game_point)': LiveFeedGamePointEvent
+  'game_point_event(game_point)': LiveFeedGamePointEvent[],
+  starting_line: PlayerResponse[],
   goal: PlayerResponse
   assist: PlayerResponse
 }>
-const expansionString = 'goal,assist,game_point_event(game_point).player'
+const expansionString = 'goal,assist,game_point_event(game_point).player,starting_line'
 
 export async function getPointsForGame(gameId: string) {
   return pb.collection('game_point').getFullList<LiveFeedGamePoint>({
@@ -76,9 +77,7 @@ export function initLiveGameContext(team: TeamWithGame) {
 
   async function updatePointEvent(id: string) {
     try {
-      const newVal = await pb
-        .collection('game_point')
-        .getOne<LiveFeedGamePoint>(id, { expand: expansionString })
+      const newVal = await getPoint(id);
       if (newVal.game !== get(gameStore)?.id) return
       gamePointsStore.update((pe) => {
         pe = pe.filter((x) => x.id !== id)
@@ -112,7 +111,7 @@ export function initLiveGameContext(team: TeamWithGame) {
       .collection('game')
       .subscribe(
         '*',
-        async (e) => e.record.team === get(gameStore)?.id && updateTeamStore(),
+        async (e) => e.record.id === get(gameStore)?.id && updateTeamStore(),
       )
     const gamePointsUnsub = pb
       .collection('game_point')

@@ -2,6 +2,7 @@
   import _ from 'lodash'
   import LiveEvent from './LiveEvent.svelte'
   import { getLiveGameContext } from './gamePointType'
+  import { pb } from '$lib/pocketbase/pb'
 
   const { gamePoints, game, team } = getLiveGameContext()
   /* type LiveFeedEvent = {
@@ -16,13 +17,20 @@
 <div class="max-w-md mx-auto flex flex-col gap-2 mt-12">
   {#each $gamePoints || [] as point (point.id)}
     {#if point.expand?.goal && point.expand?.assist}
-      <LiveEvent type="success">
-        <span>{$team?.name} {point.type === 'D' ? 'Break' : 'Hold'}</span>
-        <p slot="body">
-          <b>{point.expand?.goal.name}</b> scores with an assist from
-          <b>{point.expand?.assist.name}</b>
-        </p>
-      </LiveEvent>
+      {#if point.goal === point.assist}
+        <LiveEvent type="success">
+          <span>{$team?.name} Callahan!</span>
+          <p slot="body"><b>{point.expand.goal.name}</b> Scored a Callahan!</p>
+        </LiveEvent>
+      {:else}
+        <LiveEvent type="success">
+          <span>{$team?.name} {point.type === 'D' ? 'Break' : 'Hold'}</span>
+          <p slot="body">
+            <b>{point.expand?.goal.name}</b> scores with an assist from
+            <b>{point.expand?.assist.name}</b>
+          </p>
+        </LiveEvent>
+      {/if}
     {/if}
     {#if point.opponent_goal}
       <LiveEvent type="error">
@@ -41,10 +49,16 @@
           {event.opponent ? $game?.opponent : $team?.name}
           {event.type}
           <svelte:fragment slot="body">
-            {#if event.type === 'Block' && event.expand?.player}
+            {#if event.expand?.player}
               <p>
                 <b>{event.expand.player.name}</b>
-                earned a block!
+                {#if event.type === 'Block'}
+                  earned a block!
+                {:else if event.type === 'Drop'}
+                  dropped it
+                {:else if event.type === 'Turn'}
+                  turned it
+                {/if}
               </p>
             {/if}
           </svelte:fragment>
