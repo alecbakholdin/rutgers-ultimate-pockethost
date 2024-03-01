@@ -1,17 +1,15 @@
 <script lang="ts">
-  import {
-      initLiveGameContext
-  } from './_route/gamePointType.js'
+  import { initLiveGameContext } from './_route/gamePointType.js'
 
   export let data
-  const { game } = initLiveGameContext(data.team)
+  const { team, game } = initLiveGameContext(data.team)
 </script>
 
 {#if $game}
   <div class="w-full h-12 grid place-items-center">
     <div class="flex justify-center items-center gap-2">
       <span class="text-success text-3xl font-semibold w-32 text-right">
-        {data.team.name}
+        {$team?.name}
       </span>
       <span class="text-success text-6xl font-semibold text-right w-16">
         {$game.team_score}

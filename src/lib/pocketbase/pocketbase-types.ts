@@ -21,6 +21,7 @@ export enum Collections {
 	ProductField = "product_field",
 	StoreSection = "store_section",
 	Team = "team",
+	TeamGroup = "team_group",
 	Tournament = "tournament",
 	Users = "users",
 	VendorOrder = "vendor_order",
@@ -87,22 +88,16 @@ export enum GamePointTypeOptions {
 	"D" = "D",
 	"Final" = "Final",
 }
-
-export enum GamePointResultOptions {
-	"Hold" = "Hold",
-	"Break" = "Break",
-}
 export type GamePointRecord = {
 	assist?: RecordIdString
 	game: RecordIdString
 	goal?: RecordIdString
 	opponent_goal?: boolean
 	opponent_score?: number
-	result?: GamePointResultOptions
 	starting_line?: RecordIdString[]
 	subs?: RecordIdString[]
 	team_score?: number
-	type?: GamePointTypeOptions
+	type: GamePointTypeOptions
 }
 
 export enum GamePointEventTypeOptions {
@@ -212,6 +207,13 @@ export type TeamRecord = {
 	slug: string
 }
 
+export type TeamGroupRecord = {
+	color?: string
+	name: string
+	players?: RecordIdString[]
+	team: RecordIdString
+}
+
 export type TournamentRecord = {
 	end: IsoDateString
 	field?: RecordIdString
@@ -251,6 +253,7 @@ export type ProductResponse<Texpand = unknown> = Required<ProductRecord> & BaseS
 export type ProductFieldResponse<TpriceIncreaseArray = unknown, Texpand = unknown> = Required<ProductFieldRecord<TpriceIncreaseArray>> & BaseSystemFields<Texpand>
 export type StoreSectionResponse<Texpand = unknown> = Required<StoreSectionRecord> & BaseSystemFields<Texpand>
 export type TeamResponse<Texpand = unknown> = Required<TeamRecord> & BaseSystemFields<Texpand>
+export type TeamGroupResponse<Texpand = unknown> = Required<TeamGroupRecord> & BaseSystemFields<Texpand>
 export type TournamentResponse<Texpand = unknown> = Required<TournamentRecord> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 export type VendorOrderResponse<Texpand = unknown> = Required<VendorOrderRecord> & BaseSystemFields<Texpand>
@@ -273,6 +276,7 @@ export type CollectionRecords = {
 	product_field: ProductFieldRecord
 	store_section: StoreSectionRecord
 	team: TeamRecord
+	team_group: TeamGroupRecord
 	tournament: TournamentRecord
 	users: UsersRecord
 	vendor_order: VendorOrderRecord
@@ -294,6 +298,7 @@ export type CollectionResponses = {
 	product_field: ProductFieldResponse
 	store_section: StoreSectionResponse
 	team: TeamResponse
+	team_group: TeamGroupResponse
 	tournament: TournamentResponse
 	users: UsersResponse
 	vendor_order: VendorOrderResponse
@@ -318,6 +323,7 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'product_field'): RecordService<ProductFieldResponse>
 	collection(idOrName: 'store_section'): RecordService<StoreSectionResponse>
 	collection(idOrName: 'team'): RecordService<TeamResponse>
+	collection(idOrName: 'team_group'): RecordService<TeamGroupResponse>
 	collection(idOrName: 'tournament'): RecordService<TournamentResponse>
 	collection(idOrName: 'users'): RecordService<UsersResponse>
 	collection(idOrName: 'vendor_order'): RecordService<VendorOrderResponse>

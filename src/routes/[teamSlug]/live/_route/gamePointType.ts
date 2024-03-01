@@ -4,6 +4,7 @@ import type {
   GamePointResponse,
   GameResponse,
   PlayerResponse,
+  TeamGroupResponse,
   TeamResponse,
 } from '$lib/pocketbase/pocketbase-types'
 import _ from 'lodash'
@@ -49,7 +50,8 @@ export async function getPointEvent(id: string) {
 type GameWithTeam = GameResponse<{ team: TeamResponse }>
 type TeamWithGame = TeamResponse<{
   live_game: GameResponse<{ team: TeamResponse }>
-  'player(team)': PlayerResponse[]
+  'player(team)': PlayerResponse[],
+  'team_group(team)': TeamGroupResponse[],
 }>
 export type LiveGameContext = {
   team: Readable<TeamWithGame | undefined>
@@ -67,7 +69,7 @@ export function initLiveGameContext(team: TeamWithGame) {
   async function updateTeamStore() {
     teamStore.set(
       await pb.collection('team').getOne<TeamWithGame>(team.id, {
-        expand: 'live_game.team,player(team)',
+        expand: 'live_game.team,player(team),team_group(team)',
       }),
     )
   }
@@ -75,8 +77,8 @@ export function initLiveGameContext(team: TeamWithGame) {
   async function updatePointEvent(id: string) {
     try {
       const newVal = await pb
-        .collection<LiveFeedGamePoint>('game_point')
-        .getOne(id, { expand: expansionString })
+        .collection('game_point')
+        .getOne<LiveFeedGamePoint>(id, { expand: expansionString })
       if (newVal.game !== get(gameStore)?.id) return
       gamePointsStore.update((pe) => {
         pe = pe.filter((x) => x.id !== id)
@@ -94,17 +96,23 @@ export function initLiveGameContext(team: TeamWithGame) {
       .subscribe(team.id, async (e) =>
         e.action === 'update' ? updateTeamStore() : teamStore.set(undefined),
       )
+    const groupUnsub = pb
+      .collection('team_group')
+      .subscribe(
+        '*',
+        async (e) => e.record.team === get(teamStore)?.id && updateTeamStore(),
+      )
     const playerUnsub = pb
       .collection('player')
       .subscribe(
-        team.id,
+        '*',
         async (e) => e.record.team === get(teamStore)?.id && updateTeamStore(),
       )
     const gameUnsub = pb
       .collection('game')
       .subscribe(
         '*',
-        async (e) => e.record.id === get(gameStore)?.id && updateTeamStore(),
+        async (e) => e.record.team === get(gameStore)?.id && updateTeamStore(),
       )
     const gamePointsUnsub = pb
       .collection('game_point')
@@ -126,6 +134,7 @@ export function initLiveGameContext(team: TeamWithGame) {
     return () =>
       [
         teamUnsub,
+        groupUnsub,
         playerUnsub,
         gameUnsub,
         gamePointsUnsub,
