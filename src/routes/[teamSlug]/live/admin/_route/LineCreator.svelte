@@ -7,6 +7,8 @@
   import Icon from '@iconify/svelte'
   import { pb } from '$lib/pocketbase/pb'
   import type {
+    GamePointRecord,
+    GamePointTypeOptions,
     TeamGroupRecord,
     TeamGroupResponse,
   } from '$lib/pocketbase/pocketbase-types'
@@ -14,7 +16,7 @@
   import _ from 'lodash'
     import { newShade } from '$lib/util/functions/changeShade'
 
-  const { players, gamePoints, team } = getLiveGameContext()
+  const { game, players, gamePoints, team } = getLiveGameContext()
   $: groups = $team?.expand?.['team_group(team)'] || []
   let selectedPlayers: string[] = []
   $: calculatedPlayers = $players.map((player) => ({
@@ -69,7 +71,24 @@
       await pb.collection('team_group').create(rest)
     }
   }
+
+  $: pointInProgress = !!$gamePoints.find(x => !x.goal && x.opponent_goal);
+  async function submitToPoint() {
+    if(!$game) return;
+    const point: GamePointRecord = {
+      game: $game.id,
+      starting_line: selectedPlayers,
+      type: $gamePoints.length && $gamePoints[0].type === 'O' && 'D' || 'O'
+    }
+    pb.collection('game_point').create()
+  }
 </script>
+
+{#if !pointInProgress}
+  <button type="button" disabled={selectedPlayers.length !== 7} on:click={submitToPoint}>
+    Submit to point ({selectedPlayers.length}/7)
+  </button>
+{/if}
 
 <dialog id="group_modal" class="modal">
   <form method="dialog" class="modal-backdrop"><button class="pointer-default"></button></form>

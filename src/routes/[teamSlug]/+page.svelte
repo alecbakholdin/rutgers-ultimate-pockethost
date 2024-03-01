@@ -1,6 +1,8 @@
 <script lang="ts">
   import { enhance } from '$app/forms'
+    import { goto } from '$app/navigation'
   import { toast } from '$lib/component/Toasts.svelte'
+    import { pb } from '$lib/pocketbase/pb'
   import type {
     GameRecord,
     GameResponse,
@@ -38,13 +40,19 @@
 
 <dialog class="modal" bind:this={modal}>
   <div class="modal-box">
-    <div class="modal-top">
-      <h3>
+    <div class="modal-top mb-4">
+      <h3 class="text-2xl font-semibold">
         {data.team.name} vs {modalGame?.opponent}
       </h3>
     </div>
-    <form method="dialog">
-      <button class="btn">Close</button>
+    <form method="dialog" class="flex flex-col gap-2">
+      <button class="btn btn-primary w-full" disabled={data.team.live_game === modalGame?.id} on:click={async () => {
+        await pb.collection('team').update(data.team.id, {
+          live_game: modalGame.id
+        })
+        goto(`/${data.team.slug}/live/admin`)
+      }}>Set Live</button>
+      <button class="btn w-full">Close</button>
     </form>
   </div>
   <form method="dialog" class="modal-backdrop">
@@ -73,6 +81,7 @@
         <h3>New Game</h3>
       </div>
       <div class="flex flex-col gap-1">
+        <input type="hidden" name="team" value={data.team.id}>
         <label for="opponent" class="label">Opponent</label>
         <input
           type="text"

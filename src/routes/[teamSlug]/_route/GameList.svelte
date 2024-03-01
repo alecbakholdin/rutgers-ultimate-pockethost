@@ -3,7 +3,7 @@
     GameResponse,
     TeamResponse,
   } from '$lib/pocketbase/pocketbase-types'
-    import { createEventDispatcher } from 'svelte'
+  import { createEventDispatcher } from 'svelte'
   import GameCard from './GameCard.svelte'
 
   export let team: TeamResponse<{ 'game(team)': GameResponse[] }>
@@ -15,12 +15,12 @@
   $: scheduledGames = teamGames.filter((x) => x.id !== liveGame?.id && !x.end)
 
   function contextMenuHandler(game: GameResponse) {
-    return function(e: MouseEvent) {
-        if(openModal) {
-            e.preventDefault();
-            e.stopPropagation();
-            openModal(game);
-        }
+    return function (e: MouseEvent) {
+      if (openModal) {
+        e.preventDefault()
+        e.stopPropagation()
+        openModal(game)
+      }
     }
   }
 </script>
@@ -29,7 +29,7 @@
   <div class="my-2">
     <p class="text-lg font-semibold">Live Game</p>
     <div on:contextmenu={contextMenuHandler(liveGame)} role="article">
-        <GameCard {team} game={liveGame} href="/{team.slug}/live" live />
+      <GameCard {team} game={liveGame} href="/{team.slug}/live" live />
     </div>
   </div>
 {/if}
@@ -38,7 +38,9 @@
   <div class="my-2">
     <p class="text-lg font-semibold">Scheduled</p>
     {#each scheduledGames as game}
-      <GameCard {team} {game} scheduled />
+      <div on:contextmenu={contextMenuHandler(game)} role="article">
+        <GameCard {team} {game} scheduled />
+      </div>
     {/each}
   </div>
 {/if}
@@ -47,7 +49,9 @@
   <div class="my-2">
     <p class="text-lg font-semibold">Past</p>
     {#each finishedGames as game}
-      <GameCard {team} {game} finished />
+      <div on:contextmenu={contextMenuHandler(game)} role="article">
+        <GameCard {team} {game} finished />
+      </div>
     {/each}
   </div>
 {/if}

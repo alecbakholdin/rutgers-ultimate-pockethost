@@ -23,7 +23,6 @@
   class="!bg-opacity-30 card card-bordered border-2"
   class:bg-error={error}
   class:bg-success={success}
-  class:bg-neutral={neutral}
   on:click={() => href && goto(href)}
   class:cursor-pointer={href}
   class:hover:bg-info={href}
