@@ -1,12 +1,14 @@
 <script lang="ts">
   import { enhance } from '$app/forms'
-    import { goto } from '$app/navigation'
+  import { disableScrollHandling, goto, invalidateAll } from '$app/navigation'
   import { toast } from '$lib/component/Toasts.svelte'
-    import { pb } from '$lib/pocketbase/pb'
+  import { pb } from '$lib/pocketbase/pb'
   import type {
     GameRecord,
     GameResponse,
   } from '$lib/pocketbase/pocketbase-types'
+  import Icon from '@iconify/svelte'
+  import GameAdminForm from './_route/GameAdminForm.svelte'
   import GameList from './_route/GameList.svelte'
 
   export let data
@@ -20,22 +22,12 @@
     modal?.showModal()
   }
 
-  function freshGameRecord(): GameRecord {
-    return {
-      team: data.team.id,
-      opponent: '',
-      opponent_score: 0,
-      team_score: 0,
-    }
+  function openDeletionModal(id: string) {
+    ;(document.getElementById(id) as HTMLDialogElement)?.showModal()
   }
-  let newGame = freshGameRecord()
-
-  let newGameStartDate: string
-  let newGameStartTime: string
-  $: newGame.start =
-    newGameStartDate && newGameStartTime
-      ? `${newGameStartDate}T${newGameStartTime}`
-      : undefined
+  function closeDeletionModal(id: string) {
+    ;(document.getElementById(id) as HTMLDialogElement)?.close()
+  }
 </script>
 
 <dialog class="modal" bind:this={modal}>
@@ -46,12 +38,16 @@
       </h3>
     </div>
     <form method="dialog" class="flex flex-col gap-2">
-      <button class="btn btn-primary w-full" disabled={data.team.live_game === modalGame?.id} on:click={async () => {
-        await pb.collection('team').update(data.team.id, {
-          live_game: modalGame.id
-        })
-        goto(`/${data.team.slug}/live/admin`)
-      }}>Set Live</button>
+      <button
+        class="btn btn-primary w-full"
+        disabled={data.team.live_game === modalGame?.id}
+        on:click={async () => {
+          await pb.collection('team').update(data.team.id, {
+            live_game: modalGame.id,
+          })
+          goto(`/${data.team.slug}/live/admin`)
+        }}>Set Live</button
+      >
       <button class="btn w-full">Close</button>
     </form>
   </div>
@@ -59,61 +55,86 @@
     <button class="cursor-default"></button>
   </form>
 </dialog>
+
 <GameList team={data.team} {openModal} />
 
 {#if data.user?.isManager}
-  <div class="card">
-    <form
-      method="POST"
-      action="?/createGame"
-      use:enhance={() => {
-        return async ({ result, update }) => {
-          result.type === 'error' &&
-            toast({ type: 'error', message: result.error?.message })
-          result.type === 'failure' &&
-            toast({ type: 'error', message: 'Unexpected failure' })
-          if(result.type !== 'error' && result.type !== 'failure') await update();
+  <GameAdminForm team={data.team} />
+{/if}
+
+<div class="mt-4">
+  <span class="text-xl font-semibold mb-2">Roster</span>
+  <div class="mx-2 w-full flex flex-col gap-2">
+    {#each data.team.expand?.['player(team)'] || [] as player}
+      {@const modalId = `deletion-modal-${player.id}`}
+      <dialog class="modal" id={modalId}>
+        <div class="modal-box">
+          <h3 class="modal-top text-xl font-semibold">Are You Sure?</h3>
+          <div class="modal-middle my-2">
+            You are about to delete <b>{player.name}</b>. This action is
+            unreversible. All stats may be lost.
+          </div>
+          <div class="modal-action">
+            <form method="dialog">
+              <button type="button" class="btn">Close</button>
+            </form>
+            <button
+              type="button"
+              class="btn btn-error bg-opacity-30"
+              on:click={async () => {
+                await pb.collection('player').delete(player.id)
+                await invalidateAll();
+                closeDeletionModal(modalId)
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+        <form class="modal-backdrop cursor-default" method="dialog">
+          <button></button>
+        </form>
+      </dialog>
+      <div
+        class="flex py-1 items-center border-b first:border-t border-gray-400"
+      >
+        <span class="flex-grow">{player.name}</span>
+        <input type="hidden" name="playerId" value={player.id} />
+        <button
+          class="btn btn-circle btn-sm"
+          on:click={() => openDeletionModal(modalId)}
+          aria-label="delete {player.name}"
+        >
+          <Icon icon="mdi:remove" />
+        </button>
+      </div>
+    {/each}
+  </div>
+  <p class="font-semibold mt-2">New Player</p>
+  <form
+    action="?/createPlayer"
+    method="POST"
+    class="flex gap-2"
+    use:enhance={() =>
+      async ({ result, update }) => {
+        result.type === 'error' &&
+          toast({ type: 'error', message: result.error?.message })
+        result.type === 'failure' &&
+          toast({ type: 'error', message: 'Error submitting form' })
+        if (!['error', 'failure'].includes(result.type)) {
+          await update()
         }
       }}
-      class="card-body"
-    >
-      <div class="card-title">
-        <h3>New Game</h3>
-      </div>
-      <div class="flex flex-col gap-1">
-        <input type="hidden" name="team" value={data.team.id}>
-        <label for="opponent" class="label">Opponent</label>
-        <input
-          type="text"
-          name="opponent"
-          id="opponent"
-          class="input input-bordered"
-          placeholder="Opponent"
-          bind:value={newGame.opponent}
-        />
-        <label for="start_date" class="label">Start</label>
-        <div class="flex gap-1 [&>*]:flex-grow">
-          <input
-            class="input input-bordered"
-            type="date"
-            name="start_date"
-            id="start_date"
-            aria-label="start date"
-            bind:value={newGameStartDate}
-          />
-          <input
-            class="input input-bordered"
-            type="time"
-            name="start_time"
-            id="start_time"
-            aria-label="start time"
-            bind:value={newGameStartTime}
-          />
-        </div>
-      </div>
-      <div class="card-actions">
-        <button class="btn">+ Create Game</button>
-      </div>
-    </form>
-  </div>
-{/if}
+  >
+    <input type="hidden" name="teamId" value={data.team.id} />
+    <input
+      type="text"
+      name="name"
+      id="createPlayerName"
+      class="input input-bordered flex-grow block"
+      placeholder="Player Name"
+      aria-label="Player Name"
+    />
+    <button class="btn">+ Create</button>
+  </form>
+</div>

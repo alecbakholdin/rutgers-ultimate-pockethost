@@ -10,7 +10,7 @@
   import {
     type LiveFeedGamePointEvent,
     getLiveGameContext,
-  } from '../../_route/gamePointType'
+  } from './gamePointType'
   import Icon from '@iconify/svelte'
 
   const { game, gamePoints } = getLiveGameContext()

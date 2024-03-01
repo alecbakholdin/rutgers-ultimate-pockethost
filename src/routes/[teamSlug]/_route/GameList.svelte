@@ -1,9 +1,8 @@
 <script lang="ts">
   import type {
-    GameResponse,
-    TeamResponse,
+      GameResponse,
+      TeamResponse,
   } from '$lib/pocketbase/pocketbase-types'
-  import { createEventDispatcher } from 'svelte'
   import GameCard from './GameCard.svelte'
 
   export let team: TeamResponse<{ 'game(team)': GameResponse[] }>

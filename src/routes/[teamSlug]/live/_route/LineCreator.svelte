@@ -8,7 +8,7 @@
   import {
     getLiveGameContext,
     type LiveFeedGamePoint,
-  } from '../../_route/gamePointType'
+  } from './gamePointType'
   import Icon from '@iconify/svelte'
   import { pb } from '$lib/pocketbase/pb'
   import {

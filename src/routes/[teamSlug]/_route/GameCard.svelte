@@ -30,11 +30,9 @@
 >
   <div class="card-body">
     <h4 class="card-title flex justify-between w-full">
-      <span
-        >{team.name}({game.team_score})
-        <!-- content here -->
-        vs {game.opponent}({game.opponent_score})</span
-      >
+      <span>
+        {team.name}({game.team_score}) vs {game.opponent}({game.opponent_score})
+      </span>
       {#if live}
         <div class="flex gap-2">
           <span class="text-red-400">Live</span>
@@ -46,7 +44,7 @@
     </h4>
     <div class="text-gray-400 flex items-center gap-2">
       <Icon icon="formkit:date" />
-      <span>{new Date(game.start).toLocaleTimeString()}</span>
+      <span>{new Date(game.start).toLocaleString()}</span>
     </div>
   </div>
 </div>
