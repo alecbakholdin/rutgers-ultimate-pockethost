@@ -1,11 +1,13 @@
 import { pb } from '$lib/pocketbase/pb'
-import type {
-  GamePointEventResponse,
-  GamePointResponse,
-  GameResponse,
-  PlayerResponse,
-  TeamGroupResponse,
-  TeamResponse,
+import {
+  GamePointEventTypeOptions,
+  GamePointTypeOptions,
+  type GamePointEventResponse,
+  type GamePointResponse,
+  type GameResponse,
+  type PlayerResponse,
+  type TeamGroupResponse,
+  type TeamResponse,
 } from '$lib/pocketbase/pocketbase-types'
 import _ from 'lodash'
 import { getContext, onMount, setContext } from 'svelte'
@@ -21,12 +23,13 @@ export type LiveFeedGamePointEvent = GamePointEventResponse<{
   player: PlayerResponse
 }>
 export type LiveFeedGamePoint = GamePointResponse<{
-  'game_point_event(game_point)': LiveFeedGamePointEvent[],
-  starting_line: PlayerResponse[],
+  'game_point_event(game_point)': LiveFeedGamePointEvent[]
+  starting_line: PlayerResponse[]
   goal: PlayerResponse
   assist: PlayerResponse
 }>
-const expansionString = 'goal,assist,game_point_event(game_point).player,starting_line'
+const expansionString =
+  'goal,assist,game_point_event(game_point).player,starting_line'
 
 export async function getPointsForGame(gameId: string) {
   return pb.collection('game_point').getFullList<LiveFeedGamePoint>({
@@ -51,14 +54,16 @@ export async function getPointEvent(id: string) {
 type GameWithTeam = GameResponse<{ team: TeamResponse }>
 type TeamWithGame = TeamResponse<{
   live_game: GameResponse<{ team: TeamResponse }>
-  'player(team)': PlayerResponse[],
-  'team_group(team)': TeamGroupResponse[],
+  'player(team)': PlayerResponse[]
+  'team_group(team)': TeamGroupResponse[]
 }>
 export type LiveGameContext = {
   team: Readable<TeamWithGame | undefined>
   players: Readable<PlayerResponse[]>
   game: Readable<GameWithTeam | undefined>
   gamePoints: Readable<LiveFeedGamePoint[]>
+  gameOver: Readable<boolean>
+  ourPossession: Readable<boolean>
 }
 export function getLiveGameContext(): LiveGameContext {
   return getContext('liveGame')
@@ -77,7 +82,7 @@ export function initLiveGameContext(team: TeamWithGame) {
 
   async function updatePointEvent(id: string) {
     try {
-      const newVal = await getPoint(id);
+      const newVal = await getPoint(id)
       if (newVal.game !== get(gameStore)?.id) return
       gamePointsStore.update((pe) => {
         pe = pe.filter((x) => x.id !== id)
@@ -150,6 +155,28 @@ export function initLiveGameContext(team: TeamWithGame) {
       ($team) => $team?.expand?.['player(team)'] || [],
     ),
     gamePoints: gamePointsStore,
+    gameOver: derived(gamePointsStore, ($gp) =>
+      Boolean($gp?.length && $gp[0].type === GamePointTypeOptions.Final),
+    ),
+    ourPossession: derived(gamePointsStore, ($gp) => {
+      const livePoint = $gp?.find(
+        (x) =>
+          !x.opponent_goal && !x.goal && x.type !== GamePointTypeOptions.Final,
+      )
+
+      const startedWithPossession = livePoint?.type === GamePointTypeOptions.O
+      const numberOfTurns =
+        livePoint?.expand?.['game_point_event(game_point)']?.filter(
+          (x) =>
+            x.type === GamePointEventTypeOptions.Turn ||
+            x.type === GamePointEventTypeOptions.Drop ||
+            x.type === GamePointEventTypeOptions.Block,
+        ).length || 0
+      return Boolean(
+        (startedWithPossession && !(numberOfTurns % 2)) ||
+          (!startedWithPossession && numberOfTurns % 2),
+      )
+    }),
   } satisfies LiveGameContext
   setContext('liveGame', context)
   return context

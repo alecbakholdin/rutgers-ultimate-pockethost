@@ -13,11 +13,12 @@
   } from './gamePointType'
   import Icon from '@iconify/svelte'
 
-  const { game, gamePoints } = getLiveGameContext()
+  const { game, gamePoints, ourPossession } = getLiveGameContext()
   $: lastPoint = ($gamePoints?.length && $gamePoints[0]) || undefined
   $: livePoint = $gamePoints?.find(
     (x) => !x.opponent_goal && !x.goal && x.type !== GamePointTypeOptions.Final,
   )
+
   async function updatePointType(type: GamePointTypeOptions) {
     if (livePoint && livePoint.type !== type) {
       pb.collection('game_point').update(livePoint.id, {
@@ -25,19 +26,6 @@
       } satisfies Partial<GamePointRecord>)
     }
   }
-
-  $: startedWithPossession = livePoint?.type === GamePointTypeOptions.O
-  $: numberOfTurns =
-    livePoint?.expand?.['game_point_event(game_point)']?.filter(
-      (x) =>
-        x.type === GamePointEventTypeOptions.Turn ||
-        x.type === GamePointEventTypeOptions.Drop ||
-        x.type === GamePointEventTypeOptions.Block,
-    ).length || 0
-  $: currentlyInPossession = Boolean(
-    (startedWithPossession && !(numberOfTurns % 2)) ||
-      (!startedWithPossession && numberOfTurns % 2),
-  )
 
   async function createNewEvent(
     type: GamePointEventTypeOptions,
@@ -104,6 +92,7 @@
       await pb.collection('game_point_event').delete(gamePointEvents[0].id)
     } else {
       await pb.collection('game_point').delete(lastPoint.id)
+      dispatch('pointOver')
     }
   }
 </script>
@@ -139,7 +128,7 @@
     </button>
   </div>
   <div class="flex flex-col gap-2">
-    {#if currentlyInPossession}
+    {#if $ourPossession}
       {#each livePoint.expand?.starting_line || [] as player}
         <div class="flex items-center gap-1">
           <span class="flex-grow">{player.name}</span>

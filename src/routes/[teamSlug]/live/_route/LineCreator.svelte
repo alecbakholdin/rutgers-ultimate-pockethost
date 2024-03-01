@@ -5,10 +5,7 @@
 
 <script lang="ts">
   import { scale } from 'svelte/transition'
-  import {
-    getLiveGameContext,
-    type LiveFeedGamePoint,
-  } from './gamePointType'
+  import { getLiveGameContext, type LiveFeedGamePoint } from './gamePointType'
   import Icon from '@iconify/svelte'
   import { pb } from '$lib/pocketbase/pb'
   import {
@@ -20,9 +17,9 @@
   import { toggleArray } from '$lib/util/functions/toggleArray'
   import _ from 'lodash'
   import { newShade } from '$lib/util/functions/changeShade'
-    import { createEventDispatcher } from 'svelte'
+  import { createEventDispatcher } from 'svelte'
 
-  const { game, players, gamePoints, team } = getLiveGameContext()
+  const { game, players, gamePoints, team, gameOver } = getLiveGameContext()
   $: groups = $team?.expand?.['team_group(team)'] || []
   $: calculatedPlayers = $players.map((player) => ({
     ...player,
@@ -48,7 +45,7 @@
   }
 
   function openModal(id: string) {
-    (document.getElementById(id) as HTMLDialogElement)?.showModal()
+    ;(document.getElementById(id) as HTMLDialogElement)?.showModal()
   }
 
   const colorOptions = [
@@ -77,16 +74,20 @@
     }
   }
 
-  const dispatch = createEventDispatcher<{startPoint: void}>()
-  $: pointInProgress = !!$gamePoints?.find((x) => !x.goal && x.opponent_goal)
-  async function submitToPoint() {
+  const dispatch = createEventDispatcher<{ startPoint: void }>()
+  $: pointInProgress = !!$gamePoints?.find((x) => !x.goal && !x.opponent_goal)
+  async function submitToPoint(final?: boolean) {
     if (!$game) return
     const O = GamePointTypeOptions.O
     const D = GamePointTypeOptions.D
+    const Final = GamePointTypeOptions.Final
+    const type = ($gamePoints?.length && $gamePoints[0].opponent_goal && O) || D
     const point: GamePointRecord = {
       game: $game.id,
-      starting_line: $selectedPlayers,
-      type: ($gamePoints.length && $gamePoints[0].type === O && D) || O,
+      starting_line: final ? [] : $selectedPlayers,
+      team_score: $game.team_score,
+      opponent_score: $game.opponent_score,
+      type: final ? Final : type,
     }
     await pb.collection('game_point').create(point)
     $selectedPlayers = []
@@ -104,14 +105,23 @@
 </script>
 
 {#if !pointInProgress}
-  <button
-    type="button"
-    class="btn btn-primary w-full mb-2"
-    disabled={$selectedPlayers.length !== 7}
-    on:click={submitToPoint}
-  >
-    Submit to point ({$selectedPlayers.length}/7)
-  </button>
+  <div>
+    <button
+      type="button"
+      class="btn btn-primary w-full mb-2"
+      disabled={$selectedPlayers.length !== 7 || $gameOver}
+      on:click={() => submitToPoint()}
+    >
+      Submit to point ({$selectedPlayers.length}/7)
+    </button>
+    <button
+      class="btn w-full mb-2"
+      on:click={() => submitToPoint(true)}
+      disabled={$gameOver}
+    >
+      Mark as Final Score
+    </button>
+  </div>
 {/if}
 
 <dialog id="group_modal" class="modal">
