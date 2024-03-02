@@ -279,7 +279,7 @@
 {#if groups.length}
   <p class="label">Groups</p>
 {/if}
-<div class="flex gap-1">
+<div class="flex gap-1 flex-wrap">
   {#each groups as group}
     {@const selected = !!selectedGroups.includes(group.id)}
     <button
