@@ -12,6 +12,7 @@
     getLiveGameContext,
   } from './gamePointType'
   import Icon from '@iconify/svelte'
+  import _ from 'lodash'
 
   const { game, gamePoints, ourPossession } = getLiveGameContext()
   $: lastPoint = ($gamePoints?.length && $gamePoints[0]) || undefined
@@ -41,15 +42,18 @@
     const event = await pb
       .collection('game_point_event')
       .create<LiveFeedGamePointEvent>(pointEvent, { expand: 'player' })
-    livePoint.expand?.['game_point_event(game_point)']?.unshift(event)
-    if (
-      !livePoint.expand?.['game_point_event(game_point)'] &&
-      livePoint.expand
-    ) {
-      livePoint.expand = {
-        ...livePoint.expand,
+
+    const pointIndex = $gamePoints.findIndex((x) => x.id === livePoint?.id)
+    const point = $gamePoints.find((x) => x.id === livePoint?.id)
+    point?.expand?.['game_point_event(game_point)']?.unshift(event)
+    if (!point?.expand?.['game_point_event(game_point)'] && point?.expand) {
+      point.expand = {
+        ...point.expand,
         'game_point_event(game_point)': [event],
       }
+    }
+    if (point) {
+      $gamePoints[pointIndex] = point
     }
   }
 
@@ -58,11 +62,10 @@
     value: GamePointRecord[T],
   ) {
     if (!livePoint) return
-    const resp = await pb.collection('game_point').update(livePoint.id, {
+    pb.collection('game_point').update(livePoint.id, {
       [key]: value,
     })
-    const { expand, ...rest } = resp
-    livePoint = { ...livePoint, ...rest }
+    livePoint = {...livePoint, [key]: value}
   }
   const dispatch = createEventDispatcher<{ pointOver: void }>()
 
@@ -128,57 +131,65 @@
     </button>
   </div>
   <div class="flex flex-col gap-2">
-    {#if $ourPossession}
-      {#each livePoint.expand?.starting_line || [] as player}
-        <div class="flex items-center gap-1">
-          <span class="flex-grow">{player.name}</span>
-          {#if !livePoint.assist}
-            <button
-              type="button"
-              class="btn btn-sm btn-error bg-opacity-30"
-              on:click={() =>
-                createNewEvent(GamePointEventTypeOptions.Turn, player.id)}
-            >
-              Turn
-            </button>
-            <button
-              type="button"
-              class="btn btn-sm btn-error bg-opacity-30"
-              on:click={() =>
-                createNewEvent(GamePointEventTypeOptions.Drop, player.id)}
-            >
-              Drop
-            </button>
-            <button
-              type="button"
-              class="btn btn-sm btn-success bg-opacity-30"
-              on:click={() => setPointValue('assist', player.id)}
-            >
-              Assist
-            </button>
-          {:else}
-            <button
-              type="button"
-              class="btn btn-sm btn-success bg-opacity-30"
-              on:click={() => {
-                setPointValue('goal', player.id)
-                if (!livePoint) return
-                pb.collection('game').update(livePoint.game, {
-                  'team_score+': 1,
-                })
-                dispatch('pointOver')
-              }}
-            >
-              {#if player.id === livePoint.assist}
-                Callahan
-              {:else}
-                Goal
-              {/if}
-            </button>
-          {/if}
-        </div>
-      {/each}
-    {:else}
+    {#each livePoint.expand?.starting_line || [] as player}
+      <div class="flex items-center gap-1">
+        <span class="flex-grow">{player.name}</span>
+        {#if !$ourPossession}
+          <button
+            type="button"
+            class="btn btn-sm btn-info bg-opacity-30"
+            on:click={() =>
+              createNewEvent(GamePointEventTypeOptions.Block, player.id)}
+          >
+            Block
+          </button>
+        {:else if !livePoint.assist}
+          <button
+            type="button"
+            class="btn btn-sm btn-error bg-opacity-30"
+            on:click={() =>
+              createNewEvent(GamePointEventTypeOptions.Turn, player.id)}
+          >
+            Turn
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-error bg-opacity-30"
+            on:click={() =>
+              createNewEvent(GamePointEventTypeOptions.Drop, player.id)}
+          >
+            Drop
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-success bg-opacity-30"
+            on:click={() => setPointValue('assist', player.id)}
+          >
+            Assist
+          </button>
+        {:else}
+          <button
+            type="button"
+            class="btn btn-sm btn-success bg-opacity-30"
+            on:click={() => {
+              setPointValue('goal', player.id)
+              if (!livePoint) return
+              pb.collection('game').update(livePoint.game, {
+                'team_score+': 1,
+              })
+              dispatch('pointOver')
+            }}
+          >
+            {#if player.id === livePoint.assist}
+              Callahan
+            {:else}
+              Goal
+            {/if}
+          </button>
+        {/if}
+      </div>
+    {/each}
+    {#if !$ourPossession}
       <div class="w-full my-8 flex flex-col gap-2">
         <button
           type="button"

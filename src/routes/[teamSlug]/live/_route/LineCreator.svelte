@@ -13,6 +13,7 @@
     type GamePointRecord,
     type TeamGroupRecord,
     type TeamGroupResponse,
+    GamePointEventTypeOptions,
   } from '$lib/pocketbase/pocketbase-types'
   import { toggleArray } from '$lib/util/functions/toggleArray'
   import _ from 'lodash'
@@ -27,7 +28,22 @@
       $gamePoints?.findIndex(pointContainsPlayer(player.id)) ?? 0,
     pointsPlayed:
       $gamePoints?.filter(pointContainsPlayer(player.id)).length ?? 0,
+    goals: $gamePoints?.filter((x) => x.goal === player.id).length ?? 0,
+    assists: $gamePoints?.filter((x) => x.assist === player.id).length ?? 0,
+    blocks: eventCount(GamePointEventTypeOptions.Block, player.id),
+    turns: eventCount(GamePointEventTypeOptions.Turn, player.id),
+    drops: eventCount(GamePointEventTypeOptions.Drop, player.id),
   }))
+  $: allEvents =
+    $gamePoints?.flatMap(
+      (x) => x.expand?.['game_point_event(game_point)'] || [],
+    ) || []
+  function eventCount(type: GamePointEventTypeOptions, player: string) {
+    return (
+      allEvents?.filter((x) => x.type === type && x.player === player).length ??
+      0
+    )
+  }
 
   let selectedGroups: string[] = []
   $: playersInGroup = _.uniq(
@@ -231,13 +247,14 @@
         {#each groups as group}
           <button
             type="button"
-            class="badge badge-lg pointer-cursor"
+            class="badge badge-lg pointer-cursor whitespace-nowrap"
+            style:background-color={group.color}
             on:click={() =>
               pb.collection('team_group').update(group.id, {
                 players: _.uniq([...group.players, ...$selectedPlayers]),
               })}
           >
-            {group.name}
+            {group.name} ({group.players?.length})
           </button>
         {/each}
       </div>
@@ -267,7 +284,7 @@
     {@const selected = !!selectedGroups.includes(group.id)}
     <button
       type="button"
-      class="badge badge-lg cursor-pointer badge-outline border-2"
+      class="badge badge-lg cursor-pointer badge-outline border-2 select-none"
       style:border-color={selected ? newShade(group.color, -40) : 'transparent'}
       style:background-color={group.color}
       on:contextmenu|stopPropagation|preventDefault={() => {
@@ -277,7 +294,7 @@
       }}
       on:click={() => (selectedGroups = toggleArray(selectedGroups, group.id))}
     >
-      {group.name}
+      {group.name} ({group.players?.length})
     </button>
   {/each}
 </div>
@@ -314,14 +331,15 @@
       <div>
         <p>{player.name}</p>
         <p class="text-gray-400">
+          {player.goals}G {player.assists}A
+          {player.blocks}B {player.turns}T {player.drops}D |
           {player.lastPlayedPoint < 0
             ? 'Has Not Played'
             : player.lastPlayedPoint > 0
               ? `Played ${player.lastPlayedPoint} Point${
                   player.lastPlayedPoint > 1 ? 's' : ''
                 } Ago`
-              : 'Just Played'} |
-          {player.pointsPlayed ?? 0} Points
+              : 'Just Played'} | {player.pointsPlayed ?? 0} Points
         </p>
       </div>
     </label>
