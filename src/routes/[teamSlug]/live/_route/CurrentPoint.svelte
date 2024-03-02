@@ -13,9 +13,9 @@
   } from './gamePointType'
   import Icon from '@iconify/svelte'
   import _ from 'lodash'
-    import {selectedPlayers} from './LineCreator.svelte'
+  import { selectedPlayers } from './LineCreator.svelte'
 
-  const { game, gamePoints, ourPossession } = getLiveGameContext()
+  const { team, game, gamePoints, ourPossession } = getLiveGameContext()
   $: lastPoint = ($gamePoints?.length && $gamePoints[0]) || undefined
   $: livePoint = $gamePoints?.find(
     (x) => !x.opponent_goal && !x.goal && x.type !== GamePointTypeOptions.Final,
@@ -66,7 +66,7 @@
     pb.collection('game_point').update(livePoint.id, {
       [key]: value,
     })
-    livePoint = {...livePoint, [key]: value}
+    livePoint = { ...livePoint, [key]: value }
   }
   const dispatch = createEventDispatcher<{ pointOver: void }>()
 
@@ -100,16 +100,31 @@
       dispatch('pointOver')
     }
   }
+
+  let subModal: HTMLDialogElement
+  let subOut: string | undefined
+  let subIn: string | undefined
+  $: activePlayers = livePoint?.starting_line || []
+  $: subOptions = $team?.expand?.['player(team)'].filter(x => !activePlayers.includes(x.id)) || []
+  async function performSub() {
+    if(!livePoint || !subIn || !subOut) return;
+    pb.collection('game_point').update(livePoint.id, {
+      'starting_line-': subOut,
+      'subs+': subOut,
+    })
+    pb.collection('game_point').update(livePoint.id, {
+      'starting_line+': subIn
+    })
+  }
 </script>
 
 {#if livePoint}
   <div class="flex justify-between">
     <div>
-      <span>Started on</span>
       <div class="flex gap-1">
         <button
           type="button"
-          class="btn btn-sm"
+          class="btn"
           class:pointer-events-none={livePoint.type === GamePointTypeOptions.O}
           class:btn-primary={livePoint.type === GamePointTypeOptions.O}
           on:click={() => updatePointType(GamePointTypeOptions.O)}
@@ -118,7 +133,7 @@
         </button>
         <button
           type="button"
-          class="btn btn-sm"
+          class="btn"
           class:pointer-events-none={livePoint.type === GamePointTypeOptions.D}
           class:btn-primary={livePoint.type === GamePointTypeOptions.D}
           on:click={() => updatePointType(GamePointTypeOptions.D)}
@@ -132,7 +147,7 @@
       Undo
     </button>
   </div>
-  <div class="flex flex-col gap-2">
+  <div class="flex flex-col gap-2 mt-2">
     {#each livePoint.expand?.starting_line || [] as player}
       <div class="flex items-center gap-1">
         <span class="flex-grow">{player.name}</span>
@@ -216,6 +231,39 @@
         </button>
       </div>
     {/if}
+    <button type="button" class="btn w-full" on:click={() => {
+      subIn = undefined;
+      subOut = undefined;
+      subModal.showModal()
+    }}>Make Substitution</button>
+    <dialog class="modal" bind:this={subModal}>
+      <form method="dialog" class="modal-backdrop"><button></button></form>
+      <div class="modal-box">
+        <div class="modal-top">
+          <h3 class="text-xl font-semibold">Make Substitution</h3>
+        </div>
+        <div class="modal-middle">
+          <label for="subOut" class="label">Out</label>
+          <select name="subOut" id="subOut" class="select select-bordered" bind:value={subOut}>
+            {#each livePoint?.expand?.['starting_line'] || [] as player}
+              <option value={player.id}>{player.name}</option>
+            {/each}
+          </select>
+          <label for="subIn" class="label">In</label>
+          <select name="subIn" id="subIn" class="select select-bordered" bind:value={subIn}>
+            {#each subOptions as player}
+              <option value={player.id}>{player.name}</option>
+            {/each}
+          </select>
+        </div>
+        <div class="modal-action">
+          <form method="dialog">
+            <button class="btn">Close</button>
+            <button class="btn btn-primary" on:click={() => performSub()}>Submit</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
   </div>
 {:else}
   <div class="flex flex-col gap-2 w-full">
