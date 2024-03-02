@@ -9,7 +9,7 @@ export async function load({ params, url}) {
         game: url.searchParams.get('game')
     }
     const filterString = `team.slug = {:slug}${filterParams.startDate ? ' && created >= {:startDate}' : ''}${filterParams.endDate ? ' && created <= {:endDate}' : ''}`
-    const gameString = (prefix : string) => filterParams.game ? ` && ${prefix}game = {:game}` : ''
+    const gameString = (prefix : string) => true ? '' : filterParams.game ? ` && ${prefix}game = {:game}` : ''
     const players = pb.collection('player').getFullList({
         filter: pb.filter('team.slug = {:slug}', filterParams)
     });
