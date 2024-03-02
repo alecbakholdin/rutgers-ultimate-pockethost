@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
   import { writable } from 'svelte/store'
-  const selectedPlayers = writable<string[]>([])
+  export const selectedPlayers = writable<string[]>([])
 </script>
 
 <script lang="ts">
@@ -284,7 +284,7 @@
     {@const selected = !!selectedGroups.includes(group.id)}
     <button
       type="button"
-      class="badge badge-lg cursor-pointer badge-outline border-2 select-none"
+      class="badge badge-lg cursor-pointer badge-outline border-2 select-none whitespace-nowrap"
       style:border-color={selected ? newShade(group.color, -40) : 'transparent'}
       style:background-color={group.color}
       on:contextmenu|stopPropagation|preventDefault={() => {

@@ -13,6 +13,7 @@
   } from './gamePointType'
   import Icon from '@iconify/svelte'
   import _ from 'lodash'
+    import {selectedPlayers} from './LineCreator.svelte'
 
   const { game, gamePoints, ourPossession } = getLiveGameContext()
   $: lastPoint = ($gamePoints?.length && $gamePoints[0]) || undefined
@@ -94,6 +95,7 @@
     } else if (gamePointEvents.length) {
       await pb.collection('game_point_event').delete(gamePointEvents[0].id)
     } else {
+      $selectedPlayers = [...lastPoint.starting_line]
       await pb.collection('game_point').delete(lastPoint.id)
       dispatch('pointOver')
     }
