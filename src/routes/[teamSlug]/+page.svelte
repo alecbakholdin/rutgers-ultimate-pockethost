@@ -45,7 +45,7 @@
           await pb.collection('team').update(data.team.id, {
             live_game: modalGame.id,
           })
-          goto(`/${data.team.slug}/live/admin`)
+          goto(`/${data.team.slug}/live`)
         }}>Set Live</button
       >
       <button class="btn w-full">Close</button>
