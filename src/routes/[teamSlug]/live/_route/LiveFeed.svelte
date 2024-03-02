@@ -3,7 +3,7 @@
   import LiveEvent from './LiveEvent.svelte'
   import { getLiveGameContext } from './gamePointType'
   import { pb } from '$lib/pocketbase/pb'
-
+  
   const { gamePoints, game, team } = getLiveGameContext()
   /* type LiveFeedEvent = {
         type: LiveEvent['$$prop_def']['type']
