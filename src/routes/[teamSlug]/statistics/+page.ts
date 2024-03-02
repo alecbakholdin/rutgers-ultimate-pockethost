@@ -8,6 +8,7 @@ export async function load({ params, url}) {
         endDate: url.searchParams.get('end_date'),
         game: url.searchParams.get('game')
     }
+    filterParams.endDate = filterParams.endDate && filterParams.endDate + ' 23:59:59'
     const filterString = `team.slug = {:slug}${filterParams.startDate ? ' && created >= {:startDate}' : ''}${filterParams.endDate ? ' && created <= {:endDate}' : ''}`
     const gameString = (prefix : string) => filterParams.game ? ` && ${prefix}game = {:game}` : ''
     const players = pb.collection('player').getFullList({
