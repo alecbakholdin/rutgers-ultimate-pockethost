@@ -17,6 +17,7 @@
   let modalGame: GameResponse
 
   function openModal(game: GameResponse) {
+    console.log('opening', game)
     if (!data.user?.isManager) return
     modalGame = game
     modal?.showModal()
@@ -37,16 +38,50 @@
         {data.team.name} vs {modalGame?.opponent}
       </h3>
     </div>
+    <div class="modal-middle mb-4">
+      {#if modalGame}
+        <label for="opponent" class="label">Opponent</label>
+        <input
+          type="text"
+          name="opponent"
+          id="opponent"
+          class="input input-bordered"
+          bind:value={modalGame.opponent}
+        />
+      {/if}
+    </div>
     <form method="dialog" class="flex flex-col gap-2">
+      {#if data.team.live_game !== modalGame?.id}
+        <button
+          class="btn btn-primary w-full"
+          on:click={async () => {
+            await pb.collection('team').update(data.team.id, {
+              live_game: modalGame.id,
+            })
+            goto(`/${data.team.slug}/live`)
+          }}
+        >
+          Set Live
+        </button>
+      {:else}
+        <button
+          type="button"
+          class="btn btn-error w-full"
+          on:click={() =>
+            pb.collection('team').update(data.team.id, {
+              live_game: '',
+            })}
+        >
+          Remove from Live
+        </button>
+      {/if}
       <button
-        class="btn btn-primary w-full"
-        disabled={data.team.live_game === modalGame?.id}
-        on:click={async () => {
-          await pb.collection('team').update(data.team.id, {
-            live_game: modalGame.id,
-          })
-          goto(`/${data.team.slug}/live`)
-        }}>Set Live</button
+        class="btn w-full btn-primary"
+        on:click={() => {
+          if (!modalGame) return
+          const { id, ...rest } = modalGame
+          pb.collection('game').update(id, rest)
+        }}>Submit Changes</button
       >
       <button class="btn w-full">Close</button>
     </form>
