@@ -48,7 +48,7 @@
   let sortBy: PlayerKey | undefined = undefined
   let sortDir: 'asc' | 'desc' = 'asc'
 
-  $: sortedPlayers = sortBy ? _.orderBy(players, [sortBy, sortDir]) : players
+  $: sortedPlayers = sortBy ? _.orderBy(players, [sortBy], [sortDir]) : players
   function toggleSort(key: PlayerKey) {
     if (sortBy !== key) {
       sortBy = key
