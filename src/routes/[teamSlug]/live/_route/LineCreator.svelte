@@ -38,12 +38,8 @@
     $gamePoints?.flatMap(
       (x) => x.expand?.['game_point_event(game_point)'] || [],
     ) || []
-  function eventCount(type: GamePointEventTypeOptions, player: string) {
-    return (
-      allEvents?.filter((x) => x.type === type && x.player === player).length ??
-      0
-    )
-  }
+  $: eventCount = (type: GamePointEventTypeOptions, player: string) =>
+    allEvents?.filter((x) => x.type === type && x.player === player).length ?? 0
 
   let selectedGroups: string[] = []
   $: playersInGroup = _.uniq(
