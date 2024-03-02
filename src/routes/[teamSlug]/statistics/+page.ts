@@ -14,10 +14,10 @@ export async function load({ params, url}) {
         filter: pb.filter('team.slug = {:slug}', filterParams)
     }).catch(console.error);
     const points = pb.collection('game_point').getFullList({
-        filter: pb.filter('game.' + filterString + gameString(''), filterParams)
+        filter: pb.filter('game.' + filterString, filterParams)
     }).catch(console.error);
     const pointEvents = pb.collection('game_point_event').getFullList({
-        filter: pb.filter('game_point.game.' + filterString + gameString('game_point.'), filterParams)
+        filter: pb.filter('game_point.game.' + filterString, filterParams)
     }).catch(console.error)
     const [playersResp, pointsResp, pointEventsResp] = await Promise.all([players, points, pointEvents])
     return {
