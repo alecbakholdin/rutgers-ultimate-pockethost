@@ -37,9 +37,9 @@
   <div class="my-2">
     <p class="text-lg font-semibold">Scheduled</p>
     {#each scheduledGames as game}
-      <div on:contextmenu={contextMenuHandler(game)} role="article">
+      <a href="statistics?game={game.id}" on:contextmenu={contextMenuHandler(game)}>
         <GameCard {team} {game} scheduled />
-      </div>
+      </a>
     {/each}
   </div>
 {/if}
@@ -48,7 +48,7 @@
   <div class="my-2">
     <p class="text-lg font-semibold">Past</p>
     {#each finishedGames as game}
-      <a href="statistics?game={game.id}" on:contextmenu={contextMenuHandler(game)} role="article">
+      <a href="statistics?game={game.id}" on:contextmenu={contextMenuHandler(game)}>
         <GameCard {team} {game} finished />
       </a>
     {/each}
