@@ -7,7 +7,7 @@
   import _ from 'lodash'
 
   export let data
-  $: players = data.players.map((p) => {
+  $: players = data.players?.map((p) => {
     const points =
       matchingPoints('starting_line', p.id) + matchingPoints('subs', p.id)
     const goals = matchingPoints('goal', p.id)
@@ -29,12 +29,13 @@
       plusMinus,
       plusMinusPerPoint,
     }
-  })
+  }) ?? []
   type PlayerKey = keyof (typeof players)[number]
   $: displayedPlayerKeys = players.length
     ? (Object.keys(players[0]).filter((x) => x !== 'id') as PlayerKey[])
     : []
   function mapName(key: PlayerKey) {
+    if(typeof key !== 'string') return ''
     switch (key) {
       case 'plusMinus':
         return '+/-'
@@ -65,18 +66,18 @@
     key: T,
     player: string,
   ) {
-    return data.points.filter((x) =>
+    return data.points?.filter((x) =>
       typeof Array.isArray(x[key])
         ? (x[key] as Array<string>).includes(player)
         : x[key] === player,
-    ).length
+    ).length ?? 0
   }
   function matchingPointEvents<
     T extends keyof typeof GamePointEventTypeOptions,
   >(type: T, player: string) {
-    return data.pointEvents.filter(
+    return data.pointEvents?.filter(
       (x) => x.type === GamePointEventTypeOptions[type] && x.player === player,
-    ).length
+    ).length ?? 0
   }
 </script>
 
