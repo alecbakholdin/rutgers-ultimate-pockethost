@@ -105,29 +105,6 @@
         )}
       </div>
     </div>
-    <div class="w-full flex justify-center items-center gap-2">
-      <div class="w-20 text-lg text-success text-right">
-        {$gamePoints?.reduce(
-          (prev, curr) =>
-            prev +
-            (curr?.expand?.['game_point_event(game_point)']?.filter(
-              (x) => x.type === GamePointEventTypeOptions.Block && !x.opponent,
-            )?.length ?? 0),
-          0,
-        )}
-      </div>
-      <span class="text-gray-400 text-center">Blocks</span>
-      <div class="w-20 text-lg text-error">
-        {$gamePoints?.reduce(
-          (prev, curr) =>
-            prev +
-            (curr?.expand?.['game_point_event(game_point)']?.filter(
-              (x) => x.type === GamePointEventTypeOptions.Block && x.opponent,
-            )?.length ?? 0),
-          0,
-        )}
-      </div>
-    </div>
     {#if $gameOver}
       <div class="flex justify-center">
         <span class="text-neutral">Final</span>
