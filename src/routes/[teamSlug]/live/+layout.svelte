@@ -1,7 +1,8 @@
 <script lang="ts">
   import Icon from '@iconify/svelte'
   import { initLiveGameContext } from './_route/gamePointType.js'
-  import { GamePointTypeOptions } from '$lib/pocketbase/pocketbase-types.js'
+  import { GamePointEventTypeOptions, GamePointTypeOptions } from '$lib/pocketbase/pocketbase-types.js'
+    import { preview } from 'vite'
 
   export let data
   const { team, game, ourPossession, gameOver, gamePoints } =
@@ -50,6 +51,39 @@
         {$gamePoints?.filter(
           (x) => x.type === GamePointTypeOptions.O && x.opponent_goal,
         ).length}
+      </div>
+    </div>
+    <div class="w-full flex justify-center items-center gap-2">
+      <div class="w-20 text-lg text-success text-right">
+        {$gamePoints?.reduce((prev, curr) => prev + (curr?.expand?.['game_point_event(game_point)']?.filter(x => x.type === GamePointEventTypeOptions.Turn && !x.opponent)?.length ?? 0), 0)}
+        </div>
+        <div class="text-gray-400 text-center">Turns</div>
+        <div class="w-full flex justify-center items-center gap-2">
+          <div class="w-20 text-lg text-error">
+        {$gamePoints?.reduce((prev, curr) => prev + (curr?.expand?.['game_point_event(game_point)']?.filter(x => x.type === GamePointEventTypeOptions.Turn && x.opponent)?.length ?? 0), 0)}
+      </div>
+      </div>
+    </div>
+    <div class="w-full flex justify-center items-center gap-2">
+      <div class="w-20 text-lg text-success text-right">
+        {$gamePoints?.reduce((prev, curr) => prev + (curr?.expand?.['game_point_event(game_point)']?.filter(x => x.type === GamePointEventTypeOptions.Drop && !x.opponent)?.length ?? 0), 0)}
+        </div>
+        <div class="text-gray-400 text-center">Drops</div>
+        <div class="w-full flex justify-center items-center gap-2">
+          <div class="w-20 text-lg text-error">
+        {$gamePoints?.reduce((prev, curr) => prev + (curr?.expand?.['game_point_event(game_point)']?.filter(x => x.type === GamePointEventTypeOptions.Drop && x.opponent)?.length ?? 0), 0)}
+      </div>
+      </div>
+    </div>
+    <div class="w-full flex justify-center items-center gap-2">
+      <div class="w-20 text-lg text-success text-right">
+        {$gamePoints?.reduce((prev, curr) => prev + (curr?.expand?.['game_point_event(game_point)']?.filter(x => x.type === GamePointEventTypeOptions.Block && !x.opponent)?.length ?? 0), 0)}
+        </div>
+        <div class="text-gray-400 text-center">Blocks</div>
+        <div class="w-full flex justify-center items-center gap-2">
+          <div class="w-20 text-lg text-error">
+        {$gamePoints?.reduce((prev, curr) => prev + (curr?.expand?.['game_point_event(game_point)']?.filter(x => x.type === GamePointEventTypeOptions.Block && x.opponent)?.length ?? 0), 0)}
+      </div>
       </div>
     </div>
     {#if $gameOver}
