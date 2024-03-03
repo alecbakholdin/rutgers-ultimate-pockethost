@@ -2,7 +2,6 @@
   import Icon from '@iconify/svelte'
   import { initLiveGameContext } from './_route/gamePointType.js'
   import { GamePointEventTypeOptions, GamePointTypeOptions } from '$lib/pocketbase/pocketbase-types.js'
-    import { preview } from 'vite'
 
   export let data
   const { team, game, ourPossession, gameOver, gamePoints } =
