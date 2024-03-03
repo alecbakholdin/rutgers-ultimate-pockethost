@@ -16,7 +16,7 @@ export const actions: Actions = {
     } else if (!date || !time) {
       throw error(400, { message: 'Date and time are both required' })
     }
-    const startDateTimeStr = `${date} ${time}Z`
+    const startDateTimeStr = `${date} ${time}`
 
     await pb.collection('game').create({
       team,
