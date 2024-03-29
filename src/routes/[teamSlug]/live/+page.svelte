@@ -10,7 +10,7 @@
   export let data
 </script>
 
-{#if data.user.isManager}
+{#if data.user?.isManager}
   <div class="max-w-xl mx-auto">
     <div class="tabs tabs-boxed mt-8 mb-4">
       {#each tabs as tab}
