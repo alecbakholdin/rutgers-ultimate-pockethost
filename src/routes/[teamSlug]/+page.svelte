@@ -58,7 +58,9 @@
             await pb.collection('team').update(data.team.id, {
               live_game: modalGame.id,
             })
-            goto(`/${data.team.slug}/live`)
+            modal?.close()
+            await goto(`/${data.team.slug}/live`)
+            invalidateAll()
           }}
         >
           Set Live
@@ -67,10 +69,13 @@
         <button
           type="button"
           class="btn btn-error w-full"
-          on:click={() =>
-            pb.collection('team').update(data.team.id, {
+          on:click={async () => {
+            await pb.collection('team').update(data.team.id, {
               live_game: '',
-            })}
+            })
+            await invalidateAll()
+            modal?.close()
+          }}
         >
           Remove from Live
         </button>
@@ -90,7 +95,11 @@
     <button class="cursor-default"></button>
   </form>
 </dialog>
-<a href="/{data.team.slug}/statistics" data-sveltekit-preload-data="off" class="btn">Stats</a>
+<a
+  href="/{data.team.slug}/statistics"
+  data-sveltekit-preload-data="off"
+  class="btn">Stats</a
+>
 <GameList team={data.team} {openModal} />
 
 {#if data.user?.isManager}
