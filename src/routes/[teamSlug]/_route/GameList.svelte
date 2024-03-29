@@ -3,16 +3,49 @@
     GameResponse,
     TeamResponse,
   } from '$lib/pocketbase/pocketbase-types'
-    import _ from 'lodash'
+  import _ from 'lodash'
   import GameCard from './GameCard.svelte'
+  import { date } from 'zod'
 
   export let team: TeamResponse<{ 'game(team)': GameResponse[] }>
   export let openModal: ((game: GameResponse) => void) | undefined = undefined
 
   $: teamGames = team.expand?.['game(team)'] || []
   $: liveGame = teamGames.find((x) => x.id === team.live_game)
-  $: finishedGames = _.reverse(teamGames.filter((x) => x.end))
-  $: scheduledGames = teamGames.filter((x) => x.id !== liveGame?.id && !x.end)
+  $: nonLiveGames = _.reverse(teamGames.filter((x) => x.id !== team.live_game))
+  $: today = nonLiveGames.filter(
+    (x) => new Date(x.start).toDateString() === new Date().toDateString(),
+  )
+  $: yesterday = nonLiveGames.filter((x) => {
+    const yesterday = new Date()
+    yesterday.setDate(new Date().getDate() - 1)
+    return new Date(x.start).toDateString() === yesterday.toDateString()
+  })
+  $: tomorrow = _.reverse(
+    nonLiveGames.filter((x) => {
+      const tomorrow = new Date()
+      tomorrow.setDate(new Date().getDate() + 1)
+      return new Date(x.start).toDateString() === tomorrow.toDateString()
+    }),
+  )
+  $: others = nonLiveGames.filter(
+    (x) =>
+      !today.find((t) => t.id === x.id) &&
+      !yesterday.find((t) => t.id === x.id) &&
+      !tomorrow.find((t) => t.id === x.id),
+  )
+  $: sections = {
+    Today: today,
+    Yesterday: yesterday,
+    Tomorrow: tomorrow,
+    Other: others,
+  }
+  $: sectionKeys = [
+    'Tomorrow',
+    'Today',
+    'Yesterday',
+    'Other',
+  ] satisfies (keyof typeof sections)[]
 
   function contextMenuHandler(game: GameResponse) {
     return function (e: MouseEvent) {
@@ -34,24 +67,24 @@
   </div>
 {/if}
 
-{#if scheduledGames.length}
-  <div class="my-2">
-    <p class="text-lg font-semibold">Scheduled</p>
-    {#each scheduledGames as game}
-      <div on:contextmenu={contextMenuHandler(game)} role="article">
-        <GameCard {team} {game} href="/{team.slug}/game/{game.id}" scheduled />
+{#each sectionKeys as sectionKey}
+  {@const section = sections[sectionKey]}
+  {#if section.length}
+    <div class="my-2">
+      <p class="text-lg font-semibold">{sectionKey}</p>
+      <div class="flex flex-col gap-1">
+        {#each section as game}
+          <div on:contextmenu={contextMenuHandler(game)} role="article">
+            <GameCard
+              {team}
+              {game}
+              href="/{team.slug}/game/{game.id}"
+              scheduled={!game.end}
+              finished={!!game.end}
+            />
+          </div>
+        {/each}
       </div>
-    {/each}
-  </div>
-{/if}
-
-{#if finishedGames.length}
-  <div class="my-2">
-    <p class="text-lg font-semibold">Past</p>
-    {#each finishedGames as game}
-      <div on:contextmenu={contextMenuHandler(game)} role="article">
-        <GameCard {team} {game} href="/{team.slug}/game/{game.id}" finished />
-      </div>
-    {/each}
-  </div>
-{/if}
+    </div>
+  {/if}
+{/each}
