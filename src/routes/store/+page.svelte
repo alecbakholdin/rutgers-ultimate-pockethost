@@ -2,7 +2,7 @@
   import ImageThumb from '$lib/component/ImageThumb.svelte'
   import { getUnitPrice } from '$lib/util/functions/cartUtils.js'
   import { formatCents } from '$lib/util/functions/formatCents.js'
-    import _ from 'lodash'
+  import _ from 'lodash'
 
   export let data
 </script>
@@ -16,7 +16,7 @@
   <div
     class="mx-auto grid grid-cols-2 md:grid-cols-3 place-items-center gap-2 max-w-[95vw]"
   >
-    {#each _.sortBy(section.expand?.products ?? [], "title") as product}
+    {#each _.sortBy(section.expand?.products ?? [], 'title') as product}
       <a class="max-w-[250px]" href="/store/product/{product.slug}">
         <figure
           class="product-image"
@@ -38,4 +38,17 @@
       </a>
     {/each}
   </div>
+{:else}
+<div
+  class="w-full py-8 mx-auto prose relative text-center flex flex-col items-center"
+>
+  <img
+    src="/machine-nightshade.png"
+    class="h-[60px] mb-0"
+    alt="machine-nightshade"
+  />
+  <h2 class="text-center mt-4 font-semibold" style:color="#ff0000">
+    We don't have anything to sell right now, but please check back later!
+  </h2>
+</div>
 {/each}
