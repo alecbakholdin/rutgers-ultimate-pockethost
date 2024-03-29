@@ -1,8 +1,7 @@
 <script lang="ts">
   let res: any
-  import { currentUser, pb } from '$lib/pocketbase/pb'
   import RecordCard from '$lib/component/RecordCard.svelte'
-  import Add from '$lib/component/Add.svelte'
+  import { currentUser } from '$lib/pocketbase/pb'
 
   async function records() {
     const response = await fetch('/getRecords')
