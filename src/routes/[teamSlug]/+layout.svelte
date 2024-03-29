@@ -2,8 +2,6 @@
   import { page } from '$app/stores'
   import Icon from '@iconify/svelte'
 
-  export let data
-
   $: routeParts = $page.route.id?.split('/').slice(1) || []
   $: params = Object.entries($page.params ?? {}) as [string, string][]
   $: getCrumbText = (part: string) =>

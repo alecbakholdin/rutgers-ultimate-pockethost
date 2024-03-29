@@ -14,6 +14,8 @@
   export let team: TeamResponse
   export let gamePoints: LiveFeedGamePoint[] | undefined = undefined
 
+  export let size: 'sm' | 'lg' = 'lg'
+
   $: isLive = team?.live_game === game?.id && !game?.end
   $: isFinal = Boolean(game?.end)
 
@@ -38,7 +40,7 @@
     )
 </script>
 
-<div class="card rounded-md card-compact card-bordered max-w-sm mx-auto">
+<div class="card rounded-md card-compact card-bordered max-w-sm w-full">
   <div class="card-body !p-0">
     <div class="p-2 border-b w-full grid grid-cols-[1fr_3fr_1fr]">
       <div
@@ -62,7 +64,8 @@
   </div>
   <div class="p-2 grid grid-cols-[1fr_auto_1fr] place-items-center">
     <div class="flex flex-col items-center">
-      <img class="object-contain w-20 h-20" src={teamLogo} alt={team.name} />
+      <img
+        class="object-contain w-20 h-20" class:hidden={size === 'sm'} src={teamLogo} alt={team.name} />
       <span class="text-center font-semibold">{team.name}</span>
     </div>
     <div class="flex flex-col items-center">
@@ -86,6 +89,7 @@
     <div class="flex flex-col items-center">
       <img
         class="object-contain w-20 h-20"
+        class:hidden={size === 'sm'}
         src={opponentLogo}
         alt={game?.opponent}
       />

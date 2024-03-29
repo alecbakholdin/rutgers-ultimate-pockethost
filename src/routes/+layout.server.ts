@@ -13,7 +13,7 @@ export async function load({ url, locals: { user, pb } }) {
 
   return {
     liveTeams: liveTeams.filter(
-      (team) => `/${team.slug}/live` !== url.pathname,
+      (team) => url.pathname.split('/').filter(x => x)[0] !== team.slug,
     ),
     user
   }
