@@ -72,8 +72,11 @@
 
   async function undo() {
     if (!lastPoint) return
-    const gamePointEvents =
-      lastPoint.expand?.['game_point_event(game_point)'] || []
+    const gamePointEvents = _.orderBy(
+      lastPoint.expand?.['game_point_event(game_point)'] || [],
+      ['created'],
+      ['desc'],
+    )
     if (lastPoint.opponent_goal) {
       await pb.collection('game_point').update(lastPoint.id, {
         opponent_goal: false,
@@ -105,15 +108,18 @@
   let subOut: string | undefined
   let subIn: string | undefined
   $: activePlayers = livePoint?.starting_line || []
-  $: subOptions = $team?.expand?.['player(team)'].filter(x => !activePlayers.includes(x.id)) || []
+  $: subOptions =
+    $team?.expand?.['player(team)'].filter(
+      (x) => !activePlayers.includes(x.id),
+    ) || []
   async function performSub() {
-    if(!livePoint || !subIn || !subOut) return;
+    if (!livePoint || !subIn || !subOut) return
     pb.collection('game_point').update(livePoint.id, {
       'starting_line-': subOut,
       'subs+': subOut,
     })
     pb.collection('game_point').update(livePoint.id, {
-      'starting_line+': subIn
+      'starting_line+': subIn,
     })
   }
 </script>
@@ -231,11 +237,15 @@
         </button>
       </div>
     {/if}
-    <button type="button" class="btn w-full" on:click={() => {
-      subIn = undefined;
-      subOut = undefined;
-      subModal.showModal()
-    }}>Make Substitution</button>
+    <button
+      type="button"
+      class="btn w-full"
+      on:click={() => {
+        subIn = undefined
+        subOut = undefined
+        subModal.showModal()
+      }}>Make Substitution</button
+    >
     <dialog class="modal" bind:this={subModal}>
       <form method="dialog" class="modal-backdrop"><button></button></form>
       <div class="modal-box">
@@ -244,13 +254,23 @@
         </div>
         <div class="modal-middle">
           <label for="subOut" class="label">Out</label>
-          <select name="subOut" id="subOut" class="select select-bordered" bind:value={subOut}>
+          <select
+            name="subOut"
+            id="subOut"
+            class="select select-bordered"
+            bind:value={subOut}
+          >
             {#each livePoint?.expand?.['starting_line'] || [] as player}
               <option value={player.id}>{player.name}</option>
             {/each}
           </select>
           <label for="subIn" class="label">In</label>
-          <select name="subIn" id="subIn" class="select select-bordered" bind:value={subIn}>
+          <select
+            name="subIn"
+            id="subIn"
+            class="select select-bordered"
+            bind:value={subIn}
+          >
             {#each subOptions as player}
               <option value={player.id}>{player.name}</option>
             {/each}
@@ -259,7 +279,9 @@
         <div class="modal-action">
           <form method="dialog">
             <button class="btn">Close</button>
-            <button class="btn btn-primary" on:click={() => performSub()}>Submit</button>
+            <button class="btn btn-primary" on:click={() => performSub()}
+              >Submit</button
+            >
           </form>
         </div>
       </div>
