@@ -4,22 +4,22 @@
 </script>
 
 <script lang="ts">
-  import { scale } from 'svelte/transition'
-  import { getLiveGameContext, type LiveFeedGamePoint } from './gamePointType'
-  import Icon from '@iconify/svelte'
   import { pb } from '$lib/pocketbase/pb'
   import {
+    GamePointEventTypeOptions,
     GamePointTypeOptions,
+    PlayerStatusOptions,
     type GamePointRecord,
     type TeamGroupRecord,
-    type TeamGroupResponse,
-    GamePointEventTypeOptions,
-    type GameRecord,
+    type PlayerResponse,
   } from '$lib/pocketbase/pocketbase-types'
-  import { toggleArray } from '$lib/util/functions/toggleArray'
-  import _ from 'lodash'
   import { newShade } from '$lib/util/functions/changeShade'
+  import { toggleArray } from '$lib/util/functions/toggleArray'
+  import Icon from '@iconify/svelte'
+  import _ from 'lodash'
   import { createEventDispatcher } from 'svelte'
+  import { scale } from 'svelte/transition'
+  import { getLiveGameContext, type LiveFeedGamePoint } from './gamePointType'
 
   const { game, players, gamePoints, team, gameOver } = getLiveGameContext()
   $: groups = $team?.expand?.['team_group(team)'] || []
@@ -51,6 +51,26 @@
   $: filteredPlayers = selectedGroups.length
     ? calculatedPlayers.filter((p) => playersInGroup.includes(p.id))
     : calculatedPlayers
+  $: playersByStatus = _.groupBy(
+    filteredPlayers,
+    (x) => x.status || PlayerStatusOptions.active,
+  )
+  $: playerSections = [
+    ['', playersByStatus[PlayerStatusOptions.active]],
+    ['Injured', playersByStatus[PlayerStatusOptions.injured]],
+    ['Inactive', playersByStatus[PlayerStatusOptions.inactive]],
+  ].filter(([_, arr]) => arr?.length) as [
+    string,
+    (PlayerResponse & {
+      pointsPlayed: number
+      lastPlayedPoint: number
+      goals: number
+      assists: number
+      blocks: number
+      turns: number
+      drops: number
+    })[],
+  ][]
 
   function pointContainsPlayer(playerId: string) {
     return (pt: LiveFeedGamePoint) =>
@@ -69,7 +89,6 @@
     '#f2c6de',
     '#f7d9c4',
   ] as const
-  let groupToAddTo: string | undefined
   let modalPlayerOptions: string[] = []
   let modalGroup: TeamGroupRecord & { id?: string } = {
     name: '',
@@ -103,9 +122,9 @@
       type: final ? Final : type,
     }
     await pb.collection('game_point').create(point)
-    if(final) {
+    if (final) {
       await pb.collection('game').update($game.id, {
-        end: new Date()
+        end: new Date(),
       })
     }
     $selectedPlayers = []
@@ -239,7 +258,12 @@
 </dialog>
 <div class="flex gap-1">
   <div class="dropdown">
-    <div tabindex="0" role="button" class="btn btn-outline btn-sm opacity-70">
+    <div
+      tabindex="0"
+      role="button"
+      class="btn btn-outline btn-sm opacity-70"
+      class:disabled={!$selectedPlayers.length}
+    >
       + Add to Group
     </div>
     <div
@@ -274,8 +298,33 @@
       }
       modalPlayerOptions = [...$selectedPlayers]
       openModal('group_modal')
-    }}>+ Create new Group</button
+    }}
+    class:disabled={!$selectedPlayers.length}
   >
+    + Create new Group
+  </button>
+  <div class="dropdown">
+    <div tabindex="0" role="button" class="btn btn-outline btn-sm opacity-70">
+      Change Status
+    </div>
+    <div
+      class="dropdown-content z-[1] card card-compact shadow bg-neutral-50 text-neutral-400"
+    >
+      <div class="card-body flex flex-col">
+        {#each Object.values(PlayerStatusOptions) as status}
+          <button
+            type="button"
+            class="btn btn-outline btn-sm"
+            on:click={() => {
+              $selectedPlayers.forEach((player) =>
+                pb.collection('player').update(player, { status }),
+              )
+            }}>{status}</button
+          >
+        {/each}
+      </div>
+    </div>
+  </div>
 </div>
 <div class="h-2"></div>
 {#if groups.length}
@@ -316,34 +365,41 @@
               (x) => !filteredPlayers.find((f) => f.id === x),
             ))}
     />
-    <span class="text-lg font-semibold">Player</span>
+    <span class="text-lg font-semibold">Player ({$selectedPlayers.length ? `${$selectedPlayers.length}/` : ''}{playersByStatus[PlayerStatusOptions.active].length})</span>
   </div>
-  {#each filteredPlayers as player}
-    {@const checkboxId = `player-${player.id}`}
-    <label for={checkboxId} class="flex items-center gap-3 cursor-pointer">
-      <input
-        type="checkbox"
-        name={checkboxId}
-        id={checkboxId}
-        class="checkbox"
-        checked={$selectedPlayers.includes(player.id)}
-        on:click={() =>
-          ($selectedPlayers = toggleArray($selectedPlayers, player.id))}
-      />
-      <div>
-        <p>{player.name}</p>
-        <p class="text-gray-400">
-          {player.goals}G {player.assists}A
-          {player.blocks}B {player.turns}T {player.drops}D |
-          {player.lastPlayedPoint < 0
-            ? 'Has Not Played'
-            : player.lastPlayedPoint > 0
-              ? `Played ${player.lastPlayedPoint} Point${
-                  player.lastPlayedPoint > 1 ? 's' : ''
-                } Ago`
-              : 'Just Played'} | {player.pointsPlayed ?? 0} Points
-        </p>
-      </div>
-    </label>
+  {#each playerSections as [status, players]}
+    {#if status}
+      <p class="text-lg border-b">
+        {status}
+      </p>
+    {/if}
+    {#each players as player}
+      {@const checkboxId = `player-${player.id}`}
+      <label for={checkboxId} class="flex items-center gap-3 cursor-pointer">
+        <input
+          type="checkbox"
+          name={checkboxId}
+          id={checkboxId}
+          class="checkbox"
+          checked={$selectedPlayers.includes(player.id)}
+          on:click={() =>
+            ($selectedPlayers = toggleArray($selectedPlayers, player.id))}
+        />
+        <div>
+          <p>{player.name}</p>
+          <p class="text-gray-400">
+            {player.goals}G {player.assists}A
+            {player.blocks}B {player.turns}T {player.drops}D |
+            {player.lastPlayedPoint < 0
+              ? 'Has Not Played'
+              : player.lastPlayedPoint > 0
+                ? `Played ${player.lastPlayedPoint} Point${
+                    player.lastPlayedPoint > 1 ? 's' : ''
+                  } Ago`
+                : 'Just Played'} | {player.pointsPlayed ?? 0} Points
+          </p>
+        </div>
+      </label>
+    {/each}
   {/each}
 </div>
