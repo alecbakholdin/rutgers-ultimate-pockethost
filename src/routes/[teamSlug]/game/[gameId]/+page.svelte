@@ -8,6 +8,8 @@
 </script>
 
 {#if $game && $team}
-  <GameScore game={$game} team={$team} gamePoints={$gamePoints}></GameScore>
+  <div class="w-full flex justify-center">
+    <GameScore game={$game} team={$team} gamePoints={$gamePoints}></GameScore>
+  </div>
 {/if}
 <LiveFeed {game} {gamePoints} {team} />

@@ -60,12 +60,25 @@
       <span class="text-gray-500 text-center">
         {game?.start && formatDate(game.start)}
       </span>
+      {#if size !== 'sm'}
+        <a
+          data-sveltekit-preload-data="off"
+          href="/machine/statistics?game={game?.id}"
+          class="text-right text-gray-500"
+        >
+          Stats
+        </a>
+      {/if}
     </div>
   </div>
   <div class="p-2 grid grid-cols-[1fr_auto_1fr] place-items-center">
     <div class="flex flex-col items-center">
       <img
-        class="object-contain w-20 h-20" class:hidden={size === 'sm'} src={teamLogo} alt={team.name} />
+        class="object-contain w-20 h-20"
+        class:hidden={size === 'sm'}
+        src={teamLogo}
+        alt={team.name}
+      />
       <span class="text-center font-semibold">{team.name}</span>
     </div>
     <div class="flex flex-col items-center">
