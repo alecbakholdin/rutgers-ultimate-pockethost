@@ -3,9 +3,12 @@
   import LineCreator from './_route/LineCreator.svelte'
 
   import LiveFeed from './_route/LiveFeed.svelte'
+  import { getLiveGameContext } from './_route/gamePointType'
 
   const tabs = ['Lines', 'Current Point', 'Feed'] as const
   let activeTab: (typeof tabs)[number] = tabs[0]
+
+  const { gamePoints, game, team } = getLiveGameContext()
 
   export let data
 </script>
@@ -32,9 +35,9 @@
     {:else if activeTab === 'Current Point'}
       <CurrentPoint on:pointOver={() => (activeTab = 'Lines')} />
     {:else if activeTab === 'Feed'}
-      <LiveFeed />
+      <LiveFeed {gamePoints} {game} {team} />
     {/if}
   </div>
 {:else}
-  <LiveFeed />
+  <LiveFeed {gamePoints} {game} {team} />
 {/if}

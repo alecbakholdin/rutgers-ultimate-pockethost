@@ -1,17 +1,11 @@
 <script lang="ts">
   import _ from 'lodash'
   import LiveEvent from './LiveEvent.svelte'
-  import { getLiveGameContext } from './gamePointType'
-  import { pb } from '$lib/pocketbase/pb'
-  
-  const { gamePoints, game, team } = getLiveGameContext()
-  /* type LiveFeedEvent = {
-        type: LiveEvent['$$prop_def']['type']
-        time: LiveEvent['$$prop_def']['time']
-    }
-  $gamePoints.flatMap(point => {
-    
-  }) */
+  import type { LiveGameContext } from './gamePointType'
+
+  export let gamePoints: LiveGameContext['gamePoints']
+  export let game: LiveGameContext['game']
+  export let team: LiveGameContext['team']
 </script>
 
 <div class="max-w-md mx-auto flex flex-col gap-2 mt-12">

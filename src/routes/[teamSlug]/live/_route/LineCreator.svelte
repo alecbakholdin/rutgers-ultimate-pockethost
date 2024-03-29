@@ -14,6 +14,7 @@
     type TeamGroupRecord,
     type TeamGroupResponse,
     GamePointEventTypeOptions,
+    type GameRecord,
   } from '$lib/pocketbase/pocketbase-types'
   import { toggleArray } from '$lib/util/functions/toggleArray'
   import _ from 'lodash'
@@ -102,6 +103,11 @@
       type: final ? Final : type,
     }
     await pb.collection('game_point').create(point)
+    if(final) {
+      await pb.collection('game').update($game.id, {
+        end: new Date()
+      })
+    }
     $selectedPlayers = []
     dispatch('startPoint')
   }

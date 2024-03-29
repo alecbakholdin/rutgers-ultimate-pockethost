@@ -16,13 +16,12 @@ export const actions: Actions = {
     } else if (!date || !time) {
       throw error(400, { message: 'Date and time are both required' })
     }
-    const startDateTimeStr = `${date} ${time}.000Z`
 
     await pb.collection('game').create({
       team,
       opponent,
-      start: startDateTimeStr,
-    } satisfies GameRecord)
+      start: new Date(`${date} ${time}`),
+    } satisfies GameRecord | { start: Date })
   },
   async createPlayer({ request, locals: { pb } }) {
     const formData = await request.formData()
@@ -34,7 +33,7 @@ export const actions: Actions = {
     }
     await pb.collection('player').create({
       name,
-      team
+      team,
     } satisfies PlayerRecord)
   },
 }

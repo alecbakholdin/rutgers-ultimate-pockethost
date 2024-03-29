@@ -1,8 +1,9 @@
 <script lang="ts">
   import type {
-      GameResponse,
-      TeamResponse,
+    GameResponse,
+    TeamResponse,
   } from '$lib/pocketbase/pocketbase-types'
+    import _ from 'lodash'
   import GameCard from './GameCard.svelte'
 
   export let team: TeamResponse<{ 'game(team)': GameResponse[] }>
@@ -10,7 +11,7 @@
 
   $: teamGames = team.expand?.['game(team)'] || []
   $: liveGame = teamGames.find((x) => x.id === team.live_game)
-  $: finishedGames = teamGames.filter((x) => x.end)
+  $: finishedGames = _.reverse(teamGames.filter((x) => x.end))
   $: scheduledGames = teamGames.filter((x) => x.id !== liveGame?.id && !x.end)
 
   function contextMenuHandler(game: GameResponse) {
@@ -37,9 +38,9 @@
   <div class="my-2">
     <p class="text-lg font-semibold">Scheduled</p>
     {#each scheduledGames as game}
-      <a href="/{team.slug}/statistics?game={game.id}" on:contextmenu={contextMenuHandler(game)}>
-        <GameCard {team} {game} scheduled />
-      </a>
+      <div on:contextmenu={contextMenuHandler(game)} role="article">
+        <GameCard {team} {game} href="/{team.slug}/game/{game.id}" scheduled />
+      </div>
     {/each}
   </div>
 {/if}
@@ -48,10 +49,9 @@
   <div class="my-2">
     <p class="text-lg font-semibold">Past</p>
     {#each finishedGames as game}
-      <a href="/{team.slug}/statistics?game={game.id}" on:contextmenu={contextMenuHandler(game)}>
-        <GameCard {team} {game} finished />
-      </a>
+      <div on:contextmenu={contextMenuHandler(game)} role="article">
+        <GameCard {team} {game} href="/{team.slug}/game/{game.id}" finished />
+      </div>
     {/each}
   </div>
 {/if}
-

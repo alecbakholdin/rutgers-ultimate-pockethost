@@ -90,7 +90,7 @@
     <button class="cursor-default"></button>
   </form>
 </dialog>
-<a href="/{data.team.slug}/statistics" class="btn">Stats</a>
+<a href="/{data.team.slug}/statistics" data-sveltekit-preload-data="off" class="btn">Stats</a>
 <GameList team={data.team} {openModal} />
 
 {#if data.user?.isManager}

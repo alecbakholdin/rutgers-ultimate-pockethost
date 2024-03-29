@@ -203,6 +203,7 @@ export type StoreSectionRecord = {
 
 export type TeamRecord = {
 	live_game?: RecordIdString
+	logo?: string
 	name: string
 	slug: string
 }
