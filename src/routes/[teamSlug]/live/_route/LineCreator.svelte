@@ -280,7 +280,7 @@
                 players: _.uniq([...group.players, ...$selectedPlayers]),
               })}
           >
-            {group.name} ({$selectedPlayers.length ? $selectedPlayers.filter(x => group.players?.includes(x) + "/") : ""}{group.players?.length})
+            {group.name} ({group.players?.length})
           </button>
         {/each}
       </div>
@@ -345,7 +345,7 @@
       }}
       on:click={() => (selectedGroups = toggleArray(selectedGroups, group.id))}
     >
-      {group.name} ({group.players?.length})
+      {group.name} ({$selectedPlayers.length ? $selectedPlayers.filter(x => group.players?.includes(x)).length + "/" : ""}{group.players?.length})
     </button>
   {/each}
 </div>
