@@ -4,6 +4,7 @@
     GameResponse,
     TeamResponse,
   } from '$lib/pocketbase/pocketbase-types'
+    import { formatDate } from '$lib/util/functions/formatDate'
   import Icon from '@iconify/svelte'
 
   export let team: TeamResponse
@@ -44,7 +45,7 @@
     </h4>
     <div class="text-gray-400 flex items-center gap-2">
       <Icon icon="formkit:date" />
-      <span>{new Date(game.start).toLocaleString()}</span>
+      <span>{formatDate(game.start)}</span>
     </div>
   </div>
 </div>
