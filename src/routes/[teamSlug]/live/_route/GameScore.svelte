@@ -55,7 +55,7 @@
       >
         {#if isLive}
           <div
-            class="rounded-full w-2 h-2 bg-red-400 mt-[2px] animate-pulse"
+            class="rounded-full mb-[1px] w-2 h-2 bg-red-400 mt-[2px] animate-pulse"
           ></div>
         {/if}
         <span>{isLive ? 'Live' : isFinal ? 'Final' : 'Scheduled'}</span>

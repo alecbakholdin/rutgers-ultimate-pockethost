@@ -16,7 +16,7 @@
     const turns = matchingPointEvents('Turn', p.id)
     const drops = matchingPointEvents('Drop', p.id)
     const plusMinus = goals + assists + blocks - turns - drops
-    const plusMinusPerPoint = plusMinus / points
+    const plusMinusPerPoint = points && plusMinus / points
     return {
       id: p.id,
       name: p.name,
