@@ -280,7 +280,7 @@
                 players: _.uniq([...group.players, ...$selectedPlayers]),
               })}
           >
-            {group.name} ({group.players?.length})
+            {group.name} ({$selectedPlayers.length ? $selectedPlayers.filter(x => group.players?.includes(x) + "/") : ""}{group.players?.length})
           </button>
         {/each}
       </div>
