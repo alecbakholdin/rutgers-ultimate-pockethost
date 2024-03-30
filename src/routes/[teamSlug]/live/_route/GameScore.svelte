@@ -35,8 +35,11 @@
     gamePointEvents.filter(
       (x) =>
         x &&
-        x.type === GamePointEventTypeOptions.Turn &&
-        !!opponent === !!x.opponent,
+        (([
+          GamePointEventTypeOptions.Turn,
+          GamePointEventTypeOptions.Drop
+        ].includes(x.type) &&
+        !!opponent === !!x.opponent)||(x.type === GamePointEventTypeOptions.Block && !!opponent === !x.opponent)) ,
     )
 </script>
 
