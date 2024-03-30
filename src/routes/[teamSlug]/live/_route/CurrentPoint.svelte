@@ -169,7 +169,7 @@
         {:else if !livePoint.assist}
           <button
             type="button"
-            class="btn btn-sm btn-error bg-opacity-30"
+            class="btn btn-sm btn-warning bg-opacity-30"
             on:click={() =>
               createNewEvent(GamePointEventTypeOptions.Turn, player.id)}
           >
@@ -177,7 +177,7 @@
           </button>
           <button
             type="button"
-            class="btn btn-sm btn-error bg-opacity-30"
+            class="btn btn-sm btn-warning bg-opacity-30"
             on:click={() =>
               createNewEvent(GamePointEventTypeOptions.Drop, player.id)}
           >
