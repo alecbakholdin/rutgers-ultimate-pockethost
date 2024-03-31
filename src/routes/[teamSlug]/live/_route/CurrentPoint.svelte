@@ -29,6 +29,7 @@
     }
   }
 
+  let message: string;
   async function createNewEvent(
     type: GamePointEventTypeOptions,
     player?: string,
@@ -39,11 +40,13 @@
       game_point: livePoint.id,
       opponent: !player,
       player,
+      message,
     }
     const event = await pb
       .collection('game_point_event')
       .create<LiveFeedGamePointEvent>(pointEvent, { expand: 'player' })
 
+    message = ''
     const pointIndex = $gamePoints.findIndex((x) => x.id === livePoint?.id)
     const point = $gamePoints.find((x) => x.id === livePoint?.id)
     point?.expand?.['game_point_event(game_point)']?.unshift(event)
@@ -237,6 +240,7 @@
         </button>
       </div>
     {/if}
+    <input class="input input-bordered w-full my-1" placeholder="Message" bind:value={message} />
     <button
       type="button"
       class="btn w-full"

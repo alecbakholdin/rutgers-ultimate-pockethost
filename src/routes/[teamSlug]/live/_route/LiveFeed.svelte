@@ -2,6 +2,7 @@
   import _ from 'lodash'
   import LiveEvent from './LiveEvent.svelte'
   import type { LiveGameContext } from './gamePointType'
+    import { message } from 'sveltekit-superforms/server'
 
   export let gamePoints: LiveGameContext['gamePoints']
   export let game: LiveGameContext['game']
@@ -46,7 +47,9 @@
             {#if event.expand?.player}
               <p>
                 <b>{event.expand.player.name}</b>
-                {#if event.type === 'Block'}
+                {#if event.message}
+                  {event.message}
+                {:else if event.type === 'Block'}
                   earned a block!
                 {:else if event.type === 'Drop'}
                   dropped it

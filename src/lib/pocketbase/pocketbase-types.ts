@@ -111,6 +111,7 @@ export type GamePointEventRecord = {
 	opponent?: boolean
 	player?: RecordIdString
 	type?: GamePointEventTypeOptions
+	message?: string
 }
 
 export type LineItemRecord<Tfields = unknown> = {
