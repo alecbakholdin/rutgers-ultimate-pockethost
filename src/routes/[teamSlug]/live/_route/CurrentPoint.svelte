@@ -240,7 +240,7 @@
         </button>
       </div>
     {/if}
-    <input class="input input-bordered w-full my-1" placeholder="Message" bind:value={message} />
+    <input class="input input-bordered w-full my-1" placeholder="Message" bind:value={message} autocapitalize="off" />
     <button
       type="button"
       class="btn w-full"
