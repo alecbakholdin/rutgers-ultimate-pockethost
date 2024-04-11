@@ -15,7 +15,7 @@
 </script>
 
 <svelte:head>
-  <title>R Ultimate</title>
+  <title>Ultimate</title>
 </svelte:head>
 
 <div>

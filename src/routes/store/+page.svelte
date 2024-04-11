@@ -8,7 +8,7 @@
 </script>
 
 <svelte:head>
-  <title>R Ultimate Store</title>
+  <title>Ultimate Store</title>
 </svelte:head>
 
 {#each data.sections as section}
