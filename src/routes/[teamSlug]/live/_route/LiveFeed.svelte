@@ -13,12 +13,12 @@
   {#each $gamePoints || [] as point (point.id)}
     {#if point.expand?.goal && point.expand?.assist}
       {#if point.goal === point.assist}
-        <LiveEvent type="success">
+        <LiveEvent type="success" time={point.end}>
           <span>{$team?.name} Callahan!</span>
           <p slot="body"><b>{point.expand.goal.name}</b> Scored a Callahan!</p>
         </LiveEvent>
       {:else}
-        <LiveEvent type="success">
+        <LiveEvent type="success" time={point.end}>
           <span>{$team?.name} {point.type === 'D' ? 'Break' : 'Hold'}</span>
           <p slot="body">
             <b>{point.expand?.goal.name}</b> scores with an assist from
@@ -28,7 +28,7 @@
       {/if}
     {/if}
     {#if point.opponent_goal}
-      <LiveEvent type="error">
+      <LiveEvent type="error" time={point.end}>
         <span>{$game?.opponent} {point.type === 'D' ? 'Hold' : 'Break'}</span>
       </LiveEvent>
     {/if}

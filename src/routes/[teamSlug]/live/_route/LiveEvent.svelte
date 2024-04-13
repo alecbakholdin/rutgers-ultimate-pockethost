@@ -8,6 +8,8 @@
 </script>
 
 <script lang="ts">
+    import { formatDate } from '$lib/util/functions/formatDate'
+
   import _ from 'lodash'
   import { writable } from 'svelte/store'
   import { fly } from 'svelte/transition'
@@ -63,9 +65,18 @@
     <div class="card-title !mb-0 flex w-full">
       <slot />
       {#if timeDiffStr}
-        <span class="flex-grow text-right text-xs opacity-40">
-          {timeDiffStr}
-        </span>
+        <div class="dropdown flex-grow">
+          <div tabindex="0" role="button" class="w-full text-right text-xs opacity-40">{timeDiffStr}</div>
+          <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+          <div
+            tabindex="0"
+            class="dropdown-content z-[1] w-64 card card-compact shadow bg-neutral text-neutral-content"
+          >
+            <div class="card-body">
+              <p>{formatDate(time)}</p>
+            </div>
+          </div>
+        </div>
       {/if}
     </div>
     <slot name="body" />
