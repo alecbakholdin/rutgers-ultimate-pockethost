@@ -6,11 +6,16 @@ const config = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
 
   theme: {
-    extend: {},
+    extend: {}
   },
 
   daisyui: {
-    themes: ["light", "dark"]
+    themes: [{
+      light: {
+        ...require("daisyui/src/theming/themes")["light"],
+        primary: "FF004E",
+      }
+    }]
   },
 
   plugins: [forms, typography, daisyui],

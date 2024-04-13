@@ -1,4 +1,5 @@
 <script lang="ts">
+  import BannerText from '$lib/component/BannerText.svelte'
   import ImageThumb from '$lib/component/ImageThumb.svelte'
   import { getUnitPrice } from '$lib/util/functions/cartUtils.js'
   import { formatCents } from '$lib/util/functions/formatCents.js'
@@ -39,16 +40,7 @@
     {/each}
   </div>
 {:else}
-<div
-  class="w-full py-8 mx-auto prose relative text-center flex flex-col items-center"
->
-  <img
-    src="/machine-nightshade.png"
-    class="h-[60px] mb-0"
-    alt="machine-nightshade"
+  <BannerText
+    text={"We don't have anything to sell right now, but please check back later!"}
   />
-  <h2 class="text-center mt-4 font-semibold" style:color="#ff0000">
-    We don't have anything to sell right now, but please check back later!
-  </h2>
-</div>
 {/each}

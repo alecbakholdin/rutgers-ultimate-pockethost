@@ -1,16 +1,27 @@
 <script lang="ts">
-  let res: any
-  import RecordCard from '$lib/component/RecordCard.svelte'
-  import { currentUser } from '$lib/pocketbase/pb'
+  import BannerText from '$lib/component/BannerText.svelte'
+  import { pb } from '$lib/pocketbase/pb.js'
+  import type { TeamResponse } from '$lib/pocketbase/pocketbase-types.js'
+  import Icon from '@iconify/svelte'
+  export let data
 
-  async function records() {
-    const response = await fetch('/getRecords')
-    res = await response.json()
-    return res
-  }
-
-  if ($currentUser) {
-    records()
+  type Link = {
+    title: string
+    href: string
+    imageUrl?: string
+    icon?: string
+}
+  $: links = getLinks(data.teams, data.storeSections.length)
+  function getLinks(teams: TeamResponse[], numStoreSections: number): Link[] {
+    const links: Link[] = teams.map((team) => ({
+      title: team.name,
+      href: `/${team.slug}`,
+      imageUrl: pb.getFileUrl(team, team.logo),
+    }))
+    if (numStoreSections) {
+      links.push({ title: 'Store', href: "/store", icon: 'material-symbols:store' })
+    }
+    return links
   }
 </script>
 
@@ -18,45 +29,24 @@
   <title>Ultimate</title>
 </svelte:head>
 
-<div>
-  {#if $currentUser}
-    <div class="hero p-10 bg-base-200">
-      <div class="hero-content text-center">
-        <div class="max-w-md">
-          <h1 class="text-5xl font-bold">
-            Hello, <strong class="capitalize">{$currentUser.name}!</strong>
-          </h1>
-          <p class="py-6">Add your favorite records to your collection.</p>
-          <button class="btn btn-primary">
-            <a href="/addRecord">Add Record</a>
-          </button>
+<BannerText text={'Welcome to Rutgers Ultimate! Check out the pages below'} />
+<div class="max-w-md mx-auto flex gap-2 items-center">
+  {#await Promise.all([data.teams, data.storeSections])}
+    <div class="loading loading-lg text-primary mx-auto"></div>
+  {:then}
+    <div class="flex gap-2 mx-auto">
+      {#each links as link}
+        <div class="card card-bordered border-primary">
+          <a class="card-body flex items-center justify-center" href={link.href} >
+            {#if link.imageUrl}
+              <img src={link.imageUrl} alt={link.title} class="h-12 w-12" />
+            {:else if link.icon}
+              <Icon icon={link.icon} />
+            {/if}
+            <span class="text-xl text-primary">{link.title}</span>
+          </a>
         </div>
-      </div>
+      {/each}
     </div>
-
-    <!-- <div>
-      <Add />
-    </div> -->
-
-    {#if res !== undefined}
-      <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
-        {#each res as item}
-          <div class="">
-            <RecordCard
-              id={item.id}
-              name={item.name}
-              artist={item.artist}
-              genre={item.genre}
-              year={item.year}
-            />
-          </div>
-        {/each}
-      </div>
-    {/if}
-  {:else}
-    <div class="text-3xl my-10">Hey, stranger. You're not logged in!</div>
-    <button class="btn btn-primary">
-      <a href="/login">Login</a>
-    </button>
-  {/if}
+  {/await}
 </div>
