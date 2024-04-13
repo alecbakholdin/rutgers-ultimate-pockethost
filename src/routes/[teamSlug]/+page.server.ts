@@ -1,4 +1,9 @@
-import type { GameRecord, PlayerRecord } from '$lib/pocketbase/pocketbase-types'
+import type {
+  GameRecord,
+  PlayerRecord,
+  TeamResponse,
+  TypedPocketBase,
+} from '$lib/pocketbase/pocketbase-types'
 import { error, type Actions } from '@sveltejs/kit'
 import { indexOf } from 'lodash'
 
@@ -36,4 +41,44 @@ export const actions: Actions = {
       team,
     } satisfies PlayerRecord)
   },
+  async editGame({ request, locals: { pb }, params }) {
+    const form = await request.formData()
+    const gameId = form.get('gameId')?.toString()
+    if (!gameId) throw error(400, { message: 'Missing gameId' })
+    const start = form.get('start')?.toString()
+    const half_cap_min = parseInt(form.get('half_cap_min')?.toString() ?? "") || 0
+    const soft_cap_min = parseInt(form.get('soft_cap_min')?.toString() ?? "") || 0
+    const hard_cap_min = parseInt(form.get('hard_cap_min')?.toString() ?? "") || 0
+
+    await pb
+      .collection('game')
+      .update(gameId, {
+        start: start && new Date(start),
+        half_cap_min,
+        soft_cap_min,
+        hard_cap_min,
+      } as Partial<GameRecord & {start: Date}>)
+  },
+  async setLive({ request, locals: { pb }, params }) {
+    const form = await request.formData()
+    const gameId = form.get('gameId')?.toString()
+    if (!gameId) throw error(400, { message: 'Missing gameId' })
+    const team = await getTeam(pb, params.teamSlug!)
+    await pb
+      .collection('team')
+      .update(team.id, { live_game: gameId } as Partial<TeamResponse>)
+  },
+  async removeFromLive({ locals: { pb }, params }) {
+    const team = await getTeam(pb, params.teamSlug!)
+    await pb.collection('team').update(team.id, { live_game: '' })
+  },
+}
+
+async function getTeam(
+  pb: TypedPocketBase,
+  slug: string,
+): Promise<TeamResponse> {
+  return pb
+    .collection('team')
+    .getFirstListItem(pb.filter('slug = {:slug}', { slug }))
 }

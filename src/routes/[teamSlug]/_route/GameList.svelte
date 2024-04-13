@@ -5,10 +5,9 @@
   } from '$lib/pocketbase/pocketbase-types'
   import _ from 'lodash'
   import GameCard from './GameCard.svelte'
-  import { date } from 'zod'
+  import {openModal} from './GameModal.svelte'
 
   export let team: TeamResponse<{ 'game(team)': GameResponse[] }>
-  export let openModal: ((game: GameResponse) => void) | undefined = undefined
 
   $: teamGames = team.expand?.['game(team)'] || []
   $: liveGame = teamGames.find((x) => x.id === team.live_game)
@@ -66,6 +65,8 @@
     </div>
   </div>
 {/if}
+
+
 
 {#each sectionKeys as sectionKey}
   {@const section = sections[sectionKey]}

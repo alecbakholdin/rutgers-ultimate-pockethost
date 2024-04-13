@@ -10,18 +10,12 @@
   import Icon from '@iconify/svelte'
   import GameAdminForm from './_route/GameAdminForm.svelte'
   import GameList from './_route/GameList.svelte'
+    import GameModal from './_route/GameModal.svelte'
 
   export let data
 
   let modal: HTMLDialogElement
   let modalGame: GameResponse
-
-  function openModal(game: GameResponse) {
-    console.log('opening', game)
-    if (!data.user?.isManager) return
-    modalGame = game
-    modal?.showModal()
-  }
 
   function openDeletionModal(id: string) {
     ;(document.getElementById(id) as HTMLDialogElement)?.showModal()
@@ -31,76 +25,14 @@
   }
 </script>
 
-<dialog class="modal" bind:this={modal}>
-  <div class="modal-box">
-    <div class="modal-top mb-4">
-      <h3 class="text-2xl font-semibold">
-        {data.team.name} vs {modalGame?.opponent}
-      </h3>
-    </div>
-    <div class="modal-middle mb-4">
-      {#if modalGame}
-        <label for="opponent" class="label">Opponent</label>
-        <input
-          type="text"
-          name="opponent"
-          id="opponent"
-          class="input input-bordered"
-          bind:value={modalGame.opponent}
-        />
-      {/if}
-    </div>
-    <form method="dialog" class="flex flex-col gap-2">
-      {#if data.team.live_game !== modalGame?.id}
-        <button
-          class="btn btn-primary w-full"
-          on:click={async () => {
-            await pb.collection('team').update(data.team.id, {
-              live_game: modalGame.id,
-            })
-            modal?.close()
-            await goto(`/${data.team.slug}/live`)
-            invalidateAll()
-          }}
-        >
-          Set Live
-        </button>
-      {:else}
-        <button
-          type="button"
-          class="btn btn-error w-full"
-          on:click={async () => {
-            await pb.collection('team').update(data.team.id, {
-              live_game: '',
-            })
-            await invalidateAll()
-            modal?.close()
-          }}
-        >
-          Remove from Live
-        </button>
-      {/if}
-      <button
-        class="btn w-full btn-primary"
-        on:click={() => {
-          if (!modalGame) return
-          const { id, ...rest } = modalGame
-          pb.collection('game').update(id, rest)
-        }}>Submit Changes</button
-      >
-      <button class="btn w-full">Close</button>
-    </form>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button class="cursor-default"></button>
-  </form>
-</dialog>
+
 <a
   href="/{data.team.slug}/statistics"
   data-sveltekit-preload-data="off"
   class="btn">Stats</a
 >
-<GameList team={data.team} {openModal} />
+<GameList team={data.team} />
+<GameModal/>
 
 {#if data.user?.isManager}
   <GameAdminForm team={data.team} />

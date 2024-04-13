@@ -75,8 +75,11 @@ export enum GameStatusOptions {
 }
 export type GameRecord = {
 	end?: IsoDateString
+	half_cap_min?: number
+	hard_cap_min?: number
 	opponent: string
 	opponent_score?: number
+	soft_cap_min?: number
 	start?: IsoDateString
 	status?: GameStatusOptions
 	team: RecordIdString
@@ -90,8 +93,10 @@ export enum GamePointTypeOptions {
 }
 export type GamePointRecord = {
 	assist?: RecordIdString
+	end?: IsoDateString
 	game: RecordIdString
 	goal?: RecordIdString
+	message?: string
 	opponent_goal?: boolean
 	opponent_score?: number
 	starting_line?: RecordIdString[]
@@ -105,13 +110,14 @@ export enum GamePointEventTypeOptions {
 	"Drop" = "Drop",
 	"Substitution" = "Substitution",
 	"Block" = "Block",
+	"Timeout" = "Timeout",
 }
 export type GamePointEventRecord = {
 	game_point: RecordIdString
+	message?: string
 	opponent?: boolean
 	player?: RecordIdString
 	type?: GamePointEventTypeOptions
-	message?: string
 }
 
 export type LineItemRecord<Tfields = unknown> = {
