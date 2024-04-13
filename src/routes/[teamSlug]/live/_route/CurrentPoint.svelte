@@ -202,6 +202,7 @@
               if (!livePoint) return
               pb.collection('game').update(livePoint.game, {
                 'team_score+': 1,
+                end: new Date()
               })
               dispatch('pointOver')
             }}
