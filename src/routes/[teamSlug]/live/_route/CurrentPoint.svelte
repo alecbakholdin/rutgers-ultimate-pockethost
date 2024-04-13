@@ -63,7 +63,7 @@
 
   async function setPointValue<T extends keyof GamePointRecord>(
     key: T,
-    value: GamePointRecord[T],
+    value: GamePointRecord[T] | any,
   ) {
     if (!livePoint) return
     pb.collection('game_point').update(livePoint.id, {
@@ -199,10 +199,14 @@
             class="btn btn-sm btn-success bg-opacity-30"
             on:click={() => {
               setPointValue('goal', player.id)
+              try{
+                setPointValue('end', new Date())
+              }catch{
+
+              }
               if (!livePoint) return
               pb.collection('game').update(livePoint.game, {
                 'team_score+': 1,
-                end: new Date()
               })
               dispatch('pointOver')
             }}
