@@ -65,7 +65,7 @@
     <div class="card-title !mb-0 flex w-full">
       <slot />
       {#if timeDiffStr}
-        <div class="dropdown flex-grow">
+        <div class="dropdown">
           <div tabindex="0" role="button" class="w-full text-right text-xs opacity-40">{timeDiffStr}</div>
           <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
           <div
