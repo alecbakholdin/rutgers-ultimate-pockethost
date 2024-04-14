@@ -1,141 +1,37 @@
 <script lang="ts">
-  import {
-    GamePointEventTypeOptions,
-    type GamePointRecord,
-  } from '$lib/pocketbase/pocketbase-types.js'
-  import Icon from '@iconify/svelte'
-  import _ from 'lodash'
-
+  import StatTable from '$lib/component/StatTable.svelte'
+  import { page } from '$app/stores'
   export let data
-  $: players = data.players?.map((p) => {
-    const points =
-      matchingPoints('starting_line', p.id) + matchingPoints('subs', p.id)
-    const goals = matchingPoints('goal', p.id)
-    const assists = matchingPoints('assist', p.id)
-    const blocks = matchingPointEvents('Block', p.id)
-    const turns = matchingPointEvents('Turn', p.id)
-    const drops = matchingPointEvents('Drop', p.id)
-    const plusMinus = goals + assists + blocks - turns - drops
-    const plusMinusPerPoint = points && plusMinus / points
-    return {
-      id: p.id,
-      name: p.name,
-      points,
-      goals,
-      assists,
-      blocks,
-      turns,
-      drops,
-      plusMinus,
-      plusMinusPerPoint,
-    }
-  }) ?? []
-  type PlayerKey = keyof (typeof players)[number]
-  $: displayedPlayerKeys = players.length
-    ? (Object.keys(players[0]).filter((x) => x !== 'id') as PlayerKey[])
-    : []
-  function mapName(key: PlayerKey) {
-    if(typeof key !== 'string') return ''
-    switch (key) {
-      case 'plusMinus':
-        return '+/-'
-      case 'plusMinusPerPoint':
-        return '+/-/point'
-      default:
-        return key.slice(0, 1).toUpperCase() + key.slice(1)
-    }
-  }
 
-  let sortBy: PlayerKey | undefined = undefined
-  let sortDir: 'asc' | 'desc' = 'asc'
+  const startDate = $page.url.searchParams.get('startDate') ?? '';
+  const endDate = $page.url.searchParams.get('endDate') ?? '';
 
-  $: sortedPlayers = sortBy ? _.orderBy(players, [sortBy], [sortDir]) : players
-  function toggleSort(key: PlayerKey) {
-    if (sortBy !== key) {
-      sortBy = key
-      sortDir = 'asc'
-    } else if (sortBy === key && sortDir === 'asc') {
-      sortDir = 'desc'
-    } else {
-      sortBy = undefined
-      sortDir = 'asc'
-    }
-  }
-
-  function matchingPoints<T extends keyof GamePointRecord>(
-    key: T,
-    player: string,
-  ) {
-    return data.points?.filter((x) =>
-      typeof Array.isArray(x[key])
-        ? (x[key] as Array<string>).includes(player)
-        : x[key] === player,
-    ).length ?? 0
-  }
-  function matchingPointEvents<
-    T extends keyof typeof GamePointEventTypeOptions,
-  >(type: T, player: string) {
-    return data.pointEvents?.filter(
-      (x) => x.type === GamePointEventTypeOptions[type] && x.player === player,
-    ).length ?? 0
-  }
 </script>
 
-<div class="max-w-md mx-auto">
-  <form method="get">
-    <label for="start_date" class="label">Start Date</label>
-    <input
-      type="date"
-      name="start_date"
-      id="start_date"
-      class="input input-bordered"
-      placeholder="Start Date"
-    />
-    <label for="end_date" class="label">End Date</label>
-    <input
-      type="date"
-      name="end_date"
-      id="end_date"
-      class="input input-bordered"
-      placeholder="End Date"
-    />
-    <button class="btn block mt-2">Submit</button>
-  </form>
-</div>
+<form
+  method="get"
+  class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto_1fr] max-w-[200px] sm:max-w-[400px] py-2 gap-2 items-center text-gray-400"
+>
+  <span>From</span>
+  <input
+    placeholder=""
+    class="input input-bordered"
+    type="date"
+    name="startDate"
+    value={startDate}
+  />
+  <span>To</span>
+  <input
+    class="input input-bordered"
+    type="date"
+    name="endDate"
+    value={endDate}
+  />
+  <div class="col-span-full">
+    <button class="btn">Submit</button>
+  </div>
+</form>
 
-<div class="max-w-md mx-auto overflow-x-auto">
-  <table class="table">
-    <thead>
-      {#each displayedPlayerKeys as key}
-        <th
-          role="button"
-          on:click={() => toggleSort(key)}
-          class="cursor-pointer select-none"
-        >
-          <div class="flex items-center w-fit">
-            <div
-              class="w-2 grid place-items-center"
-              class:rotate-180={sortDir === 'desc'}
-            >
-              {#if sortBy === key}
-                <Icon icon="mdi:chevron-up"></Icon>
-              {/if}
-            </div>
-            <span>
-              {mapName(key)}
-            </span>
-          </div>
-        </th>
-      {/each}
-    </thead>
-    <tbody>
-      {#each sortedPlayers as player}
-        <tr>
-          {#each displayedPlayerKeys as key}
-            <td>{player[key]}</td>
-          {/each}
-        </tr>
-      {/each}
-    </tbody>
-  </table>
+<div class="h-screen overflow-x-scroll">
+  <StatTable teamSlug={data.team.slug} {startDate} {endDate}/>
 </div>

@@ -40,7 +40,7 @@
       {/each}
     </div>
   {/if}
-  <div class="max-w-5xl mx-auto py-8 px-4">
+  <div class="py-8 px-4">
     <slot />
   </div>
   <Toasts />
