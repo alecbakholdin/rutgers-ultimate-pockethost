@@ -52,6 +52,11 @@
           type: 'error',
           message: e.message,
         })
+      } else {
+        toast({
+            type: 'error',
+            message: JSON.stringify(e)
+        })
       }
       console.error(e)
     }
