@@ -3,8 +3,8 @@
   import { page } from '$app/stores'
   export let data
 
-  const startDate = $page.url.searchParams.get('startDate') ?? '';
-  const endDate = $page.url.searchParams.get('endDate') ?? '';
+  $: startDate = $page.url.searchParams.get('startDate') ?? '';
+  $: endDate = $page.url.searchParams.get('endDate') ?? '';
 
 </script>
 
