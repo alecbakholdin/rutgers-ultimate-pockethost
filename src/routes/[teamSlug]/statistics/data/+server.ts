@@ -144,12 +144,14 @@ function getParams(url: URL, params: RouteParams): StatsQuery {
     url.searchParams
       .get('gameIds')
       ?.split(',')
-      .map((x) => x.trim()) ?? []
+      .map((x) => x.trim())
+      .filter((x) => x) ?? []
   const playerIds =
     url.searchParams
       .get('playerIds')
       ?.split(',')
-      .map((x) => x.trim()) ?? []
+      .map((x) => x.trim())
+      .filter((x) => x) ?? []
 
   return {
     teamSlug: params.teamSlug,
