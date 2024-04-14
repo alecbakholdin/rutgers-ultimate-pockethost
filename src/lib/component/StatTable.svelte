@@ -46,6 +46,7 @@
           },
         ],
       })
+      updateStats(teamSlug, gameIds, playerIds, startDate, endDate)
     } catch (e) {
       if (e instanceof Error) {
         toast({
