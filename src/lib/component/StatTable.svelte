@@ -21,10 +21,10 @@
         alwaysShowHorizontalScroll: true,
         suppressHorizontalScroll: false,
         autoSizeStrategy: {
-            type: "fitCellContents"
-       },
+          type: 'fitCellContents',
+        },
         columnDefs: [
-          { field: 'playerName', headerName: 'Player', pinned: true},
+          { field: 'playerName', headerName: 'Player', pinned: true },
           { field: 'pointsPlayed', headerName: 'Points' },
 
           { field: 'goals', headerName: 'Goals' },
@@ -42,11 +42,17 @@
             field: 'plusMinusPerPoint',
             headerName: '(+/-)/pt',
             headerTooltip: 'Plus Minus per Point',
-            valueFormatter: p => p.data?.plusMinusPerPoint?.toFixed(2) ?? ''
+            valueFormatter: (p) => p.data?.plusMinusPerPoint?.toFixed(2) ?? '',
           },
         ],
       })
     } catch (e) {
+      if (e instanceof Error) {
+        toast({
+          type: 'error',
+          message: e.message,
+        })
+      }
       console.error(e)
     }
   })
@@ -79,5 +85,9 @@
 </script>
 
 <div class="max-w-screen w-screen overflow-x-scroll">
-    <div id="stat-table" class="ag-theme-quartz h-[500px]" bind:this={gridEl}></div>
+  <div
+    id="stat-table"
+    class="ag-theme-quartz h-[500px]"
+    bind:this={gridEl}
+  ></div>
 </div>
