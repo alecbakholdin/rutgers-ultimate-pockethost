@@ -21,7 +21,7 @@
     (x) =>
       !x.opponent_goal &&
       !x.goal &&
-      (x.type === GamePointTypeOptions.Final ||
+      (x.type === GamePointTypeOptions.O ||
         x.type === GamePointTypeOptions.D),
   )
 
