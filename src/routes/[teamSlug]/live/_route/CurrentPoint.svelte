@@ -75,6 +75,11 @@
     })
     livePoint = { ...livePoint, [key]: value }
   }
+  async function setValues(o: any) {
+
+    if (!livePoint) return
+    pb.collection('game_point').update(livePoint.id, o)
+  }
   const dispatch = createEventDispatcher<{ pointOver: void }>()
 
   async function undo() {
@@ -204,8 +209,10 @@
             class="btn btn-sm btn-success bg-opacity-30"
             on:click={() => {
               try {
-                setPointValue('end', new Date())
-                setPointValue('goal', player.id)
+                setValues({
+                  'end': new Date(),
+                  'goal': player.id
+                })
               } catch {}
               if (!livePoint) return
               pb.collection('game').update(livePoint.game, {
@@ -253,8 +260,10 @@
           class="btn btn-error bg-opacity-30 w-full"
           on:click={() => {
             try {
-              setPointValue('end', new Date())
-              setPointValue('opponent_goal', true)
+              setValues({
+                'end': new Date(),
+                'opponent_goal': true
+              })
             } catch {}
             if (!livePoint) return
             pb.collection('game').update(livePoint.game, {
