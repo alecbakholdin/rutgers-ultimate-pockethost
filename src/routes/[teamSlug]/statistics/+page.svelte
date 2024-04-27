@@ -3,9 +3,10 @@
   import { page } from '$app/stores'
   export let data
 
-  $: startDate = $page.url.searchParams.get('startDate') ?? '';
-  $: endDate = $page.url.searchParams.get('endDate') ?? '';
-
+  $: startDate = $page.url.searchParams.get('startDate') ?? ''
+  $: endDate = $page.url.searchParams.get('endDate') ?? ''
+  $: game = $page.url.searchParams.get('game') ?? ''
+  $: gameIds = game ? [game] : []
 </script>
 
 <form
@@ -33,5 +34,5 @@
 </form>
 
 <div class="h-screen overflow-x-scroll">
-  <StatTable teamSlug={data.team.slug} {startDate} {endDate}/>
+  <StatTable teamSlug={data.team.slug} {startDate} {endDate} {gameIds} />
 </div>
