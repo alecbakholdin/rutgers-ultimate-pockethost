@@ -18,7 +18,11 @@
   const { team, game, gamePoints, ourPossession } = getLiveGameContext()
   $: lastPoint = ($gamePoints?.length && $gamePoints[0]) || undefined
   $: livePoint = $gamePoints?.find(
-    (x) => !x.opponent_goal && !x.goal && x.type !== GamePointTypeOptions.Final,
+    (x) =>
+      !x.opponent_goal &&
+      !x.goal &&
+      (x.type === GamePointTypeOptions.Final ||
+        x.type === GamePointTypeOptions.D),
   )
 
   async function updatePointType(type: GamePointTypeOptions) {
@@ -29,7 +33,7 @@
     }
   }
 
-  let message: string;
+  let message: string
   async function createNewEvent(
     type: GamePointEventTypeOptions,
     player?: string,
@@ -99,6 +103,7 @@
         assist: '',
       } satisfies Partial<GamePointRecord>)
     } else if (gamePointEvents.length) {
+      message = gamePointEvents[0].message
       await pb.collection('game_point_event').delete(gamePointEvents[0].id)
     } else {
       $selectedPlayers = [...lastPoint.starting_line]
@@ -198,12 +203,10 @@
             type="button"
             class="btn btn-sm btn-success bg-opacity-30"
             on:click={() => {
-              setPointValue('goal', player.id)
-              try{
+              try {
                 setPointValue('end', new Date())
-              }catch{
-
-              }
+                setPointValue('goal', player.id)
+              } catch {}
               if (!livePoint) return
               pb.collection('game').update(livePoint.game, {
                 'team_score+': 1,
@@ -220,8 +223,24 @@
         {/if}
       </div>
     {/each}
+    {#if $ourPossession}
+      <button
+        type="button"
+        class="w-full btn mb-2"
+        on:click={() => createNewEvent(GamePointEventTypeOptions.TeamTimeout)}
+        >Our Timeout</button
+      >
+    {/if}
     {#if !$ourPossession}
       <div class="w-full my-8 flex flex-col gap-2">
+        <button
+          type="button"
+          class="btn btn-info bg-opacity-30 w-full"
+          on:click={() =>
+            createNewEvent(GamePointEventTypeOptions.OpponentTimeout)}
+        >
+          {$game?.opponent ?? 'Opponent'} Timeout
+        </button>
         <button
           type="button"
           class="btn btn-info bg-opacity-30 w-full"
@@ -233,7 +252,10 @@
           type="button"
           class="btn btn-error bg-opacity-30 w-full"
           on:click={() => {
-            setPointValue('opponent_goal', true)
+            try {
+              setPointValue('end', new Date())
+              setPointValue('opponent_goal', true)
+            } catch {}
             if (!livePoint) return
             pb.collection('game').update(livePoint.game, {
               'opponent_score+': 1,
@@ -245,7 +267,12 @@
         </button>
       </div>
     {/if}
-    <input class="input input-bordered w-full my-1" placeholder="Message" bind:value={message} autocapitalize="off" />
+    <input
+      class="input input-bordered w-full my-1"
+      placeholder="Message"
+      bind:value={message}
+      autocapitalize="off"
+    />
     <button
       type="button"
       class="btn w-full"

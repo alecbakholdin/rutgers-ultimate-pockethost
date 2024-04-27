@@ -39,8 +39,10 @@
     $gamePoints?.flatMap(
       (x) => x.expand?.['game_point_event(game_point)'] || [],
     ) || []
-  $: eventCount = (type: GamePointEventTypeOptions, player: string) =>
-    allEvents?.filter((x) => x.type === type && x.player === player).length ?? 0
+  $: eventCount = (type: GamePointEventTypeOptions, player?: string) =>
+    allEvents?.filter(
+      (x) => x.type === type && (!player || x.player === player),
+    ).length ?? 0
 
   let selectedGroups: string[] = []
   $: playersInGroup = _.uniq(
@@ -107,22 +109,32 @@
   }
 
   const dispatch = createEventDispatcher<{ startPoint: void }>()
-  $: pointInProgress = !!$gamePoints?.find((x) => !x.goal && !x.opponent_goal)
-  async function submitToPoint(final?: boolean) {
+  $: pointInProgress = !!$gamePoints?.find(
+    (x) => !x.end,
+  )
+  async function submitToPoint(
+    nonStandard?:
+      | GamePointTypeOptions.Half
+      | GamePointTypeOptions.TeamTimeout
+      | GamePointTypeOptions.OpponentTimeout
+      | GamePointTypeOptions.Final,
+  ) {
     if (!$game) return
     const O = GamePointTypeOptions.O
     const D = GamePointTypeOptions.D
-    const Final = GamePointTypeOptions.Final
     const type = ($gamePoints?.length && $gamePoints[0].opponent_goal && O) || D
     const point: GamePointRecord = {
       game: $game.id,
-      starting_line: final ? [] : $selectedPlayers,
+      starting_line: nonStandard ? [] : $selectedPlayers,
       team_score: $game.team_score,
       opponent_score: $game.opponent_score,
-      type: final ? Final : type,
+      type: nonStandard || type,
+    }
+    if (nonStandard) {
+      point.end = new Date() as any
     }
     await pb.collection('game_point').create(point)
-    if (final) {
+    if (nonStandard === GamePointTypeOptions.Final) {
       await pb.collection('game').update($game.id, {
         end: new Date(),
       })
@@ -139,6 +151,7 @@
   )
   $: somePlayersSelected = !allPlayersSelected && atLeastOnePlayerSelected
   $: noPlayersSelected = !atLeastOnePlayerSelected
+  $: firstHalf = !$gamePoints?.find((x) => x.type === GamePointTypeOptions.Half)
 </script>
 
 {#if !pointInProgress}
@@ -151,9 +164,35 @@
     >
       Submit to point ({$selectedPlayers.length}/7)
     </button>
+    {#if firstHalf}
+      <button
+        type="button"
+        class="btn w-full mb-2"
+        on:click={() => submitToPoint(GamePointTypeOptions.Half)}
+      >
+        Halftime
+      </button>
+    {/if}
+
+    <div class="flex items-center gap-1">
+      <button
+        type="button"
+        class="btn flex-grow mb-2"
+        on:click={() => submitToPoint(GamePointTypeOptions.TeamTimeout)}
+      >
+        Our Timeout
+      </button>
+      <button
+        type="button"
+        class="btn flex-grow mb-2"
+        on:click={() => submitToPoint(GamePointTypeOptions.OpponentTimeout)}
+      >
+        Their Timeout
+      </button>
+    </div>
     <button
       class="btn w-full mb-2"
-      on:click={() => submitToPoint(true)}
+      on:click={() => submitToPoint(GamePointTypeOptions.Final)}
       disabled={$gameOver}
     >
       Mark as Final Score
@@ -345,7 +384,10 @@
       }}
       on:click={() => (selectedGroups = toggleArray(selectedGroups, group.id))}
     >
-      {group.name} ({$selectedPlayers.length ? $selectedPlayers.filter(x => group.players?.includes(x)).length + "/" : ""}{group.players?.length})
+      {group.name} ({$selectedPlayers.length
+        ? $selectedPlayers.filter((x) => group.players?.includes(x)).length +
+          '/'
+        : ''}{group.players?.length})
     </button>
   {/each}
 </div>
@@ -365,7 +407,11 @@
               (x) => !filteredPlayers.find((f) => f.id === x),
             ))}
     />
-    <span class="text-lg font-semibold">Player ({$selectedPlayers.length ? `${$selectedPlayers.length}/` : ''}{playersByStatus[PlayerStatusOptions.active].length})</span>
+    <span class="text-lg font-semibold"
+      >Player ({$selectedPlayers.length
+        ? `${$selectedPlayers.length}/`
+        : ''}{playersByStatus[PlayerStatusOptions.active].length})</span
+    >
   </div>
   {#each playerSections as [status, players]}
     {#if status}

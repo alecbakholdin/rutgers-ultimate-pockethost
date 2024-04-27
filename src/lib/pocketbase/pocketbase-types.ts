@@ -90,6 +90,9 @@ export enum GamePointTypeOptions {
 	"O" = "O",
 	"D" = "D",
 	"Final" = "Final",
+	"Half" = "Half",
+	"TeamTimeout" = "TeamTimeout",
+	"OpponentTimeout" = "OpponentTimeout",
 }
 export type GamePointRecord = {
 	assist?: RecordIdString
@@ -110,7 +113,8 @@ export enum GamePointEventTypeOptions {
 	"Drop" = "Drop",
 	"Substitution" = "Substitution",
 	"Block" = "Block",
-	"Timeout" = "Timeout",
+	"TeamTimeout" = "TeamTimeout",
+	"OpponentTimeout" = "OpponentTimeout",
 }
 export type GamePointEventRecord = {
 	game_point: RecordIdString
