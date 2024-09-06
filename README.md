@@ -1,3 +1,4 @@
+
 # pocketbase-sveltekit-auth
 
 This is a project that demonstrates how to integrate PocketBase with SvelteKit 1.0. The project includes login and registration pages, as well as examples of how to retrieve the current user. You can watch a video of the creation of this project on YouTube at [this link](https://youtu.be/AxPB3e-3yEM).
@@ -34,3 +35,5 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+
+t
