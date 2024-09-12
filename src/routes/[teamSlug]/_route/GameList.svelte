@@ -71,7 +71,7 @@
   {#if section.length}
     <div class="my-2">
       <p class="text-lg font-semibold">{sectionKey}</p>
-      <div class="flex flex-col gap-1">
+      <div class="flex flex-col gap-3">
         {#each section as game}
           <div on:contextmenu={contextMenuHandler(game)} role="article">
             <GameCard
