@@ -26,7 +26,9 @@
   class:bg-success={success}
   on:click={() => href && goto(href)}
   class:cursor-pointer={href}
-  class:hover:bg-info={href}
+  class:hover:shadow-xl={href}
+  class:hover:opacity-80={href}
+  class:hover:bg-black={href}
   role={href && 'link'}
 >
   <div class="card-body">
