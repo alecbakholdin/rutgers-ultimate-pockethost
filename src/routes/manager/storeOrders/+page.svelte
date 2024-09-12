@@ -54,7 +54,7 @@
           <th>Name</th>
           <th>Quantity</th>
           {#each fieldNames as field}
-          <td>{field}</td>
+            <td>{field}</td>
           {/each}
         </tr>
       </thead>

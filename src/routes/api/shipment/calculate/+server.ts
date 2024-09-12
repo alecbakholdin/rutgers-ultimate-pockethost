@@ -9,7 +9,7 @@ import {
 export async function POST({ request }) {
   const {
     shippingAddress: { line1, line2, city, state, postal_code },
-    weightInOz
+    weightInOz,
   } = CalculateShipmentSchema.parse(await request.json())
   const shipment = await easyPost.Shipment.create({
     from_address: {
@@ -32,9 +32,12 @@ export async function POST({ request }) {
       weight: weightInOz,
     },
   } satisfies IShipmentCreateParameters)
-  if(!shipment.rates) throw error(400, {message: "No viable shipments found"})
+  if (!shipment.rates)
+    throw error(400, { message: 'No viable shipments found' })
   return json({
     shipmentId: shipment.id,
-    cheapestShipmentInCents: Math.floor(parseFloat(shipment.lowestRate()?.rate) * 100 * 1.1)
+    cheapestShipmentInCents: Math.floor(
+      parseFloat(shipment.lowestRate()?.rate) * 100 * 1.1,
+    ),
   } satisfies CalculatedShipmentSchema)
 }

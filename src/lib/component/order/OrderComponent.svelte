@@ -13,7 +13,9 @@
   export let showAdminControls: boolean | undefined = false
   const dispatch = createEventDispatcher<{ expand: void }>()
 
-  $: orderFulfilled = !order.expand?.['order_line_item(order)'].find(x => !x.fulfilled)
+  $: orderFulfilled = !order.expand?.['order_line_item(order)'].find(
+    (x) => !x.fulfilled,
+  )
   $: createdDate = new Date(order.created)
   $: fulfillIcon = orderFulfilled ? 'mdi:done' : 'mdi:remove'
   $: fulfilledDate = orderFulfilled ? 'Fulfilled' : 'Unfulfilled'
@@ -91,9 +93,9 @@
           <div class="flex gap-2">
             <div class="flex flex-col justify-center">
               {#if lineItem.fulfilled}
-                <Icon icon="mdi:check"/>
+                <Icon icon="mdi:check" />
               {:else}
-                <Icon icon="mdi:remove"/>
+                <Icon icon="mdi:remove" />
               {/if}
             </div>
             <ImageThumb

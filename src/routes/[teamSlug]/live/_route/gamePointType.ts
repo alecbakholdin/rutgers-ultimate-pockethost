@@ -68,9 +68,15 @@ export type LiveGameContext = {
 export function getLiveGameContext(): LiveGameContext {
   return getContext('liveGame')
 }
-export function initLiveGameContext(team: TeamWithGame, game?: GameResponse<{team: TeamResponse}>) {
+export function initLiveGameContext(
+  team: TeamWithGame,
+  game?: GameResponse<{ team: TeamResponse }>,
+) {
   const teamStore = writable<TeamWithGame | undefined>(team)
-  const gameStore = derived(teamStore, ($team) => game ?? $team?.expand?.live_game)
+  const gameStore = derived(
+    teamStore,
+    ($team) => game ?? $team?.expand?.live_game,
+  )
   const gamePointsStore = writable<LiveFeedGamePoint[]>()
   async function updateTeamStore() {
     teamStore.set(

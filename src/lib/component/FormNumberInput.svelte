@@ -21,7 +21,10 @@
   }
 
   // @ts-ignore
-  const numValue = numberProxy(formContext.form, name, {empty: "undefined", emptyIfZero: false})
+  const numValue = numberProxy(formContext.form, name, {
+    empty: 'undefined',
+    emptyIfZero: false,
+  })
 </script>
 
 <input

@@ -5,7 +5,7 @@
   } from '$lib/pocketbase/pocketbase-types'
   import _ from 'lodash'
   import GameCard from './GameCard.svelte'
-  import {openModal} from './GameModal.svelte'
+  import { openModal } from './GameModal.svelte'
 
   export let team: TeamResponse<{ 'game(team)': GameResponse[] }>
 
@@ -65,8 +65,6 @@
     </div>
   </div>
 {/if}
-
-
 
 {#each sectionKeys as sectionKey}
   {@const section = sections[sectionKey]}

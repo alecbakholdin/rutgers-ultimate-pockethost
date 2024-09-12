@@ -8,7 +8,7 @@
 </script>
 
 <script lang="ts">
-    import { formatDate } from '$lib/util/functions/formatDate'
+  import { formatDate } from '$lib/util/functions/formatDate'
 
   import _ from 'lodash'
   import { writable } from 'svelte/store'
@@ -66,7 +66,13 @@
       <slot />
       {#if timeDiffStr}
         <div class="dropdown">
-          <div tabindex="0" role="button" class="w-full text-right text-xs opacity-40">{timeDiffStr}</div>
+          <div
+            tabindex="0"
+            role="button"
+            class="w-full text-right text-xs opacity-40"
+          >
+            {timeDiffStr}
+          </div>
           <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
           <div
             tabindex="0"

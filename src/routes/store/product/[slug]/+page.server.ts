@@ -2,7 +2,10 @@ import {
   productExpansionString,
   type ExpandedProduct,
 } from '$lib/pocketbase/derived-pocketbase-types'
-import type { LineItemRecord, TypedPocketBase } from '$lib/pocketbase/pocketbase-types'
+import type {
+  LineItemRecord,
+  TypedPocketBase,
+} from '$lib/pocketbase/pocketbase-types'
 import { error, fail } from '@sveltejs/kit'
 import { message, superValidate } from 'sveltekit-superforms/server'
 import type { PageServerLoad } from './$types'
@@ -30,7 +33,7 @@ export const actions = {
       return fail(400, { form })
     }
 
-    const cartItems = await getCartItems();
+    const cartItems = await getCartItems()
     const existingItem = cartItems.items.find(
       (item) =>
         item.product === product.id && _.isEqual(item.fields, form.data.fields),

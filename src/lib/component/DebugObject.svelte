@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let obj: any;
+  export let obj: any
 </script>
 
 <pre>

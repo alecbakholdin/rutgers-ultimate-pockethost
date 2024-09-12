@@ -5,23 +5,21 @@ import { LoginWithPasswordSchema } from './schemas'
 
 export async function load() {
   return {
-    loginForm: await superValidate(LoginWithPasswordSchema)
+    loginForm: await superValidate(LoginWithPasswordSchema),
   }
 }
 
 export const actions: Actions = {
   default: async ({ locals, request }) => {
-    const form = await superValidate(request, LoginWithPasswordSchema);
-    if (!form) return fail(400, { form });
-    const { email, password } = form.data;
+    const form = await superValidate(request, LoginWithPasswordSchema)
+    if (!form) return fail(400, { form })
+    const { email, password } = form.data
 
     try {
-      await locals.pb
-        .collection('users')
-        .authWithPassword(email, password)
+      await locals.pb.collection('users').authWithPassword(email, password)
     } catch (e) {
       console.error(e)
-      return message(form, "Invalid login credentials", { status: 400 })
+      return message(form, 'Invalid login credentials', { status: 400 })
     }
 
     throw redirect(303, '/')

@@ -10,7 +10,7 @@
     href: string
     imageUrl?: string
     icon?: string
-}
+  }
   $: links = getLinks(data.teams, data.storeSections.length)
   function getLinks(teams: TeamResponse[], numStoreSections: number): Link[] {
     const links: Link[] = teams.map((team) => ({
@@ -19,7 +19,11 @@
       imageUrl: pb.getFileUrl(team, team.logo),
     }))
     if (numStoreSections) {
-      links.push({ title: 'Store', href: "/store", icon: 'material-symbols:store' })
+      links.push({
+        title: 'Store',
+        href: '/store',
+        icon: 'material-symbols:store',
+      })
     }
     return links
   }
@@ -37,7 +41,10 @@
     <div class="flex gap-2 mx-auto">
       {#each links as link}
         <div class="card card-bordered border-primary">
-          <a class="card-body flex items-center justify-center" href={link.href} >
+          <a
+            class="card-body flex items-center justify-center"
+            href={link.href}
+          >
             {#if link.imageUrl}
               <img src={link.imageUrl} alt={link.title} class="h-12 w-12" />
             {:else if link.icon}

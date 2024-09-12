@@ -6,7 +6,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   pb.authStore.loadFromCookie(event.request.headers.get('cookie') || '')
   if (pb.authStore.isValid) {
     try {
-      await pb.collection('users').authRefresh({requestKey: null})
+      await pb.collection('users').authRefresh({ requestKey: null })
     } catch (e) {
       pb.authStore.clear()
     }
@@ -14,14 +14,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   event.locals.pb = pb
   event.locals.user = structuredClone(pb.authStore.model) as any
-  currentUser.set(event.locals.user);
+  currentUser.set(event.locals.user)
 
   const response = await resolve(event)
 
   // after
   response.headers.set(
     'set-cookie',
-    pb.authStore.exportToCookie({ httpOnly: false, maxAge: 365*24*60*60, sameSite: 'Lax'})
+    pb.authStore.exportToCookie({
+      httpOnly: false,
+      maxAge: 365 * 24 * 60 * 60,
+      sameSite: 'Lax',
+    }),
   )
 
   return response

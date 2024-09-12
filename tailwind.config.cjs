@@ -6,17 +6,19 @@ const config = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
 
   theme: {
-    extend: {}
+    extend: {},
   },
 
   daisyui: {
-    themes: [{
-      light: {
-        ...require("daisyui/src/theming/themes")["light"],
-        primary: "FF004E",
-        "primary-content": "#FFFFFF"
-      }
-    }]
+    themes: [
+      {
+        light: {
+          ...require('daisyui/src/theming/themes')['light'],
+          primary: 'FF004E',
+          'primary-content': '#FFFFFF',
+        },
+      },
+    ],
   },
 
   plugins: [forms, typography, daisyui],

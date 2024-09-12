@@ -21,8 +21,7 @@
     (x) =>
       !x.opponent_goal &&
       !x.goal &&
-      (x.type === GamePointTypeOptions.O ||
-        x.type === GamePointTypeOptions.D),
+      (x.type === GamePointTypeOptions.O || x.type === GamePointTypeOptions.D),
   )
 
   async function updatePointType(type: GamePointTypeOptions) {
@@ -76,7 +75,6 @@
     livePoint = { ...livePoint, [key]: value }
   }
   async function setValues(o: any) {
-
     if (!livePoint) return
     pb.collection('game_point').update(livePoint.id, o)
   }
@@ -210,8 +208,8 @@
             on:click={() => {
               try {
                 setValues({
-                  'end': new Date(),
-                  'goal': player.id
+                  end: new Date(),
+                  goal: player.id,
                 })
               } catch {}
               if (!livePoint) return
@@ -261,8 +259,8 @@
           on:click={() => {
             try {
               setValues({
-                'end': new Date(),
-                'opponent_goal': true
+                end: new Date(),
+                opponent_goal: true,
               })
             } catch {}
             if (!livePoint) return

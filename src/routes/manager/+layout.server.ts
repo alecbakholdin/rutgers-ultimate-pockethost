@@ -1,7 +1,7 @@
-import { error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit'
 
-export async function load({locals: {user}}) {
-    if (!user?.isManager) {
-        throw error(401, 'Unauthorized');
-    }
+export async function load({ locals: { user } }) {
+  if (!user?.isManager) {
+    throw error(401, 'Unauthorized')
+  }
 }

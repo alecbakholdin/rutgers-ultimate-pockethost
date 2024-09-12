@@ -46,18 +46,19 @@ export const actions: Actions = {
     const gameId = form.get('gameId')?.toString()
     if (!gameId) throw error(400, { message: 'Missing gameId' })
     const start = form.get('start')?.toString()
-    const half_cap_min = parseInt(form.get('half_cap_min')?.toString() ?? "") || 0
-    const soft_cap_min = parseInt(form.get('soft_cap_min')?.toString() ?? "") || 0
-    const hard_cap_min = parseInt(form.get('hard_cap_min')?.toString() ?? "") || 0
+    const half_cap_min =
+      parseInt(form.get('half_cap_min')?.toString() ?? '') || 0
+    const soft_cap_min =
+      parseInt(form.get('soft_cap_min')?.toString() ?? '') || 0
+    const hard_cap_min =
+      parseInt(form.get('hard_cap_min')?.toString() ?? '') || 0
 
-    await pb
-      .collection('game')
-      .update(gameId, {
-        start: start && new Date(start),
-        half_cap_min,
-        soft_cap_min,
-        hard_cap_min,
-      } as Partial<GameRecord & {start: Date}>)
+    await pb.collection('game').update(gameId, {
+      start: start && new Date(start),
+      half_cap_min,
+      soft_cap_min,
+      hard_cap_min,
+    } as Partial<GameRecord & { start: Date }>)
   },
   async setLive({ request, locals: { pb }, params }) {
     const form = await request.formData()

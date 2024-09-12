@@ -2,9 +2,7 @@ import type {
   ExpandedField,
   ExpandedProduct,
 } from '$lib/pocketbase/derived-pocketbase-types'
-import {
-  ProductFieldTypeOptions
-} from '$lib/pocketbase/pocketbase-types'
+import { ProductFieldTypeOptions } from '$lib/pocketbase/pocketbase-types'
 import { ZodSchema, z } from 'zod'
 
 export const GenericAddToCartSchema = z.object({
@@ -33,17 +31,19 @@ function getSchemaForField(field: ExpandedField) {
       schema = z.number()
       break
     case ProductFieldTypeOptions.options:
-      const options = field.options.split(',').map(x => x.trim())
+      const options = field.options.split(',').map((x) => x.trim())
       schema = options.length ? z.enum(options as any) : z.string()
       break
     case ProductFieldTypeOptions.color:
-      schema = field.expand?.colors.length ? z.enum(field.expand.colors.map(c => c.name) as any) : z.string()
+      schema = field.expand?.colors.length
+        ? z.enum(field.expand.colors.map((c) => c.name) as any)
+        : z.string()
       break
     default:
       return z.string()
   }
-  if(field.optional) {
-    return schema.optional();
+  if (field.optional) {
+    return schema.optional()
   }
   return schema
 }

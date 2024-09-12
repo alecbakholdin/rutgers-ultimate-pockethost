@@ -109,7 +109,7 @@ export const actions = {
       line_items,
       payment_intent_data: {
         receipt_email: user.email,
-        description: 'R Ultimate Merchandise'
+        description: 'R Ultimate Merchandise',
       },
       success_url: `${url.origin}/checkout/success`,
       ...(shippingCostInCents !== undefined &&

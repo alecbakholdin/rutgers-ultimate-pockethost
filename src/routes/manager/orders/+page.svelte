@@ -10,12 +10,9 @@
   $: searchStr = $page.url.searchParams.get('q')
   $: if (typeof window !== 'undefined') {
     const key = 'order_manager_order_search'
-    const localData: string[] = JSON.parse(localStorage.getItem(key) || '[]');
+    const localData: string[] = JSON.parse(localStorage.getItem(key) || '[]')
     previousSearches = _.uniq(
-      [
-        searchStr || '',
-        ...localData,
-      ].filter((x) => x),
+      [searchStr || '', ...localData].filter((x) => x),
     ).slice(0, 5)
     localStorage.setItem(key, JSON.stringify(previousSearches))
     console.log(searchStr, previousSearches, localStorage.getItem(key))
@@ -64,11 +61,11 @@
   <button type="submit" class="btn">Go</button>
 </form>
 <div class="flex mt-4 gap-2">
-    {#each previousSearches as search}
-        <a href="?q={search}" class="badge badge-ghost badge-lg">
-            {search}
-        </a>
-    {/each}
+  {#each previousSearches as search}
+    <a href="?q={search}" class="badge badge-ghost badge-lg">
+      {search}
+    </a>
+  {/each}
 </div>
 
 <div class="my-4">

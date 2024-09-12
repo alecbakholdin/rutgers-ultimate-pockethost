@@ -109,9 +109,7 @@
   }
 
   const dispatch = createEventDispatcher<{ startPoint: void }>()
-  $: pointInProgress = !!$gamePoints?.find(
-    (x, i) => !x.end,
-  )
+  $: pointInProgress = !!$gamePoints?.find((x, i) => !x.end)
   async function submitToPoint(
     nonStandard?:
       | GamePointTypeOptions.Half

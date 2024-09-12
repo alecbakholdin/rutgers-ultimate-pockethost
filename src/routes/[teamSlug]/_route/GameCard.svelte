@@ -4,7 +4,7 @@
     GameResponse,
     TeamResponse,
   } from '$lib/pocketbase/pocketbase-types'
-    import { formatDate } from '$lib/util/functions/formatDate'
+  import { formatDate } from '$lib/util/functions/formatDate'
   import Icon from '@iconify/svelte'
 
   export let team: TeamResponse

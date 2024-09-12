@@ -6,7 +6,7 @@ export async function load() {
     completedOrders: await pb
       .collection('non_r_ultimate_orders')
       .getFullList<NonRUltimateOrdersResponse<number, number, number>>({
-        sort: '+name'
+        sort: '+name',
       }),
   }
 }

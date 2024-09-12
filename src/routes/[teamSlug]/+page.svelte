@@ -10,7 +10,7 @@
   import Icon from '@iconify/svelte'
   import GameAdminForm from './_route/GameAdminForm.svelte'
   import GameList from './_route/GameList.svelte'
-    import GameModal from './_route/GameModal.svelte'
+  import GameModal from './_route/GameModal.svelte'
 
   export let data
 
@@ -25,14 +25,13 @@
   }
 </script>
 
-
 <a
   href="/{data.team.slug}/statistics"
   data-sveltekit-preload-data="off"
   class="btn">Stats</a
 >
 <GameList team={data.team} />
-<GameModal/>
+<GameModal />
 
 {#if data.user?.isManager}
   <GameAdminForm team={data.team} />

@@ -283,6 +283,9 @@
     >
       Go to Payment
     </button>
-    <span class="text-gray-400 w-[200px] text-right">You will be directed to send payment to 1972 Ultimate Alumni Club, our nonprofit</span>
+    <span class="text-gray-400 w-[200px] text-right"
+      >You will be directed to send payment to 1972 Ultimate Alumni Club, our
+      nonprofit</span
+    >
   </div>
 </Form.Root>

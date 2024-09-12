@@ -31,8 +31,7 @@ export async function load({ url }) {
     {},
   )
   const filterStr = [...fieldFilterClauses, ...stringSearchClauses].join(' && ')
-  const filterObj = { ...fieldFilterObj, ...stringSearchObj };
-
+  const filterObj = { ...fieldFilterObj, ...stringSearchObj }
 
   const filter = pb.filter(filterStr, filterObj)
   console.log(filter)

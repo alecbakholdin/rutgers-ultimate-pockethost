@@ -131,19 +131,25 @@
       {#if game.half_cap_min}
         <div class="flex items-center gap-1">
           <Icon icon="fluent:hourglass-half-20-regular" />
-          <span class="text-neutral text-sm">{formatCap(game, game.half_cap_min)}</span>
+          <span class="text-neutral text-sm"
+            >{formatCap(game, game.half_cap_min)}</span
+          >
         </div>
       {/if}
       {#if game.soft_cap_min}
         <div class="flex items-center gap-1">
           <Icon icon="fluent:hourglass-three-quarter-16-regular" />
-          <span class="text-neutral text-sm">{formatCap(game, game.soft_cap_min)}</span>
+          <span class="text-neutral text-sm"
+            >{formatCap(game, game.soft_cap_min)}</span
+          >
         </div>
       {/if}
       {#if game.hard_cap_min}
         <div class="flex items-center gap-1">
           <Icon icon="material-symbols:done" />
-          <span class="text-neutral text-sm">{formatCap(game, game.hard_cap_min)}</span>
+          <span class="text-neutral text-sm"
+            >{formatCap(game, game.hard_cap_min)}</span
+          >
         </div>
       {/if}
     </div>

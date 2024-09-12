@@ -22,8 +22,8 @@
     modal.showModal()
   }
   function closeModal() {
-      if (!modal) return
-      modalGame.set(undefined)
+    if (!modal) return
+    modalGame.set(undefined)
     modal.close()
   }
 </script>
@@ -34,10 +34,10 @@
   const closeOnSuccess: SubmitFunction =
     () =>
     async ({ update, result }) => {
-        if (result.type === 'success') {
-            closeModal()
-        }
-        await update()
+      if (result.type === 'success') {
+        closeModal()
+      }
+      await update()
     }
 </script>
 
@@ -49,40 +49,55 @@
       </h3>
     </div>
     <form
-    id="gameModalForm"
+      id="gameModalForm"
       method="post"
       action="?/editGame"
       class="modal-middle mb-4"
       use:enhance={closeOnSuccess}
     >
-    {#if $modalGame}
-      <input type="hidden" name="gameId" value={$modalGame?.id} />
-      <label for="opponent" class="label">Opponent</label>
-      <input
-        type="text"
-        name="opponent"
-        id="opponent"
-        class="input input-bordered"
-        value={$modalGame?.opponent}
-      />
-      <label for="start" class="label">Start</label>
-      <input
-        type="datetime-local"
-        name="start"
-        id="gameModalStart"
-        class="input input-bordered"
-        value={$modalFormattedStart}
-      />
-    <label for="half_cap_min" class="label">Half Cap (min)</label>
-    <input type="text" name="half_cap_min" class={"input input-bordered"} value={$modalGame?.half_cap_min}>
-    <label for="soft_cap_min" class="label">Soft Cap (min)</label>
-    <input type="text" name="soft_cap_min" class={"input input-bordered"} value={$modalGame?.soft_cap_min}>
-    <label for="hard_cap_min" class="label">Hard Cap (min)</label>
-    <input type="text" name="hard_cap_min" class={"input input-bordered"} value={$modalGame?.hard_cap_min}>
-    {/if}
+      {#if $modalGame}
+        <input type="hidden" name="gameId" value={$modalGame?.id} />
+        <label for="opponent" class="label">Opponent</label>
+        <input
+          type="text"
+          name="opponent"
+          id="opponent"
+          class="input input-bordered"
+          value={$modalGame?.opponent}
+        />
+        <label for="start" class="label">Start</label>
+        <input
+          type="datetime-local"
+          name="start"
+          id="gameModalStart"
+          class="input input-bordered"
+          value={$modalFormattedStart}
+        />
+        <label for="half_cap_min" class="label">Half Cap (min)</label>
+        <input
+          type="text"
+          name="half_cap_min"
+          class={'input input-bordered'}
+          value={$modalGame?.half_cap_min}
+        />
+        <label for="soft_cap_min" class="label">Soft Cap (min)</label>
+        <input
+          type="text"
+          name="soft_cap_min"
+          class={'input input-bordered'}
+          value={$modalGame?.soft_cap_min}
+        />
+        <label for="hard_cap_min" class="label">Hard Cap (min)</label>
+        <input
+          type="text"
+          name="hard_cap_min"
+          class={'input input-bordered'}
+          value={$modalGame?.hard_cap_min}
+        />
+      {/if}
     </form>
     <div class="modal-action">
-        <button form="gameModalForm" class="btn">Submit</button>
+      <button form="gameModalForm" class="btn">Submit</button>
       {#if $modalGame?.id && $modalGame?.id !== team?.live_game}
         <form method="post" action="?/setLive" use:enhance={closeOnSuccess}>
           <input type="hidden" name="gameId" value={$modalGame?.id} />

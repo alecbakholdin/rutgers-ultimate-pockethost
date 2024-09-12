@@ -47,11 +47,11 @@ export async function POST({ request, locals: { pb } }) {
         (checkoutSessionCompleted.metadata as StripeOrderMetadata)
           .isRutgersWebsiteOrder === 'true'
       ) {
-        console.log("Creating order")
+        console.log('Creating order')
         await createOrder(checkoutSessionCompleted, pb)
-        console.log("Finished creating order")
+        console.log('Finished creating order')
       } else {
-        console.log('Non Rutgers website checkout session found');
+        console.log('Non Rutgers website checkout session found')
       }
       break
     default:
@@ -99,7 +99,8 @@ async function createOrder(
 
 async function createOrderObject(checkout: Stripe.Checkout.Session) {
   const { shippingAddress, shippingCostInCents } = await getShipping(checkout)
-  const { discountCode, userId, profitInCents } = checkout.metadata as StripeOrderMetadata
+  const { discountCode, userId, profitInCents } =
+    checkout.metadata as StripeOrderMetadata
   return {
     user: userId,
     discountCode,
@@ -133,10 +134,14 @@ async function createOrderLineItems(checkout: Stripe.Checkout.Session) {
     const product = await stripe.products.retrieve(
       stripeLineItem.price.product.toString(),
     )
-    const { _productId, _profitInCents: profitInCentsStr, ...fields } = product.metadata as StripeLineItemMetadata
+    const {
+      _productId,
+      _profitInCents: profitInCentsStr,
+      ...fields
+    } = product.metadata as StripeLineItemMetadata
     const quantity = stripeLineItem.quantity ?? 1
     const unitPriceCents = stripeLineItem.price.unit_amount ?? 0
-    const totalCents = quantity * unitPriceCents;
+    const totalCents = quantity * unitPriceCents
     list.push({
       product: _productId,
       quantity,

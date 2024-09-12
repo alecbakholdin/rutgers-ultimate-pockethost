@@ -11,22 +11,24 @@ import type {
 const machineJerseysId = 'i79vnh3trmzgmva'
 export async function load({ url }) {
   const sectionId = (() => {
-    const urlSectionId = url.searchParams.get('sectionId');
-    if(typeof localStorage === 'undefined') return urlSectionId ?? machineJerseysId;
-    if(urlSectionId) {
-      localStorage.setItem('managerSectionId', urlSectionId);
+    const urlSectionId = url.searchParams.get('sectionId')
+    if (typeof localStorage === 'undefined')
+      return urlSectionId ?? machineJerseysId
+    if (urlSectionId) {
+      localStorage.setItem('managerSectionId', urlSectionId)
     }
-    return localStorage.getItem('managerSectionId') ?? machineJerseysId;
+    return localStorage.getItem('managerSectionId') ?? machineJerseysId
   })()
   const productId = url.searchParams.get('productId')
 
-  const storeSections = await pb.collection('store_section').getFullList({requestKey: null});
-  const storeSection = await pb
+  const storeSections = await pb
     .collection('store_section')
-    .getOne<StoreSectionResponse<{ products: ProductResponse<{fields: ProductFieldResponse[]}>[] }>>(
-      sectionId,
-      { expand: 'products.fields', requestKey: null },
-    )
+    .getFullList({ requestKey: null })
+  const storeSection = await pb.collection('store_section').getOne<
+    StoreSectionResponse<{
+      products: ProductResponse<{ fields: ProductFieldResponse[] }>[]
+    }>
+  >(sectionId, { expand: 'products.fields', requestKey: null })
   const products = storeSection.expand!.products
   const product =
     (productId && products.find((p) => p.id === productId)) || products[0]

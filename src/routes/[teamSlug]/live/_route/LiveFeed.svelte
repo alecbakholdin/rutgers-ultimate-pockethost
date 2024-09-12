@@ -61,9 +61,13 @@
           </svelte:fragment>
         </LiveEvent>
       {:else if event.type === 'TeamTimeout'}
-      <LiveEvent type={'neutral'} time={event.created}>{$team?.name ?? 'Our'} Timeout</LiveEvent>
+        <LiveEvent type={'neutral'} time={event.created}
+          >{$team?.name ?? 'Our'} Timeout</LiveEvent
+        >
       {:else if event.type === 'OpponentTimeout'}
-      <LiveEvent type={'neutral'} time={event.created}>{$game?.opponent ?? 'Their'} Timeout</LiveEvent>
+        <LiveEvent type={'neutral'} time={event.created}
+          >{$game?.opponent ?? 'Their'} Timeout</LiveEvent
+        >
       {/if}
     {/each}
     {#if point.type === 'O' || point.type === 'D'}
@@ -78,9 +82,13 @@
     {:else if point.type === 'Half'}
       <LiveEvent type={'neutral'} time={point.created}>Halftime</LiveEvent>
     {:else if point.type === 'TeamTimeout'}
-      <LiveEvent type={'neutral'} time={point.created}>{$team?.name ?? 'Our'} Timeout</LiveEvent>
+      <LiveEvent type={'neutral'} time={point.created}
+        >{$team?.name ?? 'Our'} Timeout</LiveEvent
+      >
     {:else if point.type === 'OpponentTimeout'}
-      <LiveEvent type={'neutral'} time={point.created}>{$game?.opponent ?? 'Their'} Timeout</LiveEvent>
+      <LiveEvent type={'neutral'} time={point.created}
+        >{$game?.opponent ?? 'Their'} Timeout</LiveEvent
+      >
     {:else if point.type === 'Final'}
       <LiveEvent
         type={point.team_score > point.opponent_score ? 'success' : 'neutral'}

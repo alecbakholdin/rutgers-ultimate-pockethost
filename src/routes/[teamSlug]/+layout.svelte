@@ -17,7 +17,12 @@
           {#if i === routeParts.length - 1}
             {getCrumbText(part)}
           {:else}
-            <a href="/{routeParts.slice(0, i + 1).map(getCrumbText).join('/')}">
+            <a
+              href="/{routeParts
+                .slice(0, i + 1)
+                .map(getCrumbText)
+                .join('/')}"
+            >
               {getCrumbText(part)}
             </a>
           {/if}

@@ -58,6 +58,8 @@ export type OrderLineItemRecordTyped = OrderLineItemRecord<
 >
 export type OrderLineItemResponseTyped<Texpand = unknown> =
   OrderLineItemResponse<Record<string, string>, Texpand>
-export type FullOrderLineItemResponse = 
-  OrderLineItemResponseTyped<{product: ProductResponse, order: FullOrderResponse}>
+export type FullOrderLineItemResponse = OrderLineItemResponseTyped<{
+  product: ProductResponse
+  order: FullOrderResponse
+}>
 export const fullOrderLineItemResponseExpansionString = 'product,order.user'

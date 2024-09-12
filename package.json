@@ -9,7 +9,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --plugin-search-dir . --check . && eslint .",
-    "format": "prettier --plugin-search-dir . --write .",
+    "format": "prettier --plugin=prettier-plugin-svelte --write .",
     "types": "npx pocketbase-typegen --env -o ./src/lib/pocketbase/pocketbase-types.ts"
   },
   "type": "module",
