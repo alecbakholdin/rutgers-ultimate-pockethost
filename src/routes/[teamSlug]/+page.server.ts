@@ -41,10 +41,11 @@ export const actions: Actions = {
       team,
     } satisfies PlayerRecord)
   },
-  async editGame({ request, locals: { pb }, params }) {
+  async editGame({ request, locals: { pb } }) {
     const form = await request.formData()
     const gameId = form.get('gameId')?.toString()
     if (!gameId) throw error(400, { message: 'Missing gameId' })
+    const opponent = form.get('opponent')?.toString()
     const start = form.get('start')?.toString()
     const half_cap_min =
       parseInt(form.get('half_cap_min')?.toString() ?? '') || 0
@@ -54,6 +55,7 @@ export const actions: Actions = {
       parseInt(form.get('hard_cap_min')?.toString() ?? '') || 0
 
     await pb.collection('game').update(gameId, {
+      opponent,
       start: start && new Date(start),
       half_cap_min,
       soft_cap_min,
