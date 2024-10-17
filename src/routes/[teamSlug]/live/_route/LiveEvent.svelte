@@ -76,7 +76,7 @@
           <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
           <div
             tabindex="0"
-            class="dropdown-content z-[1] w-64 card card-compact shadow bg-neutral text-neutral-content"
+            class="dropdown-content z-[1] w-32 card card-compact shadow bg-neutral text-neutral-content"
           >
             <div class="card-body">
               <p>{formatDate(time)}</p>
