@@ -225,6 +225,7 @@ export type TeamGroupRecord = {
 	name: string
 	players?: RecordIdString[]
 	team: RecordIdString
+	use_as_color?: boolean
 }
 
 export type TournamentRecord = {

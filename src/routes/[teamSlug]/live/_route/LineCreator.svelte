@@ -419,7 +419,13 @@
     {/if}
     {#each players as player}
       {@const checkboxId = `player-${player.id}`}
-      <label for={checkboxId} class="flex items-center gap-3 cursor-pointer">
+      <label
+        for={checkboxId}
+        class="flex items-center gap-3 cursor-pointer"
+        style="background-color:{groups.find(
+          (x) => x.use_as_color && x.players?.includes(player.id),
+        )?.color}"
+      >
         <input
           type="checkbox"
           name={checkboxId}
