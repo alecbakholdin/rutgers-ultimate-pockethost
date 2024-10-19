@@ -3,6 +3,7 @@
   import LiveEvent from './LiveEvent.svelte'
   import type { LiveGameContext } from './gamePointType'
   import { message } from 'sveltekit-superforms/server'
+    import { PlayerStatusOptions } from '$lib/pocketbase/pocketbase-types'
 
   export let gamePoints: LiveGameContext['gamePoints']
   export let game: LiveGameContext['game']
@@ -73,11 +74,33 @@
     {#if point.type === 'O' || point.type === 'D'}
       <LiveEvent type="neutral" time={point.created}>
         Point start ({point.team_score}-{point.opponent_score})
-        <p slot="body">
-          <b>{$team?.name}</b> is on {point.type === 'O'
-            ? 'offense'
-            : 'defense'}
-        </p>
+        <div slot="body" class="flex items-center justify-between">
+          <p>
+            <b>{$team?.name}</b> is on {point.type === 'O'
+              ? 'offense'
+              : 'defense'}
+          </p>
+        <div class="dropdown dropdown-top dropdown-end">
+          <div
+            tabindex="0"
+            role="button"
+            class="w-full text-right text-xs opacity-40"
+          >
+            Line
+          </div>
+          <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+          <div
+            tabindex="0"
+            class="dropdown-content z-[1] w-max card card-compact shadow bg-neutral text-neutral-content text-left"
+          >
+            <div class="card-body">
+              {#each point.expand?.starting_line || [] as player}
+                <p>{player.name}</p>
+              {/each}
+            </div>
+          </div>
+        </div>
+        </div>
       </LiveEvent>
     {:else if point.type === 'Half'}
       <LiveEvent type={'neutral'} time={point.created}>Halftime</LiveEvent>
