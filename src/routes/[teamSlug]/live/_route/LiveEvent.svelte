@@ -9,6 +9,7 @@
 
 <script lang="ts">
   import { formatDate } from '$lib/util/functions/formatDate'
+    import Icon from '@iconify/svelte'
 
   import _ from 'lodash'
   import { writable } from 'svelte/store'
@@ -62,21 +63,23 @@
   transition:fly
 >
   <div class="card-body">
-    <div class="card-title !mb-0 flex w-full">
-      <slot />
+    <div class="card-title !mb-0 w-full flex flex-nowrap justify-between items-center">
+      <div class="flex-grow">
+        <slot />
+      </div>
       {#if timeDiffStr}
-        <div class="dropdown">
+        <div class="dropdown dropdown-top dropdown-end">
           <div
             tabindex="0"
             role="button"
-            class="w-full text-right text-xs opacity-40"
+            class="w-full text-right text-xs opacity-40 flex items-center gap-0.5"
           >
-            {timeDiffStr}
+            <Icon icon="mingcute:time-line"/> {timeDiffStr}
           </div>
           <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
           <div
             tabindex="0"
-            class="dropdown-content z-[1] w-32 card card-compact shadow bg-neutral text-neutral-content"
+            class="dropdown-content z-[1] w-max card card-compact shadow bg-neutral text-neutral-content"
           >
             <div class="card-body">
               <p>{formatDate(time)}</p>

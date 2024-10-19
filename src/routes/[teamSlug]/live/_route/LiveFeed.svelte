@@ -1,9 +1,8 @@
 <script lang="ts">
+  import Icon from '@iconify/svelte'
   import _ from 'lodash'
   import LiveEvent from './LiveEvent.svelte'
   import type { LiveGameContext } from './gamePointType'
-  import { message } from 'sveltekit-superforms/server'
-    import { PlayerStatusOptions } from '$lib/pocketbase/pocketbase-types'
 
   export let gamePoints: LiveGameContext['gamePoints']
   export let game: LiveGameContext['game']
@@ -80,26 +79,27 @@
               ? 'offense'
               : 'defense'}
           </p>
-        <div class="dropdown dropdown-top dropdown-end">
-          <div
-            tabindex="0"
-            role="button"
-            class="w-full text-right text-xs opacity-40"
-          >
-            Line
-          </div>
-          <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-          <div
-            tabindex="0"
-            class="dropdown-content z-[1] w-max card card-compact shadow bg-neutral text-neutral-content text-left"
-          >
-            <div class="card-body">
-              {#each point.expand?.starting_line || [] as player}
-                <p>{player.name}</p>
-              {/each}
+          <div class="dropdown dropdown-top dropdown-end">
+            <div
+              tabindex="0"
+              role="button"
+              class="w-full text-right text-xs opacity-40 flex flex-nowrap items-center gap-0.5"
+            >
+              <Icon icon="mdi:person" />
+              <span class="w-max"> Starting Line </span>
+            </div>
+            <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+            <div
+              tabindex="0"
+              class="dropdown-content z-[1] w-max card card-compact shadow bg-neutral text-neutral-content text-left"
+            >
+              <div class="card-body">
+                {#each point.expand?.starting_line || [] as player}
+                  <p>{player.name}</p>
+                {/each}
+              </div>
             </div>
           </div>
-        </div>
         </div>
       </LiveEvent>
     {:else if point.type === 'Half'}
