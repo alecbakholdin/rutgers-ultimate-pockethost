@@ -11,6 +11,8 @@ export interface StatsRow {
 
   plusMinus: number
   plusMinusPerPoint: number
+  oPoints: number
+  dPoints: number
 }
 
 export interface StatsQuery {

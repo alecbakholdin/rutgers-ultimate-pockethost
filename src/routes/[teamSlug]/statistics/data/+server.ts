@@ -6,6 +6,7 @@ import {
   TypedPocketBase,
   PlayerRecord,
   GamePointEventTypeOptions,
+  GamePointTypeOptions,
 } from '$lib/pocketbase/pocketbase-types.js'
 import type { StatsQuery, StatsRow } from './data'
 import type { RouteParams } from './$types'
@@ -37,6 +38,14 @@ export async function GET({ url, params, locals: { pb } }) {
     (p) => p.player,
   )
 
+  const oPointsDict = _.countBy(
+    points.filter(p => p.type === GamePointTypeOptions.O).flatMap((p) => [...p.starting_line, ...p.subs]),
+  )
+  const dPointsDict = _.countBy(
+    points.filter(p => p.type === GamePointTypeOptions.D).flatMap((p) => [...p.starting_line, ...p.subs]),
+  )
+
+
   const stats = players.map((player) => {
     const pointsPlayed = pointsPlayedDict[player.id] ?? 0
     const goals = goalDict[player.id] ?? 0
@@ -45,6 +54,8 @@ export async function GET({ url, params, locals: { pb } }) {
     const turns = turnDict[player.id] ?? 0
     const drops = dropDict[player.id] ?? 0
     const plusMinus = goals + assists + blocks - turns - drops
+    const oPoints = oPointsDict[player.id] ?? 0;
+    const dPoints = dPointsDict[player.id] ?? 0;
     return {
       playerId: player.id,
       playerName: player.name,
@@ -57,6 +68,8 @@ export async function GET({ url, params, locals: { pb } }) {
       drops,
       plusMinus,
       plusMinusPerPoint: plusMinus / pointsPlayed,
+      oPoints,
+      dPoints
     } satisfies StatsRow
   })
 

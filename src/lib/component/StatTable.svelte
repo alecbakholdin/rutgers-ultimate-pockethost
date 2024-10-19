@@ -44,6 +44,16 @@
             headerTooltip: 'Plus Minus per Point',
             valueFormatter: (p) => p.data?.plusMinusPerPoint?.toFixed(2) ?? '',
           },
+          {
+            field: 'oPoints',
+            headerName: 'O Pts',
+            headerTooltip: 'Number of points played on offense',
+          },
+          {
+            field: 'dPoints',
+            headerName: 'D Pts',
+            headerTooltip: 'Number of points played on defense',
+          },
         ],
       })
       updateStats(teamSlug, gameIds, playerIds, startDate, endDate)
