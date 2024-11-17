@@ -51,7 +51,7 @@
           <button
             type="button"
             on:click={() => (currentImage = image)}
-            class="border-4 rounded-md flex-shrink-0"
+            class="border-4 rounded-md flex-shrink-0 overflow-hidden"
             class:border-transparent={image !== currentImage}
             class:border-primary={image === currentImage}
             style="width: 120px; height: 120px;"
