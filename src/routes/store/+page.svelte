@@ -4,6 +4,7 @@
   import { getUnitPrice } from '$lib/util/functions/cartUtils.js'
   import { formatCents } from '$lib/util/functions/formatCents.js'
   import _ from 'lodash'
+  import { validDiscount } from '$lib/util/functions/cartUtils.js'
 
   export let data
 </script>
@@ -32,7 +33,21 @@
         </figure>
 
         <h4 class="font-semibold text-lg">{product.title}</h4>
-        <p>{formatCents(getUnitPrice(product))}</p>
+        <div class="relative inline-flex items-center space-x-2">
+          <p class="relative">
+            {formatCents(product.priceInCents)}
+            {#if $validDiscount && product.teamPriceInCents !== undefined}
+              <div
+                class="absolute w-full h-[2px] left-0 top-1/2 transform -translate-y-1/2 bg-red-700 rotate-12"
+              />
+            {/if}
+          </p>
+          {#if $validDiscount && product.teamPriceInCents !== undefined}
+            <span class="text-red-700">
+              {formatCents(product.teamPriceInCents)}
+            </span>
+          {/if}
+        </div>
         {#if product.requiredForPlayers}
           <p class="text-error">* Required for Players</p>
         {/if}
