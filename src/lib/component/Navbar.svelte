@@ -6,7 +6,7 @@
   import Dropdown from './Dropdown.svelte'
 </script>
 
-<div class="navbar bg-base-200">
+<div class="navbar bg-base-200 sticky top-0 md:static">
   <div class="flex-1">
     <a href="/" class="btn btn-ghost">
       <img
