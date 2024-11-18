@@ -4,6 +4,27 @@
   import type { TeamResponse } from '$lib/pocketbase/pocketbase-types.js'
   import Icon from '@iconify/svelte'
   export let data
+  import PromotionBanner from '$lib/component/PromotionBanner.svelte'
+
+  //declare default variables for promo banner
+  const defaultPromoBannerProps = {
+    title: 'Welcome to Rutgers Ultimate!',
+    description: 'Machine and Nightshade represent Rutgers U',
+    buttonText: '',
+    buttonLink: '',
+    imageUrl: '/promo-picture-anniversary.jpg',
+    imageAlt: 'machine-nightshade',
+  }
+
+  //declare store promo banner variables
+  const storePromoBannerProps = {
+    title: 'New Gear!',
+    description: 'Explore our new store and show your support for the team',
+    buttonText: 'Shop Now',
+    buttonLink: '/store',
+    imageUrl: '/big-store.png',
+    imageAlt: 'new merch collection',
+  }
 
   type Link = {
     title: string
@@ -16,15 +37,8 @@
     const links: Link[] = teams.map((team) => ({
       title: team.name,
       href: `/${team.slug}`,
-      imageUrl: pb.getFileUrl(team, team.logo),
+      imageUrl: pb.getFileUrl(team, team.landing_page_img),
     }))
-    if (numStoreSections) {
-      links.push({
-        title: 'Store',
-        href: '/store',
-        icon: 'material-symbols:store',
-      })
-    }
     return links
   }
 </script>
@@ -33,27 +47,45 @@
   <title>Ultimate</title>
 </svelte:head>
 
-<BannerText text={'Welcome to Rutgers Ultimate! Check out the pages below'} />
-<div class="max-w-md mx-auto flex gap-2 items-center">
-  {#await Promise.all([data.teams, data.storeSections])}
-    <div class="loading loading-lg text-primary mx-auto"></div>
-  {:then}
-    <div class="flex gap-2 mx-auto">
-      {#each links as link}
-        <div class="card card-bordered border-primary">
-          <a
-            class="card-body flex items-center justify-center"
-            href={link.href}
-          >
-            {#if link.imageUrl}
-              <img src={link.imageUrl} alt={link.title} class="h-12 w-12" />
-            {:else if link.icon}
-              <Icon icon={link.icon} />
-            {/if}
-            <span class="text-xl text-primary">{link.title}</span>
-          </a>
-        </div>
-      {/each}
-    </div>
-  {/await}
+<div class="component-wrapper mx-auto flex flex-col items-center">
+  <!-- condiitonally render the banner if they're logged in or not -->
+  <PromotionBanner
+    {...data.storeSections.length
+      ? storePromoBannerProps
+      : defaultPromoBannerProps}
+  />
+  <!-- loop through the "links" and divide screen width proportionally -->
+  <div class="flex flex-col md:flex-row flex-wrap w-full max-w-5xl mt-4 gap-4">
+    {#each links as link (link.href)}
+      <div class="flex-1 p-2">
+        <a
+          href={link.href}
+          class="flex items-center justify-center text-white text-3xl font-bold h-64 md:h-80 shadow-lg rounded-lg"
+          style="background-image: url({link.imageUrl}); background-size: cover; background-position: center;"
+        >
+          <div class="bg-black bg-opacity-60 px-4 py-2 rounded-md">
+            {link.title}
+          </div>
+        </a>
+      </div>
+    {/each}
+  </div>
+
+  <style>
+    .component-wrapper {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    a {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 1rem;
+    }
+
+    .text-white {
+      color: #ffffff;
+    }
+  </style>
 </div>
