@@ -1,6 +1,6 @@
 <script lang="ts">
   import { applyAction, enhance } from '$app/forms'
-  import { goto } from '$app/navigation'
+  import { goto, invalidateAll } from '$app/navigation'
   import { superformToast } from '$lib/component/Toasts.svelte'
   import { pb } from '$lib/pocketbase/pb'
   import { loadingButton } from '$lib/util/svelte-actions/loading-button'
@@ -30,10 +30,10 @@
             emailVisibility: true,
           })
         }
-        goto('/')
+        goto('/', { invalidateAll: true })
       })
 
-    goto('/')
+    goto('/', { invalidateAll: true })
   }
 </script>
 
@@ -46,6 +46,7 @@
           pb.authStore.loadFromCookie(document.cookie)
           await applyAction(result)
         },
+        onSuccess: invalidateAll,
       }),
     }}
     form={data.loginForm}

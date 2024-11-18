@@ -9,7 +9,7 @@
 </script>
 
 <div
-  class="store-promo-banner flex flex-col md:flex-row items-center bg-white shadow-lg p-4 sm:p-6 md:p-16"
+  class="store-promo-banner flex flex-col md:flex-row items-center bg-white shadow-none sm:shadow-lg p-4 sm:p-6 md:p-16"
   style="max-width: 1200px"
 >
   <div class="text-section flex-1 mb-4 md:mb-0 text-center md:text-left">
