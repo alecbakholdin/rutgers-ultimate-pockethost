@@ -46,23 +46,26 @@
       />
     </figure>
     <div class="w-fit overflow-x-auto flex mt-2">
-      {#each [product.primaryImage, ...product.galleryImages].filter((x) => x) as image, i}
-        <button
-          type="button"
-          on:click={() => (currentImage = image)}
-          class="border-4 rounded-md flex-shrink-0"
-          class:border-transparent={image !== currentImage}
-          class:border-primary={image === currentImage}
-        >
-          <ImageThumb
-            class="rounded-md"
-            record={product}
-            {image}
-            alt="{product.title}-{i}"
-            size={120}
-          />
-        </button>
-      {/each}
+      {#if product.galleryImages.length !== 0}
+        {#each [product.primaryImage, ...product.galleryImages].filter((x) => x) as image, i}
+          <button
+            type="button"
+            on:click={() => (currentImage = image)}
+            class="border-4 rounded-md flex-shrink-0 overflow-hidden"
+            class:border-transparent={image !== currentImage}
+            class:border-primary={image === currentImage}
+            style="width: 120px; height: 120px;"
+          >
+            <ImageThumb
+              class="rounded-md"
+              record={product}
+              {image}
+              alt="{product.title}-{i}"
+              size={120}
+            />
+          </button>
+        {/each}
+      {/if}
     </div>
   </div>
 
