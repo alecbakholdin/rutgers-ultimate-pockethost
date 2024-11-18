@@ -14,6 +14,7 @@
   import { refreshCartItemCount } from '$lib/pocketbase/cart.js'
   import { getContrastColor } from '$lib/util/functions/getContrastColor.js'
   import { pb } from '$lib/pocketbase/pb.js'
+  import { validDiscount } from '$lib/util/functions/cartUtils.js'
 
   export let data
   data.addToCartForm.data.quantity = 1
@@ -85,8 +86,24 @@
     <div class="w-full flex flex-col md:items-end prose max-w-md mx-auto">
       <h2 class="mb-2">{product.title}</h2>
       <h3 class="text-base-content m-0 p-0">
-        {formatCents(getUnitPriceWithFields(product, formValues.fields))}
+        <div class="relative inline-flex items-center space-x-2">
+          <span class="relative inline-block">
+            {formatCents(product.priceInCents)}
+            {#if $validDiscount && product.teamPriceInCents !== undefined}
+              <span
+                class="absolute w-full h-[2px] left-0 top-1/2 transform -translate-y-1/2 bg-red-700 rotate-12"
+                style="z-index: 10;"
+              ></span>
+            {/if}
+          </span>
+          {#if $validDiscount && product.teamPriceInCents !== undefined}
+            <span class="text-red-700">
+              {formatCents(product.teamPriceInCents)}
+            </span>
+          {/if}
+        </div>
       </h3>
+
       {#if product.requiredForPlayers}
         <p class="text-error m-0 p-0">* Required for Players</p>
       {/if}
