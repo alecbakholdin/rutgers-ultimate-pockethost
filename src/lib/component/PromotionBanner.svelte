@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ImageCarousel from './ImageCarousel.svelte'
+
   //props for promo banner
   export let title: string
   export let description: string
@@ -6,6 +8,7 @@
   export let buttonLink: string
   export let imageUrl: string
   export let imageAlt: string
+  export let useCarousel: boolean
 </script>
 
 <div
@@ -31,11 +34,15 @@
   </div>
 
   <div class="image-section flex-1 mt-4 md:mt-0">
-    <img
-      src={imageUrl}
-      alt={imageAlt}
-      class="w-full h-auto rounded-lg shadow-md"
-    />
+    {#if useCarousel}
+      <ImageCarousel />
+    {:else}
+      <img
+        src={imageUrl}
+        alt={imageAlt}
+        class="w-full h-auto rounded-lg shadow-md"
+      />
+    {/if}
   </div>
 </div>
 

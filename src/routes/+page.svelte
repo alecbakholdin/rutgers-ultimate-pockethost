@@ -14,6 +14,7 @@
     buttonLink: '',
     imageUrl: '/promo-picture-anniversary.jpg',
     imageAlt: 'machine-nightshade',
+    useCarousel: false,
   }
 
   //declare store promo banner variables
@@ -24,6 +25,7 @@
     buttonLink: '/store',
     imageUrl: '/big-store.png',
     imageAlt: 'new merch collection',
+    useCarousel: true,
   }
 
   type Link = {
