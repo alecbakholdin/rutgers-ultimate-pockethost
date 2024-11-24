@@ -11,8 +11,8 @@
   import Icon from '@iconify/svelte'
 </script>
 
-<div class="drawer z-[10]">
-  <input type="checkbox" id="admin-drawer" class="drawer-toggle" />
+<div class="drawer">
+  <input type="checkbox" id="admin-drawer" class="drawer-toggle"/>
   <div class="drawer-content flex flex-col md:flex-row gap-2">
     {#if adminPages.length > 1}
       <label for="admin-drawer" class="btn btn-circle btn-ghost btn-sm">
@@ -23,7 +23,7 @@
       <slot />
     </div>
   </div>
-  <div class="drawer-side">
+  <div class="drawer-side z-10">
     <label for="admin-drawer" class="drawer-overlay" aria-label="close sidebar">
     </label>
     <ul class="menu p-8 w-80 min-h-full bg-base-200 text-base-content">
