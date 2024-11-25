@@ -3,8 +3,9 @@
   import Icon from '@iconify/svelte'
   import { page } from '$app/stores'
   import _ from 'lodash'
-    import { localStorageStore } from '$lib/util/localStorageStore.js'
-    import OrderModalButton from './_route/OrderModalButton.svelte'
+  import { localStorageStore } from '$lib/util/localStorageStore.js'
+  import OrderModalButton from './_route/OrderModalButton.svelte'
+  import { type OrderFulfillmentSortBy, sortedOrders } from './_route/sortBy'
 
   export let data
 
@@ -24,36 +25,25 @@
     ...new Set(data.orders.flatMap((x) => Object.keys(x.fields ?? {}))),
   ]
   console.log(typeof fields)
-  const showFulfilledOrders = localStorageStore('managerOrdersShowDeliveredOrders', false)
-  const shownFields = localStorageStore('managerOrdersShownFields', [] as string[])
+  const showFulfilledOrders = localStorageStore(
+    'managerOrdersShowDeliveredOrders',
+    false,
+  )
+  const shownFields = localStorageStore(
+    'managerOrdersShownFields',
+    [] as string[],
+  )
 
   let receivedLoading: string[] = []
   let fulfilledLoading: string[] = []
 
-  let sortBy: { field: string; asc: boolean } | undefined
+  let sortBy: OrderFulfillmentSortBy | undefined = undefined
 
-  $: lineItems = sortBy
-    ? (() => {
-        const orders = [...data.orders]
-        orders
-          .filter(o => $showFulfilledOrders || !o.expand?.order?.events?.find(e => e.type == 'Delivered'))
-          .sort((a, b) => {
-          const valA = a.fields?.[sortBy!.field]?.trim() || ''
-          const valB = b.fields?.[sortBy!.field]?.trim() || ''
-
-          const numCompare =
-            typeof valA === 'number' && typeof valB === 'number'
-          const factor = sortBy!.asc ? 1 : -1
-          return (
-            factor *
-            (numCompare
-              ? parseFloat(valA) - parseFloat(valB)
-              : valA.localeCompare(valB))
-          )
-        })
-        return orders
-      })()
-    : data.orders
+  $: lineItems = sortedOrders(data.orders, sortBy).filter(
+    (o) =>
+      $showFulfilledOrders ||
+      !o.expand?.order?.events?.find((e) => e.type == 'Delivered'),
+  )
 </script>
 
 <!-- svelte-ignore missing-declaration -->
@@ -144,12 +134,8 @@
       <tbody>
         {#each lineItems as lineItem (lineItem.id)}
           <tr>
-            <td>
-              Actions
-            </td>
-            <td>
-              
-            </td>
+            <td> Actions </td>
+            <td> </td>
             <td>
               <OrderModalButton order={lineItem.expand?.order} />
             </td>
