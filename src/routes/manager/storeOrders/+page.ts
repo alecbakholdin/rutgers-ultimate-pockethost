@@ -7,41 +7,48 @@ import type {
   StoreSectionResponse,
   UsersResponse,
 } from '$lib/pocketbase/pocketbase-types.js'
+import { error } from '@sveltejs/kit'
 
-const machineJerseysId = 'i79vnh3trmzgmva'
-export async function load({ url }) {
-  const sectionId = (() => {
-    const urlSectionId = url.searchParams.get('sectionId')
-    if (typeof localStorage === 'undefined')
-      return urlSectionId ?? machineJerseysId
-    if (urlSectionId) {
-      localStorage.setItem('managerSectionId', urlSectionId)
-    }
-    return localStorage.getItem('managerSectionId') ?? machineJerseysId
-  })()
-  const productId = url.searchParams.get('productId')
+type storeSectionResponse = StoreSectionResponse<{
+  products: ProductResponse<{ fields: ProductFieldResponse[] }>[]
+}>
+type tableRow = OrderLineItemResponse<
+  any,
+  { order: OrderResponseTyped<{ user: UsersResponse }> }
+>
 
+export async function load({ url, parent }) {
+  const { user } = await parent()
   const storeSections = await pb
     .collection('store_section')
-    .getFullList({ requestKey: null })
-  const storeSection = await pb.collection('store_section').getOne<
-    StoreSectionResponse<{
-      products: ProductResponse<{ fields: ProductFieldResponse[] }>[]
-    }>
-  >(sectionId, { expand: 'products.fields', requestKey: null })
-  const products = storeSection.expand!.products
-  const product =
-    (productId && products.find((p) => p.id === productId)) || products[0]
+    .getFullList<storeSectionResponse>({
+      requestKey: null,
+      filter: pb.filter(`allow_preview ~ {:userId} && archived = false`, {
+        userId: user?.id,
+      }),
+      expand: 'products.fields',
+    })
+  if (storeSections.length == 0) {
+    throw error(400, { message: 'No non-archived store sections available' })
+  }
+
+  const sectionId = getStoredSectionId(url) ?? storeSections[0].id
+  const storeSection = storeSections.find((s) => s.id == sectionId)
+  if (!storeSection) {
+    throw error(400, { message: "Store section doesn't exist" })
+  }
+
+  const productId =
+    url.searchParams.get('productId') ?? storeSection.products[0]
+  const product = storeSection.expand!.products.find((p) => p.id === productId)
+  if (!product) {
+    throw error(400, { message: "Product doesn't exist" })
+  }
 
   const productLineItems = await pb
     .collection('order_line_item')
-    .getFullList<
-      OrderLineItemResponse<
-        any,
-        { order: OrderResponseTyped<{ user: UsersResponse }> }
-      >
-    >({
-      filter: pb.filter('product = {:productId}', { productId: product.id }),
+    .getFullList<tableRow>({
+      filter: pb.filter('product = {:productId}', { productId: productId }),
       expand: 'order.user',
     })
 
@@ -49,9 +56,18 @@ export async function load({ url }) {
     sectionId,
     storeSections,
     storeSection,
-    products,
+    products: storeSection.expand!.products,
     productId,
     product,
     productLineItems,
   }
+}
+
+function getStoredSectionId(url: URL) {
+  const urlSectionId = url.searchParams.get('sectionId')
+  if (typeof localStorage === 'undefined') return urlSectionId
+  if (urlSectionId) {
+    localStorage.setItem('managerSectionId', urlSectionId)
+  }
+  return localStorage.getItem('managerSectionId')
 }
