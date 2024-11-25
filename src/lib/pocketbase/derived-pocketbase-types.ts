@@ -12,6 +12,7 @@ import type {
   StoreSectionResponse,
 } from './pocketbase-types'
 import type { ShippingAddressSchema } from '$lib/schemas/shipping'
+import { OrderEvents } from '$lib/schemas/orderEvent';
 
 export type ProductFieldTyped<Texpand = unknown> = ProductFieldResponse<
   { regex: string; priceIncreaseInCents: number }[],
@@ -38,6 +39,7 @@ export type ExpandedLineItem = LineItemResponseTyped<{
 export const lineItemExpansionString = `product.fields.colors`
 
 export type OrderResponseTyped<Texpand = unknown> = OrderResponse<
+  z.infer<typeof OrderEvents>,
   z.infer<typeof ShippingAddressSchema>,
   Texpand
 >
