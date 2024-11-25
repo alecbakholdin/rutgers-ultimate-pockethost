@@ -4,6 +4,7 @@
   import { page } from '$app/stores'
   import _ from 'lodash'
     import { localStorageStore } from '$lib/util/localStorageStore.js'
+    import OrderModalButton from './_route/OrderModalButton.svelte'
 
   export let data
 
@@ -23,6 +24,7 @@
     ...new Set(data.orders.flatMap((x) => Object.keys(x.fields ?? {}))),
   ]
   console.log(typeof fields)
+  const showFulfilledOrders = localStorageStore('managerOrdersShowDeliveredOrders', false)
   const shownFields = localStorageStore('managerOrdersShownFields', [] as string[])
 
   let receivedLoading: string[] = []
@@ -33,7 +35,9 @@
   $: lineItems = sortBy
     ? (() => {
         const orders = [...data.orders]
-        orders.sort((a, b) => {
+        orders
+          .filter(o => $showFulfilledOrders || !o.expand?.order?.events?.find(e => e.type == 'Delivered'))
+          .sort((a, b) => {
           const valA = a.fields?.[sortBy!.field]?.trim() || ''
           const valB = b.fields?.[sortBy!.field]?.trim() || ''
 
@@ -144,9 +148,10 @@
               Actions
             </td>
             <td>
-              <a href="/orders/{lineItem.order}">
-                <Icon icon="lets-icons:order" class="text-2xl" />
-              </a>
+              
+            </td>
+            <td>
+              <OrderModalButton order={lineItem.expand?.order} />
             </td>
             <td>{lineItem.expand?.order.expand?.user.name}</td>
             <td>{lineItem.expand?.product.title}</td>

@@ -13,7 +13,7 @@
   export let showAdminControls: boolean | undefined = false
   const dispatch = createEventDispatcher<{ expand: void }>()
 
-  $: orderFulfilled = !order.expand?.['order_line_item(order)'].find(
+  $: orderFulfilled = !order.expand?.['order_line_item(order)']?.find(
     (x) => !x.fulfilled,
   )
   $: createdDate = new Date(order.created)
