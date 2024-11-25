@@ -3,6 +3,7 @@
   import Icon from '@iconify/svelte'
   import { page } from '$app/stores'
   import _ from 'lodash'
+    import { localStorageStore } from '$lib/util/localStorageStore.js'
 
   export let data
 
@@ -21,7 +22,8 @@
   $: fields = [
     ...new Set(data.orders.flatMap((x) => Object.keys(x.fields ?? {}))),
   ]
-  $: shownFields = [...fields]
+  console.log(typeof fields)
+  const shownFields = localStorageStore('managerOrdersShownFields', [] as string[])
 
   let receivedLoading: string[] = []
   let fulfilledLoading: string[] = []
@@ -72,7 +74,7 @@
   <p class="text-xl font-semibold">Shown Fields</p>
   <div class="flex flex-col gap-2">
     {#each fields as field}
-      {@const checked = shownFields.includes(field)}
+      {@const checked = $shownFields.includes(field)}
       <label
         for="{field}-shown"
         class="flex flex-row items-center gap-2 border border-neutral-300 p-2 rounded-md cursor-pointer"
@@ -83,9 +85,9 @@
           name={field}
           id="{field}-shown"
           on:change={() =>
-            (shownFields = checked
-              ? shownFields.filter((x) => x !== field)
-              : [...shownFields, field])}
+            ($shownFields = checked
+              ? $shownFields.filter((x) => x !== field)
+              : [...$shownFields, field])}
           {checked}
         />
         <span>{field}</span>
@@ -101,13 +103,13 @@
     <table class="table">
       <thead>
         <tr>
-          <th>Received</th>
-          <th>Fulfilled</th>
+          <th>Actions</th>
+          <th>Status</th>
           <th>Order</th>
           <th>User</th>
           <th>Product</th>
           <th>Quantity</th>
-          {#each shownFields as field}
+          {#each $shownFields as field}
             <td>
               <button
                 class="flex flex-row items-center w-full"
@@ -139,68 +141,7 @@
         {#each lineItems as lineItem (lineItem.id)}
           <tr>
             <td>
-              <form
-                action="?/markReceived"
-                method="POST"
-                use:enhance={() => {
-                  receivedLoading = [...receivedLoading, lineItem.id]
-                  return async ({ update }) => {
-                    await update()
-                    receivedLoading = receivedLoading.filter(
-                      (x) => x !== lineItem.id,
-                    )
-                    lineItem.received = !lineItem.received
-                  }
-                }}
-              >
-                <input type="hidden" name="id" value={lineItem.id} />
-                <div class="w-full h-full grid place-items-center">
-                  {#if receivedLoading.includes(lineItem.id)}
-                    <Icon icon="mdi:loading" class="animate-spin" />
-                  {:else}
-                    <input
-                      type="checkbox"
-                      name="received"
-                      id="{lineItem.id}-submit"
-                      class="checkbox"
-                      checked={lineItem.received}
-                      on:change={(e) => e.currentTarget.form?.requestSubmit()}
-                    />
-                  {/if}
-                </div>
-              </form>
-            </td>
-            <td>
-              <form
-                action="?/markFulfilled"
-                method="POST"
-                use:enhance={() => {
-                  fulfilledLoading = [...fulfilledLoading, lineItem.id]
-                  return async ({ update }) => {
-                    await update()
-                    fulfilledLoading = fulfilledLoading.filter(
-                      (x) => x !== lineItem.id,
-                    )
-                    lineItem.fulfilled = !lineItem.fulfilled
-                  }
-                }}
-              >
-                <input type="hidden" name="id" value={lineItem.id} />
-                <div class="w-full h-full grid place-items-center">
-                  {#if fulfilledLoading.includes(lineItem.id)}
-                    <Icon icon="mdi:loading" class="animate-spin" />
-                  {:else}
-                    <input
-                      type="checkbox"
-                      name="fulfilled"
-                      id="{lineItem.id}-submit"
-                      class="checkbox"
-                      checked={lineItem.fulfilled}
-                      on:change={(e) => e.currentTarget.form?.requestSubmit()}
-                    />
-                  {/if}
-                </div>
-              </form>
+              Actions
             </td>
             <td>
               <a href="/orders/{lineItem.order}">
@@ -210,7 +151,7 @@
             <td>{lineItem.expand?.order.expand?.user.name}</td>
             <td>{lineItem.expand?.product.title}</td>
             <td>{lineItem.quantity}</td>
-            {#each shownFields as field}
+            {#each $shownFields as field}
               <td>{lineItem.fields?.[field] ?? ''}</td>
             {/each}
           </tr>
