@@ -4,13 +4,25 @@ import {
 } from '$lib/pocketbase/derived-pocketbase-types.js'
 import { pb } from '$lib/pocketbase/pb.js'
 
-export async function load({ url }) {
-  const search = url.searchParams.get('q') || ''
+// the following are treated as field filters:
+//    fields.name=test  -name is "test"
+//    f.name=test       -name is "test"
+//    f.name~test       -name contains "test"
+const fieldFilterRegex = /^(?:fields)|f\.([\w\s]+)(=|~)(.*)$/
+function isNotFieldFilter(t: string): boolean {
+  return !isFieldFilter(t)
+}
+function isFieldFilter(t: string): boolean {
+  return Boolean(t.match(fieldFilterRegex))
+}
 
-  const r = /^(?:fields)|f\.([\w\s]+)(=|~)(.*)$/
-  const searchTerms = search.split(/\s+/g)
-  const stringSearchClauses = searchTerms
-    .filter((s) => !s.match(r))
+export async function load({ url }) {
+  const searchStr = url.searchParams.get('q') || ''
+  const searchTokens = searchStr.trim().split(/\s+/g)
+
+  // does a whole-string search on a few fields
+  const stringSearchClauses = searchTokens
+    .filter(isNotFieldFilter)
     .map(
       (_, i) =>
         `(${['order.user.name', 'order.user.email', 'product.title', 'fields']
@@ -18,11 +30,12 @@ export async function load({ url }) {
           .join(' || ')})`,
     )
   const stringSearchObj = stringSearchClauses.reduce(
-    (acc, _, i) => ({ ...acc, [`q${i}`]: searchTerms[i] }),
+    (acc, _, i) => ({ ...acc, [`q${i}`]: searchTokens[i] }),
     {},
   )
 
-  const fieldFilters = searchTerms.map((s) => s.match(r)).filter(Boolean)
+  // processes field-specific filters e.g. "name contains" or "name equals"
+  const fieldFilters = searchTokens.filter(isFieldFilter)
   const fieldFilterClauses = fieldFilters.map(
     (f, i) => `fields.${f![1]} ${f![2]} {:f${i}}`,
   )
