@@ -24,7 +24,6 @@
   $: fields = [
     ...new Set(data.orders.flatMap((x) => Object.keys(x.fields ?? {}))),
   ]
-  console.log(typeof fields)
   const showFulfilledOrders = localStorageStore(
     'managerOrdersShowDeliveredOrders',
     false,
@@ -56,22 +55,37 @@
   />
   <button type="submit" class="btn">Go</button>
 </form>
-<div class="flex mt-4 gap-2">
-  {#each previousSearches as search}
-    <a href="?q={search}" class="badge badge-ghost badge-lg">
-      {search}
-    </a>
-  {/each}
+<div class="space-y-1">
+  <p class="text-neutral-content">Previous searches</p>
+  <div class="flex gap-2">
+    {#each previousSearches as search}
+      <a href="?q={search}" class="badge badge-ghost badge-lg">
+        {search}
+      </a>
+    {/each}
+  </div>
 </div>
 
-<div class="my-4">
-  <p class="text-xl font-semibold">Shown Fields</p>
-  <div class="flex flex-col gap-2">
+<div class="mt-4 mb-8 space-y-1">
+  <p class="text-xl font-semibold">Options</p>
+  <div>
+    <label for="showFulfilledOrders" class="label flex justify-start flex-nowrap gap-2">
+      <input
+        type="checkbox"
+        id="showFulfilledOrders"
+        class="checkbox"
+        bind:checked={$showFulfilledOrders}
+      />
+      <span>Show fulfilled orders</span>
+    </label>
+  </div>
+  <p class="text-xl font-semibold">Fields</p>
+  <div class="flex flex-wrap gap-2">
     {#each fields as field}
       {@const checked = $shownFields.includes(field)}
       <label
         for="{field}-shown"
-        class="flex flex-row items-center gap-2 border border-neutral-300 p-2 rounded-md cursor-pointer"
+        class="flex flex-row items-center gap-2 p-2 rounded-md cursor-pointer whitespace-nowrap"
       >
         <input
           class="checkbox rounded-md"
@@ -88,6 +102,7 @@
       </label>
     {/each}
   </div>
+  <hr/>
 </div>
 
 {#if !data.orders.length}
