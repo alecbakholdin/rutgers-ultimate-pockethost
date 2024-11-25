@@ -64,4 +64,4 @@ export type FullOrderLineItemResponse = OrderLineItemResponseTyped<{
   product: ProductResponse
   order: FullOrderResponse
 }>
-export const fullOrderLineItemResponseExpansionString = 'product,order.user'
+export const fullOrderLineItemResponseExpansionString = 'product,order.user,order.order_line_item(order).product'
