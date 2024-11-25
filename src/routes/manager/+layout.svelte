@@ -1,6 +1,6 @@
 <script context="module">
   export const adminPages = [
-    { path: '/storeOrders', title: 'Campaigns' },
+    { path: '/storeSections', title: 'Store Sections' },
     { path: '/orders', title: 'Order Fulfillment' },
     /*{ path: '/products', title: 'Products' }, */
   ]
