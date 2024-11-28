@@ -1,19 +1,106 @@
 <script lang="ts">
   import BannerText from '$lib/component/BannerText.svelte'
   import ImageThumb from '$lib/component/ImageThumb.svelte'
-  import { getUnitPrice } from '$lib/util/functions/cartUtils.js'
-  import { formatCents } from '$lib/util/functions/formatCents.js'
-  import _ from 'lodash'
+  import { toast } from '$lib/component/Toasts.svelte'
   import { validDiscount } from '$lib/util/functions/cartUtils.js'
+  import { formatCents } from '$lib/util/functions/formatCents'
+  import { Form } from 'formsnap'
+  import { writable } from 'svelte/store'
+  import _ from 'lodash'
+  import { CreateDiscountCodeSchema } from './schemas.js'
+  import { superValidate } from 'sveltekit-superforms/server'
 
   export let data
+  export let form
+
+  const discountsLoading = writable(false)
+
+  //wait for valid discount code schema to load
+  export async function load() {
+    const form = await superValidate(CreateDiscountCodeSchema)
+
+    return { form }
+  }
+
+  //handle logic for applying discounts, then update validDiscount which renders the discount
+  async function applyDiscounts(code: string) {
+    discountsLoading.set(true)
+    try {
+      const response = await fetch(`/api/teamDiscount?code=${code}`, {
+        credentials: 'include',
+      })
+      if (response.status === 200) {
+        $validDiscount = true
+        toast({ message: 'Discount applied', type: 'success' })
+      } else {
+        const data = await response.json()
+        console.error(data)
+        toast({ message: data.message, type: 'error' })
+        $validDiscount = false
+      }
+    } finally {
+      discountsLoading.set(false)
+    }
+  }
+
+  //handle keypress event for input field
+  function inputKeypressHandler(discountCodeValue?: string) {
+    return function (e: KeyboardEvent) {
+      if (e.key === 'Enter' && !e.ctrlKey) {
+        e.stopPropagation()
+        e.preventDefault()
+        if (discountCodeValue) {
+          applyDiscounts(discountCodeValue)
+        }
+      }
+    }
+  }
 </script>
 
 <svelte:head>
   <title>Ultimate Store</title>
 </svelte:head>
-
 {#each data.sections as section}
+  <div class="flex flex-col w-full max-w-lg gap-4 pl-4">
+    <Form.Root
+      {form}
+      schema={CreateDiscountCodeSchema}
+      options={{
+        dataType: 'json',
+        resetForm: false, // Keeps the field value after submission
+      }}
+      let:formValues
+      let:config
+      class="flex flex-col gap-2"
+    >
+      <Form.Field {config} name="discountCode" let:handlers>
+        <Form.Label class="font-medium">Discount Code</Form.Label>
+        <div class="flex items-center gap-2">
+          <input
+            type="text"
+            class="input input-bordered flex-grow max-w-md"
+            placeholder="Enter Discount Code"
+            autocomplete="off"
+            disabled={$discountsLoading}
+            on:keypress={inputKeypressHandler(formValues.discountCode)}
+            on:input={handlers.input}
+          />
+          <button
+            type="button"
+            class="btn btn-primary"
+            disabled={!formValues.discountCode || $discountsLoading}
+            on:click={() =>
+              formValues.discountCode &&
+              applyDiscounts(formValues.discountCode)}
+          >
+            Apply
+          </button>
+        </div>
+        <Form.Validation />
+      </Form.Field>
+    </Form.Root>
+  </div>
+
   <div class="divider mt-16 first:mt-0 text-gray-400">{section.title}</div>
   <div
     class="mx-auto grid grid-cols-2 md:grid-cols-3 place-items-center gap-2 max-w-[95vw]"
