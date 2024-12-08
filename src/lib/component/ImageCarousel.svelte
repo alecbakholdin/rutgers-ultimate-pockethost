@@ -1,12 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { pb } from '$lib/pocketbase/pb.js'
+  import { pb, currentUser } from '$lib/pocketbase/pb.js'
   import Skeleton from 'svelte-skeleton/Skeleton.svelte'
+  import { get } from 'svelte/store'
+  import type { StoreSectionResponse } from '$lib/pocketbase/pocketbase-types'
 
-  let productCollectionRecords: any[] = []
   let isLoading = true
-  let index = 0
+
   let interval: any
+  let index: number
 
   //we just want primary imge and link url
   type ProductData = {
@@ -16,33 +18,48 @@
 
   let productArr: ProductData[] = []
 
-  //fetch from pocket host
-  async function fetchProducts() {
-    try {
-      productCollectionRecords = await pb
-        .collection('product')
-        .getFullList(200, {
-          sort: '-created',
-        })
-      productArr = getProductData(productCollectionRecords)
-    } catch (error) {
-      console.error('Error fetching products:', error)
-    } finally {
-      isLoading = false
-      //update state for skelton loader
-    }
-  }
+  export async function load() {
+    //get current user id
+    const userId = get(currentUser)?.id
+    const products: string[] = []
 
-  //get product data, we want global products that only start with r-ulimate. populate prudctArr with objects, where each contaisn image url and link url
-  function getProductData(productList: any[]): ProductData[] {
-    return productList
-      .filter(
-        (product) => product.enabled && product.slug.startsWith('r-ultimate'), // Filter by slug prefix
-      )
-      .map((product) => ({
-        imageUrl: pb.getFileUrl(product, product.primaryImage),
-        linkUrl: '/store/product/' + product.slug,
-      }))
+    const productRecs = await pb.collection('product').getFullList({
+      sort: '-created',
+    })
+
+    //check if user id exists in allow_preview in team_groups
+    //set up filter conditions
+    const filter = userId
+      ? pb.filter('enabled = true || allow_preview ~ {:userId}', { userId })
+      : 'enabled = true'
+
+    //get full list according ot this filter
+    const resp = await pb
+      .collection('store_section')
+      .getFullList<StoreSectionResponse>({
+        filter,
+        expand: 'products',
+      })
+
+    //populate array of products for current user
+    resp.forEach((storeSection) => {
+      products.push(...storeSection.products)
+    })
+
+    //if product id is in avail products for user, then print
+    productRecs.forEach((product) => {
+      if (products.includes(product.id)) {
+        productArr.push({
+          imageUrl: pb.getFileUrl(product, product.primaryImage),
+          linkUrl: '/store/product/' + product.slug,
+        })
+        console.log(product)
+      }
+    })
+    //randomize index we start on
+    index = Math.floor(Math.random() * productArr.length)
+    //remove skeleton loader b/c data is ready
+    isLoading = false
   }
 
   //logic for carousel indexing
@@ -59,8 +76,8 @@
   }
 
   onMount(() => {
-    fetchProducts()
     startSlider()
+    load()
     return () => stopSlider()
   })
 </script>
@@ -119,9 +136,5 @@
     width: auto;
     height: 100%;
     object-fit: contain;
-  }
-  .skeleton-loader {
-    width: 100%;
-    height: 100%;
   }
 </style>
