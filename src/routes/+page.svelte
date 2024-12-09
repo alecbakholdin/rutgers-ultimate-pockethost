@@ -1,8 +1,6 @@
 <script lang="ts">
-  import BannerText from '$lib/component/BannerText.svelte'
   import { pb } from '$lib/pocketbase/pb.js'
   import type { TeamResponse } from '$lib/pocketbase/pocketbase-types.js'
-  import Icon from '@iconify/svelte'
   export let data
   import PromotionBanner from '$lib/component/PromotionBanner.svelte'
 
@@ -50,7 +48,7 @@
 </svelte:head>
 
 <div class="component-wrapper mx-auto flex flex-col items-center">
-  <!-- condiitonally render the banner if they're logged in or not -->
+  <!-- conditionally render the banner based on if store has been released for current user -->
   <PromotionBanner
     {...data.storeSections.length
       ? storePromoBannerProps
