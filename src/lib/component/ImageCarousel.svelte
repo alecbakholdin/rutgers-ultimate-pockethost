@@ -10,7 +10,7 @@
   let interval: any
   let index: number
 
-  //we just want primary imge and link url
+  //we just want primary image and link url
   type ProductData = {
     imageUrl: string
     linkUrl: string
@@ -27,13 +27,13 @@
       sort: '-created',
     })
 
-    //check if user id exists in allow_preview in team_groups
+    //check if user id exists in allow_preview or in team_groups
     //set up filter conditions
     const filter = userId
       ? pb.filter('enabled = true || allow_preview ~ {:userId}', { userId })
       : 'enabled = true'
 
-    //get full list according ot this filter
+    //get full list of products according to this filter, returns jsonified format
     const resp = await pb
       .collection('store_section')
       .getFullList<StoreSectionResponse>({
@@ -46,14 +46,13 @@
       products.push(...storeSection.products)
     })
 
-    //if product id is in avail products for user, then print
+    //if product id is in avail products for user, then add to productArr
     productRecs.forEach((product) => {
       if (products.includes(product.id)) {
         productArr.push({
           imageUrl: pb.getFileUrl(product, product.primaryImage),
           linkUrl: '/store/product/' + product.slug,
         })
-        console.log(product)
       }
     })
     //randomize index we start on
