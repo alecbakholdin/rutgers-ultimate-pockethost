@@ -1,53 +1,80 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { pb } from '$lib/pocketbase/pb.js'
+  import { pb, currentUser } from '$lib/pocketbase/pb.js'
   import Skeleton from 'svelte-skeleton/Skeleton.svelte'
+  import { get } from 'svelte/store'
+  import type {
+    ProductResponse,
+    StoreSectionResponse,
+  } from '$lib/pocketbase/pocketbase-types'
 
-  let productCollectionRecords: any[] = []
+  type StoreSectionExpanded = StoreSectionResponse<{
+    products: ProductResponse[]
+  }>
+
   let isLoading = true
-  let index = 0
   let interval: any
+  let index: number = 0
 
-  //we just want primary imge and link url
+  //we just want primary image and link url
   type ProductData = {
     imageUrl: string
     linkUrl: string
   }
 
-  let productArr: ProductData[] = []
+  let productArr: ProductData[]
 
-  //fetch from pocket host
-  async function fetchProducts() {
-    try {
-      productCollectionRecords = await pb
-        .collection('product')
-        .getFullList(200, {
-          sort: '-created',
-        })
-      productArr = getProductData(productCollectionRecords)
-    } catch (error) {
-      console.error('Error fetching products:', error)
-    } finally {
-      isLoading = false
-      //update state for skelton loader
-    }
-  }
+  export async function load() {
+    //get current user id
+    const userId = get(currentUser)?.id
 
-  //get product data, we want global products that only start with r-ulimate. populate prudctArr with objects, where each contaisn image url and link url
-  function getProductData(productList: any[]): ProductData[] {
-    return productList
-      .filter(
-        (product) => product.enabled && product.slug.startsWith('r-ultimate'), // Filter by slug prefix
-      )
-      .map((product) => ({
+    //check if user id exists in allow_preview or in team_groups
+    const filter = userId
+      ? pb.filter('enabled = true || allow_preview ~ {:userId}', { userId })
+      : 'enabled = true'
+
+    //get full list of products according to this filter, returns jsonified format
+    const resp = await pb
+      .collection('store_section')
+      .getFullList<StoreSectionExpanded>({
+        filter,
+        expand: 'products',
+      })
+
+    //set our productArr to be an array of objects with imageUrl and linkUrl, as we flatmapped resp
+    productArr = resp.flatMap((section) =>
+      (section.expand?.products ?? []).map((product) => ({
         imageUrl: pb.getFileUrl(product, product.primaryImage),
         linkUrl: '/store/product/' + product.slug,
-      }))
+      })),
+    )
+    //shuffle productArr on each load  using Fisher-Yates shuffle algorithm
+    productArr = shuffleArray(productArr)
+
+    //remove skeleton loader b/c data is ready
+    isLoading = false
+  }
+
+  function shuffleArray(array: ProductData[]): ProductData[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      //random index
+      const j = Math.floor(Math.random() * (i + 1))
+      // Swap elements
+      ;[array[i], array[j]] = [array[j], array[i]]
+    }
+    return array
   }
 
   //logic for carousel indexing
   function nextSlide() {
-    index = (index + 1) % productArr.length
+    // if we're on last index, then wait 2.5sec before going to start
+    if (index == productArr.length - 1) {
+      setTimeout(() => {
+        index = 0
+      }, 2500)
+    } else {
+      index = (index + 1) % productArr.length
+    }
   }
 
   function startSlider() {
@@ -59,8 +86,8 @@
   }
 
   onMount(() => {
-    fetchProducts()
     startSlider()
+    load()
     return () => stopSlider()
   })
 </script>
@@ -119,9 +146,5 @@
     width: auto;
     height: 100%;
     object-fit: contain;
-  }
-  .skeleton-loader {
-    width: 100%;
-    height: 100%;
   }
 </style>
