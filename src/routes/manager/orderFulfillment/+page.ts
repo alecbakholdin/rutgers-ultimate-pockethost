@@ -16,6 +16,7 @@ function isFieldFilter(t: string): boolean {
   return Boolean(t.match(fieldFilterRegex))
 }
 
+// finds only orders since the last September, indicating the start of a new school season
 export async function load({ url }) {
   const searchStr = url.searchParams.get('q') || ''
   const searchTokens = searchStr.trim().split(/\s+/g)
@@ -43,8 +44,19 @@ export async function load({ url }) {
     (acc, f, i) => ({ ...acc, [`f${i}`]: f![3] }),
     {},
   )
-  const filterStr = [...fieldFilterClauses, ...stringSearchClauses].join(' && ')
-  const filterObj = { ...fieldFilterObj, ...stringSearchObj }
+
+
+  const filterStr = [
+    ...fieldFilterClauses,
+    ...stringSearchClauses,
+    'order.created > {:lastSeptember}',
+  ].join(' && ')
+
+  const filterObj = {
+    ...fieldFilterObj,
+    ...stringSearchObj,
+    lastSeptember: getMostRecentSeptember(),
+  }
 
   const filter = pb.filter(filterStr, filterObj)
   console.log(filter)
@@ -56,4 +68,11 @@ export async function load({ url }) {
         expand: fullOrderLineItemResponseExpansionString,
       }),
   }
+}
+
+function getMostRecentSeptember(): Date {
+  const today = new Date()
+  const year =
+    today.getMonth() < 9 ? today.getFullYear() - 1 : today.getFullYear()
+  return new Date(year, 8)
 }

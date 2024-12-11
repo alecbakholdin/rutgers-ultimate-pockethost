@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { enhance } from '$app/forms'
-  import Icon from '@iconify/svelte'
   import { page } from '$app/stores'
-  import _ from 'lodash'
   import { localStorageStore } from '$lib/util/localStorageStore.js'
+  import Icon from '@iconify/svelte'
+  import _ from 'lodash'
+  import OrderActions, { getOrderStatus } from './_route/OrderActions.svelte'
   import OrderModalButton from './_route/OrderModalButton.svelte'
   import { type OrderFulfillmentSortBy, sortedOrders } from './_route/sortBy'
 
@@ -32,6 +32,7 @@
     'managerOrdersShownFields',
     [] as string[],
   )
+
 
   let receivedLoading: string[] = []
   let fulfilledLoading: string[] = []
@@ -69,7 +70,10 @@
 <div class="mt-4 mb-8 space-y-1">
   <p class="text-xl font-semibold">Options</p>
   <div>
-    <label for="showFulfilledOrders" class="label flex justify-start flex-nowrap gap-2">
+    <label
+      for="showFulfilledOrders"
+      class="label flex justify-start flex-nowrap gap-2"
+    >
       <input
         type="checkbox"
         id="showFulfilledOrders"
@@ -102,11 +106,17 @@
       </label>
     {/each}
   </div>
-  <hr/>
+  <hr />
 </div>
 
 {#if !data.orders.length}
-  <p class="text-neutral">Please enter a search term</p>
+  <p class="text-neutral-content">
+    {#if !searchStr}
+      There are no recent orders
+    {:else}
+      No orders match your search criteria
+    {/if}
+  </p>
 {:else}
   <div class="overflow-x-auto">
     <table class="table">
@@ -149,8 +159,10 @@
       <tbody>
         {#each lineItems as lineItem (lineItem.id)}
           <tr>
-            <td> Actions </td>
-            <td> </td>
+            <td><OrderActions order={lineItem.expand?.order} /></td>
+            <td>
+              {getOrderStatus(lineItem.expand?.order)}
+            </td>
             <td>
               <OrderModalButton order={lineItem.expand?.order} />
             </td>
