@@ -60,47 +60,45 @@
 <svelte:head>
   <title>Ultimate Store</title>
 </svelte:head>
+<div class="flex flex-col w-full max-w-lg gap-4 pl-4">
+  <Form.Root
+    {form}
+    schema={CreateDiscountCodeSchema}
+    options={{
+      dataType: 'json',
+      resetForm: false, // Keeps the field value after submission
+    }}
+    let:formValues
+    let:config
+    class="flex flex-col gap-2"
+  >
+    <Form.Field {config} name="discountCode" let:handlers>
+      <Form.Label class="font-medium">Discount Code</Form.Label>
+      <div class="flex items-center gap-2">
+        <input
+          type="text"
+          class="input input-bordered flex-grow max-w-md"
+          placeholder="Enter Discount Code"
+          autocomplete="off"
+          disabled={$discountsLoading}
+          on:keypress={inputKeypressHandler(formValues.discountCode)}
+          on:input={handlers.input}
+        />
+        <button
+          type="button"
+          class="btn btn-primary"
+          disabled={!formValues.discountCode || $discountsLoading}
+          on:click={() =>
+            formValues.discountCode && applyDiscounts(formValues.discountCode)}
+        >
+          Apply
+        </button>
+      </div>
+      <Form.Validation />
+    </Form.Field>
+  </Form.Root>
+</div>
 {#each data.sections as section}
-  <div class="flex flex-col w-full max-w-lg gap-4 pl-4">
-    <Form.Root
-      {form}
-      schema={CreateDiscountCodeSchema}
-      options={{
-        dataType: 'json',
-        resetForm: false, // Keeps the field value after submission
-      }}
-      let:formValues
-      let:config
-      class="flex flex-col gap-2"
-    >
-      <Form.Field {config} name="discountCode" let:handlers>
-        <Form.Label class="font-medium">Discount Code</Form.Label>
-        <div class="flex items-center gap-2">
-          <input
-            type="text"
-            class="input input-bordered flex-grow max-w-md"
-            placeholder="Enter Discount Code"
-            autocomplete="off"
-            disabled={$discountsLoading}
-            on:keypress={inputKeypressHandler(formValues.discountCode)}
-            on:input={handlers.input}
-          />
-          <button
-            type="button"
-            class="btn btn-primary"
-            disabled={!formValues.discountCode || $discountsLoading}
-            on:click={() =>
-              formValues.discountCode &&
-              applyDiscounts(formValues.discountCode)}
-          >
-            Apply
-          </button>
-        </div>
-        <Form.Validation />
-      </Form.Field>
-    </Form.Root>
-  </div>
-
   <div class="divider mt-16 first:mt-0 text-gray-400">{section.title}</div>
   <div
     class="mx-auto grid grid-cols-2 md:grid-cols-3 place-items-center gap-2 max-w-[95vw]"
