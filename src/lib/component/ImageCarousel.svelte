@@ -14,7 +14,7 @@
 
   let isLoading = true
   let interval: any
-  let index: number
+  let index: number = 0
 
   //we just want primary image and link url
   type ProductData = {
@@ -48,15 +48,33 @@
         linkUrl: '/store/product/' + product.slug,
       })),
     )
-    //randomize index we start on
-    index = Math.floor(Math.random() * productArr.length)
+    //shuffle productArr on each load  using Fisher-Yates shuffle algorithm
+    productArr = shuffleArray(productArr)
+
     //remove skeleton loader b/c data is ready
     isLoading = false
   }
 
+  function shuffleArray(array: ProductData[]): ProductData[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      //random index
+      const j = Math.floor(Math.random() * (i + 1))
+      // Swap elements
+      ;[array[i], array[j]] = [array[j], array[i]]
+    }
+    return array
+  }
+
   //logic for carousel indexing
   function nextSlide() {
-    index = (index + 1) % productArr.length
+    // if we're on last index, then wait 2.5sec before going to start
+    if (index == productArr.length - 1) {
+      setTimeout(() => {
+        index = 0
+      }, 2500)
+    } else {
+      index = (index + 1) % productArr.length
+    }
   }
 
   function startSlider() {
