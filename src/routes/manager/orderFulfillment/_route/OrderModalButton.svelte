@@ -15,7 +15,7 @@
 {#if order}
   <dialog class="modal" bind:this={modal}>
     <div class="modal-box p-0">
-        <OrderComponent {order} />
+        <OrderComponent {order} expanded />
     </div>
     <form method="dialog" class="modal-backdrop">
       <button>close</button>
