@@ -23,7 +23,7 @@ export async function load({ url, parent }) {
     availableSections,
     selectedSection,
     availableProducts,
-    orderLineItems: await getOrderLineItems(availableProducts.map(p => p.id))
+    orderLineItems: await getOrderLineItems(availableProducts.map((p) => p.id)),
   }
 }
 
@@ -71,7 +71,8 @@ async function getOrderLineItems(productIds: string[]) {
         recentSeptember: getMostRecentSeptember(),
       },
     ),
-    expand: 'order.user, product.fields'
+    sort: '-order.created',
+    expand: 'order.user, product.fields',
   })
 }
 
