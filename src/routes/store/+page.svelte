@@ -9,6 +9,7 @@
   import _ from 'lodash'
   import { CreateDiscountCodeSchema } from './schemas.js'
   import { superValidate } from 'sveltekit-superforms/server'
+  import Icon from '@iconify/svelte'
 
   export let data
   export let form
@@ -100,6 +101,14 @@
 </div>
 {#each data.sections as section}
   <div class="divider mt-16 first:mt-0 text-gray-400">{section.title}</div>
+  {#if !section.enabled}
+    <div class="px-2 mb-8">
+      <div class="alert alert-warning max-w-lg mx-auto">
+        <Icon icon="mdi:warning" class="text-xl" />
+        This section is not visible to the public
+      </div>
+    </div>
+  {/if}
   <div
     class="mx-auto grid grid-cols-2 md:grid-cols-3 place-items-center gap-2 max-w-[95vw]"
   >
