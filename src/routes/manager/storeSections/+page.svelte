@@ -16,7 +16,7 @@
       <option value={section.id}>{section.title}</option>
     {/each}
   </select>
-  <h2 class="text-lg font-semibold">{data.storeSection.title}</h2>
+  <h2 class="text-lg font-semibold">{data.storeSection?.title}</h2>
   <div
     role="tablist"
     class="tabs tabs-boxed"
