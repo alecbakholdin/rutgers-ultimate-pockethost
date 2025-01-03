@@ -8,14 +8,16 @@
 
 <div class="navbar bg-base-200 sticky top-0 z-[1] md:static">
   <div class="flex-1">
-    <a href="/" class="btn btn-ghost">
-      <img
-        src="/machine-nightshade.png"
-        class="h-[30px] transition-all"
-        alt="machine-nightshade"
-      />
-      <span class="text-xl hidden sm:inline">Rutgers Ultimate</span></a
-    >
+    <div>
+        <a href="/" class="btn btn-ghost">
+        <img
+            src="/machine-nightshade.png"
+            class="h-[30px] transition-all"
+            alt="machine-nightshade"
+        />
+        <span class="text-xl hidden sm:inline">Rutgers Ultimate</span></a
+        >
+    </div>
   </div>
   <div class="flex-none">
     <ul class="menu menu-horizontal px-1">
