@@ -33,7 +33,7 @@ export async function load({ url, parent }) {
   }
 
   const sectionId = getStoredSectionId(url) ?? storeSections[0].id
-  const storeSection = storeSections.find((s) => s.id == sectionId)
+  const storeSection = storeSections.find((s) => s.id == sectionId) ?? storeSections[0]
 
   const productId =
     url.searchParams.get('productId') ?? storeSection.products[0]
@@ -50,7 +50,7 @@ export async function load({ url, parent }) {
     })
 
   return {
-    sectionId,
+    sectionId: storeSection.id,
     storeSections,
     storeSection,
     products: storeSection.expand!.products,
