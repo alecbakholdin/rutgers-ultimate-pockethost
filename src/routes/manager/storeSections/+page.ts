@@ -9,16 +9,38 @@ import type {
 } from '$lib/pocketbase/pocketbase-types.js'
 import { error } from '@sveltejs/kit'
 
+export async function load({ url, parent }) {
+  const { user } = await parent()
+  const availableSections = await getStoreSectionsForAdmin(user)
+
+  const sectionId =
+    url.searchParams.get('section_id') || availableSections[0].id
+  const selectedSection =
+    availableSections.find((s) => s.id == sectionId) || availableSections[0]
+  const availableProducts = selectedSection.expand!.products
+
+  return {
+    availableSections,
+    selectedSection,
+    availableProducts,
+    orderLineItems: await getOrderLineItems(availableProducts.map(p => p.id))
+  }
+}
+
+type tableRow = OrderLineItemResponse<
+  any,
+  {
+    order: OrderResponseTyped<{ user: UsersResponse }>
+    product: ProductResponse<{ fields: ProductFieldResponse[] }>
+  }
+>
+
 type storeSectionResponse = StoreSectionResponse<{
   products: ProductResponse<{ fields: ProductFieldResponse[] }>[]
 }>
-type tableRow = OrderLineItemResponse<
-  any,
-  { order: OrderResponseTyped<{ user: UsersResponse }> }
->
 
-export async function load({ url, parent }) {
-  const { user } = await parent()
+// returns non-empty list of store sections user is allowed to preview
+async function getStoreSectionsForAdmin(user: UsersResponse) {
   const storeSections = await pb
     .collection('store_section')
     .getFullList<storeSectionResponse>({
@@ -28,43 +50,34 @@ export async function load({ url, parent }) {
       }),
       expand: 'products.fields',
     })
-  if (storeSections.length == 0) {
-    throw error(400, { message: 'No non-archived store sections available' })
-  }
-
-  const sectionId = getStoredSectionId(url) ?? storeSections[0].id
-  const storeSection = storeSections.find((s) => s.id == sectionId) ?? storeSections[0]
-
-  const productId =
-    url.searchParams.get('productId') ?? storeSection.products[0]
-  const product = storeSection.expand!.products.find((p) => p.id === productId)
-  if (!product) {
-    throw error(400, { message: "Product doesn't exist" })
-  }
-
-  const productLineItems = await pb
-    .collection('order_line_item')
-    .getFullList<tableRow>({
-      filter: pb.filter('product = {:productId}', { productId: productId }),
-      expand: 'order.user',
+  if ((storeSections?.length ?? 0) == 0) {
+    throw error(400, {
+      message: 'No non-archived store sections available. Contact support',
     })
-
-  return {
-    sectionId: storeSection.id,
-    storeSections,
-    storeSection,
-    products: storeSection.expand!.products,
-    productId,
-    product,
-    productLineItems,
   }
+  return storeSections
 }
 
-function getStoredSectionId(url: URL) {
-  const urlSectionId = url.searchParams.get('sectionId')
-  if (typeof localStorage === 'undefined') return urlSectionId
-  if (urlSectionId) {
-    localStorage.setItem('managerSectionId', urlSectionId)
-  }
-  return localStorage.getItem('managerSectionId')
+async function getOrderLineItems(productIds: string[]) {
+  const productFilter = productIds
+    .map((_, i) => `product = {:${i}}`)
+    .join(' || ')
+  const paramObj = productIds.reduce((a, b, i) => ({ ...a, [`${i}`]: b }), {})
+  return pb.collection('order_line_item').getFullList<tableRow>({
+    filter: pb.filter(
+      `(${productFilter}) && order.created > {:recentSeptember} && order.testOrder = false`,
+      {
+        ...paramObj,
+        recentSeptember: getMostRecentSeptember(),
+      },
+    ),
+    expand: 'order.user, product.fields'
+  })
+}
+
+function getMostRecentSeptember(): Date {
+  const today = new Date()
+  const year =
+    today.getMonth() < 9 ? today.getFullYear() - 1 : today.getFullYear()
+  return new Date(year, 8)
 }

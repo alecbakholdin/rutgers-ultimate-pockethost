@@ -1,77 +1,79 @@
 <script lang="ts">
-  import { goto } from '$app/navigation'
+  import { formatCents } from '$lib/util/functions/formatCents'
+  import { writable } from 'svelte/store'
 
   export let data
 
-  $: fieldNames = data.product.expand?.fields.map((f) => f.title) || []
+  const sectionId = writable(data.selectedSection?.id)
+  sectionId.subscribe((value) => {
+    if (typeof window === 'undefined') return
+    if (window.location.search.includes(value)) return
+    window.location.search = `?section_id=${value}`
+  })
+
+  const products = writable(new Set<string>())
+  function handleProductChange(e: { target: HTMLInputElement }) {
+    products.update((p) => {
+      e.target.checked ? p.add(e.target.id) : p.delete(e.target.id)
+      return p
+    })
+  }
 </script>
 
-<div class="mx-auto flex flex-col gap-2 max-w-screen">
-  <select
-    class="select select-bordered max-w-80"
-    value={data.sectionId}
-    on:change={(e) => goto(`?sectionId=${e.currentTarget.value}`)}
-  >
-    {#each data.storeSections as section (section.id)}
-      <option value={section.id}>{section.title}</option>
-    {/each}
-  </select>
-  <h2 class="text-lg font-semibold">{data.storeSection?.title}</h2>
-  <div
-    role="tablist"
-    class="tabs tabs-boxed"
-    class:hidden={data.products.length > 6}
-  >
-    {#each data.products as product}
-      <a
-        role="tab"
-        class="tab"
-        class:tab-active={data.product.id === product.id}
-        href="?sectionId={data.sectionId}&productId={product.id}"
-        >{product.title}</a
-      >
-    {/each}
-  </div>
-  <select
-    name="product"
-    id="product-select"
-    class="select select-bordered"
-    class:hidden={data.products.length <= 6}
-    value={data.product.id}
-    on:change={(e) =>
-      goto(`?sectionId=${data.sectionId}&productId=${e.currentTarget.value}`)}
-  >
-    {#each data.products as product}
-      <option value={product.id}>
-        {product.title}
-      </option>
-    {/each}
-  </select>
-  <div class="overflow-x-auto">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Quantity</th>
-          {#each fieldNames as field}
-            <td>{field}</td>
-          {/each}
+<select
+  name="section_id"
+  id="section_id"
+  class="select select-bordered"
+  bind:value={$sectionId}
+>
+  {#each data.availableSections as section}
+    <option value={section.id}>{section.title}</option>
+  {/each}
+</select>
+<div class="p-4 flex gap-1 flex-wrap">
+  {#each data.availableProducts as product}
+    <label
+      for={product.id}
+      class="badge cursor-pointer text-nowrap"
+      class:badge-primary={$products.has(product.id)}
+    >
+      {product.title} ({data.orderLineItems.filter(
+        (l) => l.product === product.id,
+      ).length})
+      <input
+        id={product.id}
+        type="checkbox"
+        name="product"
+        class="hidden"
+        on:change={handleProductChange}
+      />
+    </label>
+  {/each}
+</div>
+
+<div class="overflow-x-auto">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Paid</th>
+      </tr>
+    </thead>
+    <tbody>
+      {#each data.orderLineItems as lineItem}
+        <tr class:hidden={$products.size && !$products.has(lineItem.product)}>
+          <td>{lineItem.expand?.order.created.toLocaleString()}</td>
+          <td>{lineItem.expand?.order.expand?.user.name}</td>
+          <td>{lineItem.expand?.order.expand?.user.email}</td>
+          <td>{lineItem.expand?.product.title}</td>
+          <td>{lineItem.quantity}</td>
+          <td>{formatCents(lineItem.totalCents)}</td>
         </tr>
-      </thead>
-      <tbody>
-        {#each data.productLineItems as lineItem}
-          <tr>
-            <td>{lineItem.expand?.order.expand?.user.name}</td>
-            <td>{lineItem.quantity}</td>
-            {#each fieldNames as field}
-              <td>{lineItem.fields[field] ?? ''}</td>
-            {/each}
-          </tr>
-        {/each}
-      </tbody>
-      <tfoot>
-        <div class="join"></div>
-      </tfoot>
-    </table>
-  </div>
+      {/each}
+    </tbody>
+  </table>
 </div>
