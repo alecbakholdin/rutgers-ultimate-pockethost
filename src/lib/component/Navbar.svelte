@@ -10,11 +10,6 @@
   <div class="flex-1">
     <div>
         <a href="/" class="btn btn-ghost">
-        <img
-            src="/machine-nightshade.png"
-            class="h-[30px] transition-all"
-            alt="machine-nightshade"
-        />
         <span class="text-xl hidden sm:inline">Rutgers Ultimate</span></a
         >
     </div>
