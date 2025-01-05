@@ -10,7 +10,7 @@
   <div class="flex-1">
     <div>
         <a href="/" class="btn btn-ghost">
-        <span class="text-xl sm:inline">Rutgers Ultimate</span></a
+        <span class="text-xl hidden sm:inline">Rutgers Ultimate</span></a
         >
     </div>
   </div>
