@@ -103,6 +103,9 @@
           {/if}
         </div>
       </h3>
+      {#if product.description}
+           <p>{product.description}</p>
+      {/if}
 
       {#if product.requiredForPlayers}
         <p class="text-error m-0 p-0">* Required for Players</p>
