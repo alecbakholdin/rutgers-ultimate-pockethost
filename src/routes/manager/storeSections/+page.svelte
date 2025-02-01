@@ -12,9 +12,16 @@
   })
 
   const products = writable(new Set<string>())
+  const fields = writable<string[]>([])
   function handleProductChange(e: { target: HTMLInputElement }) {
     products.update((p) => {
       e.target.checked ? p.add(e.target.id) : p.delete(e.target.id)
+      const fieldSet = new Set(
+        data.availableProducts
+          .filter((product) => p.has(product.id))
+          .flatMap((product) => product.expand?.fields.map((f) => f.title)),
+      )
+      fields.set(Array.from(fieldSet).filter((x) => x) as string[])
       return p
     })
   }
@@ -60,6 +67,9 @@
         <th>Email</th>
         <th>Product</th>
         <th>Qty</th>
+        {#each $fields as field}
+          <th>{field}</th>
+        {/each}
         <th>Paid</th>
       </tr>
     </thead>
@@ -71,6 +81,9 @@
           <td>{lineItem.expand?.order.expand?.user.email}</td>
           <td>{lineItem.expand?.product.title}</td>
           <td>{lineItem.quantity}</td>
+          {#each $fields as field}
+            <td>{lineItem.fields[field] ?? ''}</td>
+          {/each}
           <td>{formatCents(lineItem.totalCents)}</td>
         </tr>
       {/each}
