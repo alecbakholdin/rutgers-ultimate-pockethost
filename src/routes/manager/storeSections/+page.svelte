@@ -13,9 +13,9 @@
 
   const products = writable(new Set<string>())
   const fields = writable<string[]>([])
-  function handleProductChange(e: { target: HTMLInputElement }) {
+  function handleProductChange(e: { currentTarget: HTMLInputElement }) {
     products.update((p) => {
-      e.target.checked ? p.add(e.target.id) : p.delete(e.target.id)
+      e.currentTarget.checked ? p.add(e.currentTarget.id) : p.delete(e.currentTarget.id)
       const fieldSet = new Set(
         data.availableProducts
           .filter((product) => p.has(product.id))
