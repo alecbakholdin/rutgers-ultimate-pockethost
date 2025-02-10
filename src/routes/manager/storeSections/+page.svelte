@@ -82,7 +82,7 @@
           <td>{lineItem.expand?.product.title}</td>
           <td>{lineItem.quantity}</td>
           {#each $fields as field}
-            <td>{lineItem.fields[field] ?? ''}</td>
+            <td>{lineItem.fields?.[field] ?? ''}</td>
           {/each}
           <td>{formatCents(lineItem.totalCents)}</td>
         </tr>
