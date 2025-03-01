@@ -34,6 +34,13 @@
   $: teamBreaks =
     gamePoints?.filter((x) => x.type === GamePointTypeOptions.D && x.goal)
       .length ?? 0
+  $: breakOpportunities = (opponent: boolean) =>
+    gamePoints?.filter(
+      (p) =>
+        (opponent && p.type === GamePointTypeOptions.O) ||
+        (!opponent && p.type === GamePointTypeOptions.D),
+    ).filter(p => p.expand?.['game_point_event(game_point)']?.find(e => e.type === GamePointEventTypeOptions.Turn)).length
+
   $: turns = (opponent?: boolean) =>
     gamePointEvents.filter(
       (x) =>
@@ -105,10 +112,13 @@
           >
         </div>
         {#if gamePoints}
-          <div class="grid gap-x-1 grid-cols-[1fr_auto_1fr]">
+          <div class="grid gap-x-2 grid-cols-[1fr_auto_1fr]">
             <span class="text-success text-right">{teamBreaks}</span>
             <span class="text-gray-400 text-center">Breaks</span>
             <span class="text-error text-left">{opponentBreaks}</span>
+            <span class="text-success text-right">{breakOpportunities(false)}</span>
+            <span class="text-gray-400 text-center">Break Opps</span>
+            <span class="text-error text-left">{breakOpportunities(true)}</span>
             <span class="text-success text-right">{turns(false).length}</span>
             <span class="text-gray-400 text-center">Turns</span>
             <span class="text-error text-left">{turns(true).length}</span>
