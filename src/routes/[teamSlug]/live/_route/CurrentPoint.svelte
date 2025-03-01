@@ -124,14 +124,20 @@
       (x) => !activePlayers.includes(x.id),
     ) || []
   async function performSub() {
-    if (!livePoint || !subIn || !subOut) return
-    pb.collection('game_point').update(livePoint.id, {
-      'starting_line-': subOut,
-      'subs+': subOut,
-    })
-    pb.collection('game_point').update(livePoint.id, {
-      'starting_line+': subIn,
-    })
+    if (!livePoint || (!subIn && !subOut)) return
+
+    if (subIn) {
+      pb.collection('game_point').update(livePoint.id, {
+        'starting_line-': subOut,
+        'subs+': subOut,
+      })
+    }
+
+    if (subOut) {
+      pb.collection('game_point').update(livePoint.id, {
+        'starting_line+': subIn,
+      })
+    }
   }
 </script>
 
