@@ -54,6 +54,29 @@
             headerName: 'D Pts',
             headerTooltip: 'Number of points played on defense',
           },
+          {
+            field: 'oConversions',
+            headerName: 'Holds',
+            headerTooltip: 'Holds scored while playing on offense'
+          },
+          {
+            field: 'dConversions',
+            headerName: 'Breaks',
+            headerTooltip: 'Breaks scored while playing on offense'
+          },
+          {
+            field: 'oConversionPct',
+            headerName: 'Hold %',
+            headerTooltip: 'Percent of holds scored while playing on offense',
+            valueFormatter: (p) => p.data?.oConversionPct?.toFixed(0) ?? '',
+          },
+          {
+            field: 'dConversionPct',
+            headerName: 'Break %',
+            headerTooltip: 'Percent of D points resulting in a break while playing on offense',
+            valueFormatter: (p) => p.data?.dConversionPct?.toFixed(0) ?? '',
+          },
+
         ],
       })
       updateStats(teamSlug, gameIds, playerIds, startDate, endDate)

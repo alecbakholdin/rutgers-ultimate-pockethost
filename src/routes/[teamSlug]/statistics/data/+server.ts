@@ -44,6 +44,12 @@ export async function GET({ url, params, locals: { pb } }) {
   const dPointsDict = _.countBy(
     points.filter(p => p.type === GamePointTypeOptions.D).flatMap((p) => [...p.starting_line, ...p.subs]),
   )
+  const oPointConversionsDict = _.countBy(
+    points.filter(p => p.type === GamePointTypeOptions.O && !p.opponent_goal).flatMap(p => [...p.starting_line, ...p.subs])
+  )
+  const dPointConversionsDict = _.countBy(
+    points.filter(p => p.type === GamePointTypeOptions.D && !p.opponent_goal).flatMap(p => [...p.starting_line, ...p.subs])
+  )
 
 
   const stats = players.map((player) => {
@@ -56,6 +62,8 @@ export async function GET({ url, params, locals: { pb } }) {
     const plusMinus = goals + assists + blocks - turns - drops
     const oPoints = oPointsDict[player.id] ?? 0;
     const dPoints = dPointsDict[player.id] ?? 0;
+    const oConversions = oPointConversionsDict[player.id] ?? 0;
+    const dConversions = dPointConversionsDict[player.id] ?? 0;
     return {
       playerId: player.id,
       playerName: player.name,
@@ -69,7 +77,11 @@ export async function GET({ url, params, locals: { pb } }) {
       plusMinus,
       plusMinusPerPoint: plusMinus / pointsPlayed,
       oPoints,
-      dPoints
+      dPoints,
+      oConversions,
+      dConversions,
+      oConversionPct: 100 * oConversions/oPoints,
+      dConversionPct: 100 * dConversions/dPoints,
     } satisfies StatsRow
   })
 
