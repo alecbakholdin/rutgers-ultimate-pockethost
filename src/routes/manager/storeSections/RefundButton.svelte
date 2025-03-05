@@ -1,13 +1,15 @@
 <script lang="ts">
   import { toast } from '$lib/component/Toasts.svelte'
-  import type { OrderLineItemResponseTyped } from '$lib/pocketbase/derived-pocketbase-types'
+  import { formatCents } from '$lib/util/functions/formatCents'
   import { loadingButton } from '$lib/util/svelte-actions/loading-button'
   import { writable } from 'svelte/store'
+  import type { tableRow } from './+page'
 
-  export let orderLineItem: OrderLineItemResponseTyped
+  export let orderLineItem: tableRow
 
-  let refundProcessed = orderLineItem.refunded
+  let refundProcessed = orderLineItem?.refunded
   const refundProcessing = writable(false)
+  let modalRef: HTMLDialogElement
 
   async function processRefund() {
     if (orderLineItem.refunded) {
@@ -37,8 +39,35 @@
   type="button"
   class="btn btn-sm"
   disabled={refundProcessed}
-  use:loadingButton={refundProcessing}
-  on:click={processRefund}
+  on:click={() => {
+    modalRef?.showModal()
+  }}
 >
   Refund
 </button>
+<dialog class="modal" bind:this={modalRef}>
+  <div class="modal-box">
+    <h3 class="text-lg font-bold">Are you sure?</h3>
+    <p class="py-4">
+      <strong
+        >{orderLineItem.expand?.order.expand?.user.name ??
+          'This customer'}</strong
+      >
+      will be refunded <strong>{formatCents(orderLineItem.totalCents)}</strong>.
+      This action cannot be undone.
+    </p>
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn">Cancel</button>
+      </form>
+      <button
+        type="button"
+        class="btn btn-primary"
+        use:loadingButton={refundProcessing}
+        on:click={processRefund}
+      >
+        Confirm
+      </button>
+    </div>
+  </div>
+</dialog>

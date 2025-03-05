@@ -27,7 +27,7 @@ export async function load({ url, parent }) {
   }
 }
 
-type tableRow = OrderLineItemResponse<
+export type tableRow = OrderLineItemResponse<
   any,
   {
     order: OrderResponseTyped<{ user: UsersResponse }>

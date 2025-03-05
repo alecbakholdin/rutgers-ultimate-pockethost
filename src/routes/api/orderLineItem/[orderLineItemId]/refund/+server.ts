@@ -22,7 +22,10 @@ export async function POST({
 
   const lineItem = (await pb
     .collection('order_line_item')
-    .getOne(orderLineItemId, { expand: 'order' })) as OrderLineItemResponse<
+    .getOne(orderLineItemId, { expand: 'order' }).catch(x => {
+        console.error(x)
+        throw error(404, {message: 'Could not find line item in system. This may be due to a momentary outage, so please wait and try again'})
+    })) as OrderLineItemResponse<
     any,
     { order: OrderResponse }
   >
@@ -40,7 +43,10 @@ export async function POST({
     })
   }
 
-  const paymentIntent = await stripe.paymentIntents.retrieve(paymentId)
+  const paymentIntent = await stripe.paymentIntents.retrieve(paymentId).catch(x => {
+    console.error(x)
+    throw error(404, {message: 'Payment not found in payment processing system'})
+  })
   const refund = await stripe.refunds.create(
     {
       payment_intent: paymentIntent.id,
@@ -50,9 +56,15 @@ export async function POST({
     {
       idempotencyKey: orderLineItemId + '-refund',
     },
-  )
+  ).catch(x => {
+    console.error(x)
+    throw error(500, {message: 'Unexpected error creating refund'})
+  })
 
-  await pb.collection('order_line_item').update(orderLineItemId, {refunded: true, refundId: refund.id})
+  await pb.collection('order_line_item').update(orderLineItemId, {refunded: true, refundId: refund.id}).catch(x => {
+    console.error(x)
+    throw error(500, {message: 'Refund has been issued but system was not updated. Avoid further actions.'})
+  })
 
   return json({ message: 'ok' })
 }
