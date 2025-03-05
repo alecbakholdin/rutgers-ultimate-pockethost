@@ -27,6 +27,7 @@
         toast({ type: 'error', message })
       } else {
         refundProcessed = true
+        modalRef?.close()
         toast({ type: 'success', message: 'Refund successful' })
       }
     } finally {
@@ -63,6 +64,7 @@
       <button
         type="button"
         class="btn btn-primary"
+        disabled={refundProcessed}
         use:loadingButton={refundProcessing}
         on:click={processRefund}
       >
