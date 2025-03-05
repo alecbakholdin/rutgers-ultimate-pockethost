@@ -163,6 +163,8 @@ export type OrderLineItemRecord<Tfields = unknown> = {
 	received?: boolean
 	totalCents?: number
 	unitPriceCents?: number
+	refunded?: boolean
+	refundId?: string
 }
 
 export enum PlayerStatusOptions {

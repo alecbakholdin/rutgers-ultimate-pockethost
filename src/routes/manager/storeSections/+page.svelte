@@ -1,6 +1,7 @@
 <script lang="ts">
   import { formatCents } from '$lib/util/functions/formatCents'
   import { writable } from 'svelte/store'
+  import RefundButton from './RefundButton.svelte'
 
   export let data
 
@@ -15,7 +16,9 @@
   const fields = writable<string[]>([])
   function handleProductChange(e: { currentTarget: HTMLInputElement }) {
     products.update((p) => {
-      e.currentTarget.checked ? p.add(e.currentTarget.id) : p.delete(e.currentTarget.id)
+      e.currentTarget.checked
+        ? p.add(e.currentTarget.id)
+        : p.delete(e.currentTarget.id)
       const fieldSet = new Set(
         data.availableProducts
           .filter((product) => p.has(product.id))
@@ -62,6 +65,7 @@
   <table class="table">
     <thead>
       <tr>
+        <th>Refund</th>
         <th>Date</th>
         <th>Name</th>
         <th>Email</th>
@@ -76,6 +80,7 @@
     <tbody>
       {#each data.orderLineItems as lineItem}
         <tr class:hidden={$products.size && !$products.has(lineItem.product)}>
+          <td><RefundButton orderLineItem={lineItem} /></td>
           <td>{lineItem.expand?.order.created.toLocaleString()}</td>
           <td>{lineItem.expand?.order.expand?.user.name}</td>
           <td>{lineItem.expand?.order.expand?.user.email}</td>
