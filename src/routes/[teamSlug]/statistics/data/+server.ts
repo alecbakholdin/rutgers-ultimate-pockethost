@@ -80,6 +80,13 @@ export async function GET({ url, params, locals: { pb } }) {
       .flatMap((p) => [...p.starting_line, ...p.subs]),
   )
 
+  const numOPoints = points.filter(
+    (p) => p.type === GamePointTypeOptions.O,
+  ).length
+  const numDPoints = points.filter(
+    (p) => p.type === GamePointTypeOptions.D,
+  ).length
+
   const stats = players.map((player) => {
     const pointsPlayed = pointsPlayedDict[player.id] ?? 0
     const goals = goalDict[player.id] ?? 0
@@ -94,6 +101,9 @@ export async function GET({ url, params, locals: { pb } }) {
     const dConversions = dPointConversionsDict[player.id] ?? 0
     const oTurns = oTurnDict[player.id] ?? 0
     const dTurns = dTurnDict[player.id] ?? 0
+    const pointsPlayedPct = (100 * pointsPlayed) / points.length
+    const oPointsPct = (100 * oPoints) / numOPoints
+    const dPointsPct = (100 * dPoints) / numDPoints
 
     return {
       playerId: player.id,
@@ -115,6 +125,9 @@ export async function GET({ url, params, locals: { pb } }) {
       dConversionPct: (100 * dConversions) / dPoints,
       oTurns,
       dTurns,
+      pointsPlayedPct,
+      oPointsPct,
+      dPointsPct,
     } satisfies StatsRow
   })
 

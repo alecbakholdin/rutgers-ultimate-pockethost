@@ -20,6 +20,10 @@ export interface StatsRow {
 
   oTurns: number
   dTurns: number
+
+  pointsPlayedPct: number
+  oPointsPct: number
+  dPointsPct: number
 }
 
 export interface StatsQuery {

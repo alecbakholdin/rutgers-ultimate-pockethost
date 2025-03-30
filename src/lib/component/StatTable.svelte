@@ -81,11 +81,28 @@
             headerName: 'O Turns',
             headerTooltip: 'Number of turns + drops on O points',
           },
-
           {
             field: 'dTurns',
             headerName: 'D Turns',
             headerTooltip: 'Number of turns + drops on D points',
+          },
+          {
+            field: 'pointsPlayedPct',
+            headerName: 'Pts %',
+            headerTooltip: 'Percent of all points played',
+            valueFormatter: (p) => p.data?.pointsPlayedPct?.toFixed(0) ?? '',
+          },
+          {
+            field: 'oPointsPct',
+            headerName: 'O Pts %',
+            headerTooltip: 'Percent of O points played out of all o points',
+            valueFormatter: (p) => p.data?.oPointsPct?.toFixed(0) ?? '',
+          },
+          {
+            field: 'dPointsPct',
+            headerName: 'D Pts %',
+            headerTooltip: 'Percent of D points played out of all o points',
+            valueFormatter: (p) => p.data?.dPointsPct?.toFixed(0) ?? '',
           }
 
         ],
