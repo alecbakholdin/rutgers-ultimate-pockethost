@@ -65,7 +65,7 @@
             headerName: 'D Pts %',
             headerTooltip: 'Percent of D points played out of all D points',
             valueFormatter: (p) => p.data?.dPointsPct?.toFixed(0) ?? '',
-          }
+          },
           {
             field: 'pointsPlayedPct',
             headerName: 'Pts %',
@@ -103,8 +103,7 @@
             field: 'dTurns',
             headerName: 'D Turns',
             headerTooltip: 'Number of turns + drops on D points',
-          },
-
+          }
         ],
       })
       updateStats(teamSlug, gameIds, playerIds, startDate, endDate)
