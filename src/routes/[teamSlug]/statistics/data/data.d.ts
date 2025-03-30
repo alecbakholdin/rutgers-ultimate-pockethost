@@ -17,6 +17,9 @@ export interface StatsRow {
   dConversions: number
   oConversionPct: number
   dConversionPct: number
+
+  oTurns: number
+  dTurns: number
 }
 
 export interface StatsQuery {

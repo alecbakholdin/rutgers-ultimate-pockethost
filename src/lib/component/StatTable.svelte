@@ -76,6 +76,17 @@
             headerTooltip: 'Percent of D points resulting in a break while playing on offense',
             valueFormatter: (p) => p.data?.dConversionPct?.toFixed(0) ?? '',
           },
+          {
+            field: 'oTurns',
+            headerName: 'O Turns',
+            headerTooltip: 'Number of turns + drops on O points',
+          },
+
+          {
+            field: 'dTurns',
+            headerName: 'D Turns',
+            headerTooltip: 'Number of turns + drops on D points',
+          }
 
         ],
       })

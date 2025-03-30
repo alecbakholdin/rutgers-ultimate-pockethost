@@ -1,10 +1,8 @@
 import { json } from '@sveltejs/kit'
 import {
-  GamePointRecord,
-  GamePointEventRecord,
-  GameRecord,
-  TypedPocketBase,
-  PlayerRecord,
+  type GamePointRecord,
+  type GamePointEventRecord,
+  type TypedPocketBase,
   GamePointEventTypeOptions,
   GamePointTypeOptions,
 } from '$lib/pocketbase/pocketbase-types.js'
@@ -23,6 +21,11 @@ export async function GET({ url, params, locals: { pb } }) {
   const pointsPlayedDict = _.countBy(
     points.flatMap((p) => [...p.starting_line, ...p.subs]),
   )
+  const pointDict = points.reduce(
+    (prev, curr) => ({ ...prev, [curr.id]: curr }),
+    {} as { [id: string]: GamePointRecord },
+  )
+
   const goalDict = _.countBy(points, (p) => p.goal)
   const assistDict = _.countBy(points, (p) => p.assist)
   const blockDict = _.countBy(
@@ -37,20 +40,45 @@ export async function GET({ url, params, locals: { pb } }) {
     pointEvents.filter((p) => p.type === GamePointEventTypeOptions.Drop),
     (p) => p.player,
   )
+  const oTurnDict = _.countBy(
+    pointEvents.filter(
+      (p) =>
+        (p.type === GamePointEventTypeOptions.Turn ||
+          p.type === GamePointEventTypeOptions.Drop) &&
+        pointDict[p.game_point]?.type === GamePointTypeOptions.O,
+    ),
+    (p) => p.player,
+  )
+  const dTurnDict = _.countBy(
+    pointEvents.filter(
+      (p) =>
+        (p.type === GamePointEventTypeOptions.Turn ||
+          p.type === GamePointEventTypeOptions.Drop) &&
+        pointDict[p.game_point]?.type === GamePointTypeOptions.D,
+    ),
+    (p) => p.player,
+  )
 
   const oPointsDict = _.countBy(
-    points.filter(p => p.type === GamePointTypeOptions.O).flatMap((p) => [...p.starting_line, ...p.subs]),
+    points
+      .filter((p) => p.type === GamePointTypeOptions.O)
+      .flatMap((p) => [...p.starting_line, ...p.subs]),
   )
   const dPointsDict = _.countBy(
-    points.filter(p => p.type === GamePointTypeOptions.D).flatMap((p) => [...p.starting_line, ...p.subs]),
+    points
+      .filter((p) => p.type === GamePointTypeOptions.D)
+      .flatMap((p) => [...p.starting_line, ...p.subs]),
   )
   const oPointConversionsDict = _.countBy(
-    points.filter(p => p.type === GamePointTypeOptions.O && !p.opponent_goal).flatMap(p => [...p.starting_line, ...p.subs])
+    points
+      .filter((p) => p.type === GamePointTypeOptions.O && !p.opponent_goal)
+      .flatMap((p) => [...p.starting_line, ...p.subs]),
   )
   const dPointConversionsDict = _.countBy(
-    points.filter(p => p.type === GamePointTypeOptions.D && !p.opponent_goal).flatMap(p => [...p.starting_line, ...p.subs])
+    points
+      .filter((p) => p.type === GamePointTypeOptions.D && !p.opponent_goal)
+      .flatMap((p) => [...p.starting_line, ...p.subs]),
   )
-
 
   const stats = players.map((player) => {
     const pointsPlayed = pointsPlayedDict[player.id] ?? 0
@@ -60,10 +88,13 @@ export async function GET({ url, params, locals: { pb } }) {
     const turns = turnDict[player.id] ?? 0
     const drops = dropDict[player.id] ?? 0
     const plusMinus = goals + assists + blocks - turns - drops
-    const oPoints = oPointsDict[player.id] ?? 0;
-    const dPoints = dPointsDict[player.id] ?? 0;
-    const oConversions = oPointConversionsDict[player.id] ?? 0;
-    const dConversions = dPointConversionsDict[player.id] ?? 0;
+    const oPoints = oPointsDict[player.id] ?? 0
+    const dPoints = dPointsDict[player.id] ?? 0
+    const oConversions = oPointConversionsDict[player.id] ?? 0
+    const dConversions = dPointConversionsDict[player.id] ?? 0
+    const oTurns = oTurnDict[player.id] ?? 0
+    const dTurns = dTurnDict[player.id] ?? 0
+
     return {
       playerId: player.id,
       playerName: player.name,
@@ -80,8 +111,10 @@ export async function GET({ url, params, locals: { pb } }) {
       dPoints,
       oConversions,
       dConversions,
-      oConversionPct: 100 * oConversions/oPoints,
-      dConversionPct: 100 * dConversions/dPoints,
+      oConversionPct: (100 * oConversions) / oPoints,
+      dConversionPct: (100 * dConversions) / dPoints,
+      oTurns,
+      dTurns,
     } satisfies StatsRow
   })
 
