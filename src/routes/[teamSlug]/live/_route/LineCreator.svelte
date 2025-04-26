@@ -1,6 +1,8 @@
 <script context="module" lang="ts">
-  import { writable } from 'svelte/store'
-  export const selectedPlayers = writable<string[]>([])
+  export const selectedPlayers = localStorageStore<string[]>(
+    'selectedPlayers',
+    [],
+  )
 </script>
 
 <script lang="ts">
@@ -20,6 +22,7 @@
   import { createEventDispatcher } from 'svelte'
   import { scale } from 'svelte/transition'
   import { getLiveGameContext, type LiveFeedGamePoint } from './gamePointType'
+  import { localStorageStore } from '$lib/util/localStorageStore'
 
   const { game, players, gamePoints, team, gameOver } = getLiveGameContext()
   $: groups = $team?.expand?.['team_group(team)'] || []
@@ -367,7 +370,7 @@
 {#if groups.length}
   <p class="label">Groups</p>
 {/if}
-<div class="flex gap-1 flex-wrap">
+<div class="flex gap-1 flex-nowrap overflow-x-scroll pb-3">
   {#each groups as group}
     {@const selected = !!selectedGroups.includes(group.id)}
     <button
